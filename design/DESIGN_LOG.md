@@ -14,6 +14,7 @@ Check this file before any design or emoji work. Tick items off as they're done.
 | 2026-10-16 | **Pins are the sticker itself**, no colored circle behind it: soft colored glow at night, soft shadow by day, small anchor dot under it. |
 | 2026-10-16 | **Spot-type badges sit on a small round chip** (white on the day map, dark navy on the night map) at the pin's bottom-left, so tiny icons stay readable and don't blend into the food. |
 | 2026-10-16 | Every emoji is checked at 24, 40 and 56 px on both the night and day map before it's approved. |
+| 2026-10-16 | **Logo: concept B · Bite pin** (chosen by the founder). A map pin with a bite taken out of it: food + location. Splash: the pin pops in and gets bitten, crumbs fly, then the wordmark. |
 | 2026-10-16 | Cleanup is always applied: remove haze, make fully opaque, trim, square. |
 
 ## Changes to make
@@ -42,10 +43,13 @@ Check this file before any design or emoji work. Tick items off as they're done.
 Concepts (canvas): https://claude.ai/artifact/BpSfoPp9LvWgkv5tmJujG7 · source copies in `logo/`.
 A · Pin-o (the "o" is a map pin), B · Bite pin (pin with a bite), C · Neon sign (script neon), D · Sticker slap (sticker wordmark + emoji).
 
-- [ ] Choose a concept. Lead designer recommendation: **A · Pin-o** for the logo and app icon (simple, readable at 16 px, says "local + map"), with D's emoji stickers popping in around it on the splash.
-- [ ] B: check it doesn't read as a reference to Apple's bitten apple before using it.
-- [ ] C: script is hard to read at small sizes; keep neon as a splash effect only.
-- [ ] Final logo: have a designer refine the vector before any trademark filing.
+- [x] Choose a concept: **B · Bite pin**.
+- [ ] Refine the bite so it reads as a **food bite, not Apple's logo**: keep three clear rounded "teeth" scallops at the top right, keep the pin's pointed tail and the hole as the main silhouette, no leaf, never on a round fruit-like shape.
+- [ ] Test the app icon at 16, 24, 40 and 60 px; make a simplified small-size version if the bite disappears.
+- [ ] Define the logo palette (yellow → orange → pink gradient) and a one-color version (white on the gradient, dark on light).
+- [ ] Use B's pop + bite + crumbs animation as the real splash (Lottie), under 2 seconds.
+- [ ] Trademark search for the final name and mark, then have a designer redraw the final vector.
+- Rejected for now: A · Pin-o, C · Neon sign (neon may return as a splash effect), D · Sticker slap (emoji pop-ins may return elsewhere).
 
 ### App and mockup changes
 
