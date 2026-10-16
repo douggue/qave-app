@@ -39,9 +39,11 @@ What this means for version 1:
 | Time zones | 6 | 6 | All times stored in UTC and shown in the spot's local time |
 | Store availability | ✓ | ✓ | App Store and Google Play limited to the US and Canada at launch |
 
-**Pilot cities:** Austin (US) and **one Canadian city**, with Montreal the best fit to test French
-and Quebec rules (Toronto or Vancouver are alternatives with bigger food-truck scenes). Seed place data
-(Foursquare Open Source Places or Overture) covers both countries.
+**Every city at once:** Lokal launches across all of the US and Canada on day one (founder decision).
+Seed place data (Foursquare Open Source Places or Overture) is imported for both whole countries, chains
+filtered out, so every city's map starts populated. Food trucks and pop-ups still depend on owners and
+users adding them, so the app pushes "be the first" moments and invite-a-truck links in quiet areas,
+and marketing concentrates wherever people start using it on their own.
 
 Going global later mostly means more languages, more currencies and checking each new country's
 privacy and payment rules; the version 1 groundwork above (translations, units, UTC times, local currency) carries over.
@@ -140,7 +142,8 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 - Sticker pins with glow or shadow, spot-type badge chips, clustering when zoomed out, live dot.
 - Pull-up sheet (trending, closest), filters, search.
 - Spot page (read-only first): photos, status, schedule, dishes, "not a chain".
-- **Seed data:** import Foursquare Open Source Places (or Overture) for the pilot cities, filter out chains, map categories to our emoji. Pilot cities: **Austin** and **Montreal** (or another Canadian city).
+- **Seed data:** import Foursquare Open Source Places (or Overture) for **all of the US and Canada**, filter out chains, keep food places, map categories to our emoji. Expect hundreds of thousands to over a million spots: needs the Supabase paid tier, map pin clustering and tiled loading (only the visible area is fetched).
+- Quiet-area design: "No trucks reported here yet" prompts and invite-a-truck links.
 - Distances in miles or kilometres by region; every screen in English and French.
 - Directions button hands off to Apple or Google Maps.
 - Done when: the founder browses real Austin spots on the night map.
@@ -174,7 +177,8 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 
 ### Phase 6 · Beta (about 2 weeks, overlaps phase 5)
 - iPhone TestFlight and Android internal testing.
-- **Two pilots:** about 20 eaters and 5 trucks or small spots in Austin, and the same in the Canadian city, including French-speaking testers.
+- **Spread-out beta:** testers in many cities across both countries (including Quebec, for French), plus a handful of trucks recruited online who claim their spots on their own.
+- Self-serve owner onboarding must work with no help from us.
 - Watch crashes (Sentry) and real usage (PostHog); fix the top issues each few days.
 - Done when: testers keep reporting and checking in without being asked.
 
@@ -191,7 +195,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 | Week | Milestone |
 |---|---|
 | 1 | Accounts ready, database live |
-| 2 | Real Austin and Canadian pilot spots on the night map, in English and French |
+| 2 | Real spots across the US and Canada on the night map, in English and French |
 | 3 | Sign-in, check-ins, reports, add a spot |
 | 4–5 | Business mode working end to end |
 | 6 | Ask Lokal and notifications |
@@ -218,7 +222,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 - **Name:** shortlist, then check app stores, domains, social handles and trademarks.
 - **Legal:** privacy policy and terms in English and French, content and review policy, location data disclosure; Quebec Law 25 items (privacy contact, impact assessment, consent records). Have a lawyer review before launch.
 - **Translation:** French copy reviewed by a native Canadian French speaker, not only machine translated.
-- **Vendor outreach:** list 30 trucks and pop-ups in each pilot city, visit and invite them before beta.
+- **Vendor outreach:** online first (food-truck associations, social media, invite links); in person in the cities that take off first.
 
 ---
 
@@ -226,7 +230,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 
 | Item | Early stage |
 |---|---|
-| Supabase | free tier, then about $25/month |
+| Supabase | paid tier from launch (about $25/month to start, more as the nationwide data and users grow) |
 | Mapbox | free tier for early users |
 | Claude API | about 1–2 cents per Ask Lokal question; small for summaries and moderation |
 | EAS (Expo) | free tier; paid plan if builds or updates exceed it |
@@ -240,7 +244,8 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 
 | Risk | What we do |
 |---|---|
-| Empty map in a new city | Seed with open place data, pilot one city, onboard vendors in person |
+| Thin cities (few trucks or pop-ups yet) | Seeded restaurants and stalls everywhere, "be the first" prompts, invite-a-truck links, marketing focused where usage grows |
+| Moderation at national scale | Automatic AI checks, report buttons, expiring reports, check-in required to review |
 | Stale truck locations | Owners' one-tap "we're here", report expiry, "still true?" votes |
 | Fake or unfair reviews | Check-in required to review, AI moderation, owner replies, report button |
 | Costs from AI use | Daily limits, caching, fast model for bulk work |
@@ -257,5 +262,5 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 | 0 | Create the accounts, add keys to Expo and GitHub (guided step by step) |
 | 1–5 | Test each update on your phone, give feedback, make design calls |
 | 2–5 | Generate the remaining emoji sheets in ChatGPT |
-| 6 | Recruit beta testers and a few trucks in Austin and the Canadian pilot city |
+| 6 | Recruit beta testers across many cities (some French-speaking) and a few trucks online |
 | 7 | Choose the final name (check it works in English and French), approve store listings, enroll 12+ testers for Google, get the policies reviewed |

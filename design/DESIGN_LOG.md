@@ -17,6 +17,7 @@ Check this file before any design or emoji work. Tick items off as they're done.
 | 2026-10-16 | **Logo: concept B · Bite pin** (chosen by the founder). A map pin with a bite taken out of it: food + location. Splash: the pin pops in and gets bitten, crumbs fly, then the wordmark. |
 | 2026-10-16 | Cleanup is always applied: remove haze, make fully opaque, trim, square. |
 | 2026-10-16 | **Launch markets: US and Canada**, then global. Every screen designed for English and Canadian French (French text runs ~20% longer, so layouts must allow it); miles or km by region; USD or CAD. The final name must work in both languages. |
+| 2026-10-16 | **Every city at launch** across the US and Canada (no pilot cities). Design must handle quiet areas well: populated by seeded restaurants, with "be the first" prompts and invite-a-truck links where no trucks are reported yet. |
 
 ## Changes to make
 
