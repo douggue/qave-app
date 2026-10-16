@@ -7,11 +7,16 @@
 "SplashA.dc.html":{"x":125,"y":1220,"w":390,"h":844,"title":"Splash A · Pin-o"},
 "SplashB.dc.html":{"x":845,"y":1220,"w":390,"h":844,"title":"Splash B · Bite pin"},
 "SplashC.dc.html":{"x":1565,"y":1220,"w":390,"h":844,"title":"Splash C · Neon sign"},
-"SplashD.dc.html":{"x":2285,"y":1220,"w":390,"h":844,"title":"Splash D · Sticker slap"}
+"SplashD.dc.html":{"x":2285,"y":1220,"w":390,"h":844,"title":"Splash D · Sticker slap"},
+"RefineBite.dc.html":{"x":0,"y":2484,"w":900,"h":700,"title":"B refined · The bite"},
+"IconSizes.dc.html":{"x":980,"y":2484,"w":900,"h":700,"title":"B refined · App icon at real sizes"},
+"Palette.dc.html":{"x":1960,"y":2484,"w":900,"h":700,"title":"B refined · Colors and versions"},
+"SplashB2.dc.html":{"x":2940,"y":2484,"w":390,"h":844,"title":"B refined · Splash"}
 },
-"order":["Main.dc.html","ConceptB.dc.html","ConceptC.dc.html","ConceptD.dc.html","SplashA.dc.html","SplashB.dc.html","SplashC.dc.html","SplashD.dc.html"],
+"order":["Main.dc.html","ConceptB.dc.html","ConceptC.dc.html","ConceptD.dc.html","SplashA.dc.html","SplashB.dc.html","SplashC.dc.html","SplashD.dc.html","RefineBite.dc.html","IconSizes.dc.html","Palette.dc.html","SplashB2.dc.html"],
 "notes":{
 "t1":{"x":0,"y":-300,"text":"Logo concepts","kind":"title1","maxW":2800},
-"t2":{"x":0,"y":920,"text":"Animated splash screens","kind":"title1","maxW":2800}
+"t2":{"x":0,"y":920,"text":"Animated splash screens","kind":"title1","maxW":2800},
+"t3":{"x":0,"y":2184,"text":"Chosen: B · Bite pin, refined","kind":"title1","maxW":3330}
 },
 "designSystems":[]}

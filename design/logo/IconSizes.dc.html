@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bite pin: app icon at real sizes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@800&amp;family=Figtree:wght@600;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ffcc33}a:hover{color:#ffe08a}
+</style>
+</helmet>
+<div style="width: 900px; height: 700px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 22px; background: #0d0e19; color: #f5f2ff; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;">
+  <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+    <defs>
+      <linearGradient id="i-grad" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#ffcc33"></stop><stop offset="0.55" stop-color="#ff7a45"></stop><stop offset="1" stop-color="#ff2d6f"></stop></linearGradient>
+      <mask id="i-v2"><rect width="100" height="130" fill="#fff"></rect><circle cx="79" cy="4" r="12" fill="#000"></circle><circle cx="94" cy="15" r="12" fill="#000"></circle><circle cx="101" cy="32" r="12" fill="#000"></circle></mask>
+      <mask id="i-v3"><rect width="100" height="130" fill="#fff"></rect><circle cx="86" cy="7" r="16" fill="#000"></circle><circle cx="102" cy="30" r="16" fill="#000"></circle></mask>
+    </defs>
+  </svg>
+  <div style="display: flex; justify-content: space-between; align-items: baseline;">
+    <h1 style="margin: 0; font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-size: 26px; letter-spacing: -0.02em;">App icon at real sizes</h1>
+    <span style="font-size: 13px; font-weight: 600; color: #9d9abb;">Main bite at 180–40 px · simplified bite at 24 and 16 px</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.12em; color: #ffcc33;">APP ICON · WHITE PIN ON THE GRADIENT</span>
+    <div style="display: flex; gap: 28px; align-items: flex-end; padding: 22px; border-radius: 22px; background: linear-gradient(160deg, #2a2f52, #151830);">
+      <div style="width: 180px; height: 180px; border-radius: 40px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ffcc33, #ff7a45 50%, #ff2d6f);"><svg role="img" aria-label="App icon, 180 pixels" width="96" height="125" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="12" fill="#ff5a4c"></circle></svg></div>
+      <div style="width: 120px; height: 120px; border-radius: 27px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ffcc33, #ff7a45 50%, #ff2d6f);"><svg aria-hidden="true" width="64" height="83" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="12" fill="#ff5a4c"></circle></svg></div>
+      <div style="width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ffcc33, #ff7a45 50%, #ff2d6f);"><svg aria-hidden="true" width="32" height="42" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="12" fill="#ff5a4c"></circle></svg></div>
+      <div style="width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ffcc33, #ff7a45 50%, #ff2d6f);"><svg aria-hidden="true" width="22" height="28" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="13" fill="#ff5a4c"></circle></svg></div>
+      <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ffcc33, #ff7a45 50%, #ff2d6f);"><svg aria-hidden="true" width="14" height="18" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#i-v3)"></path></svg></div>
+      <div style="width: 16px; height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ffcc33, #ff7a45 50%, #ff2d6f);"><svg aria-hidden="true" width="10" height="13" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#i-v3)"></path></svg></div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.12em; color: #9d9abb;">ALTERNATE · GRADIENT PIN ON NIGHT NAVY</span>
+    <div style="display: flex; gap: 28px; align-items: flex-end; padding: 22px; border-radius: 22px; background: #eef0f6;">
+      <div style="width: 180px; height: 180px; border-radius: 40px; display: flex; align-items: center; justify-content: center; background: radial-gradient(70% 70% at 50% 40%, rgba(255,90,60,0.35), transparent 70%), #12142a;"><svg role="img" aria-label="Alternate app icon, 180 pixels" width="96" height="125" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#i-grad)" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="12" fill="#12142a"></circle></svg></div>
+      <div style="width: 120px; height: 120px; border-radius: 27px; display: flex; align-items: center; justify-content: center; background: radial-gradient(70% 70% at 50% 40%, rgba(255,90,60,0.35), transparent 70%), #12142a;"><svg aria-hidden="true" width="64" height="83" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#i-grad)" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="12" fill="#12142a"></circle></svg></div>
+      <div style="width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: #12142a;"><svg aria-hidden="true" width="32" height="42" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#i-grad)" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="12" fill="#12142a"></circle></svg></div>
+      <div style="width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; background: #12142a;"><svg aria-hidden="true" width="22" height="28" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#i-grad)" mask="url(#i-v2)"></path><circle cx="46" cy="56" r="13" fill="#12142a"></circle></svg></div>
+      <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: #12142a;"><svg aria-hidden="true" width="14" height="18" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#i-grad)" mask="url(#i-v3)"></path></svg></div>
+      <div style="width: 16px; height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: #12142a;"><svg aria-hidden="true" width="10" height="13" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#i-grad)" mask="url(#i-v3)"></path></svg></div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 24px; font-size: 13px; font-weight: 600; color: #9d9abb;">
+    <span>180 · App Store</span><span>120 · home screen</span><span>60 · settings</span><span>40 · notifications</span><span>24 · tab and favicon</span><span>16 · smallest favicon</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":900,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

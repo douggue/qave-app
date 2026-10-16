@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bite pin: refined splash</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@800&amp;family=Figtree:wght@700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ffcc33}a:hover{color:#ffe08a}
+@keyframes s2Pop{0%{transform:scale(0) rotate(-18deg)}8%{transform:scale(1.14) rotate(4deg)}12%,100%{transform:scale(1) rotate(0)}}
+@keyframes s2T1{0%,17%{transform:scale(0)}19%,100%{transform:scale(1)}}
+@keyframes s2T2{0%,19%{transform:scale(0)}21%,100%{transform:scale(1)}}
+@keyframes s2T3{0%,21%{transform:scale(0)}23%,100%{transform:scale(1)}}
+@keyframes s2Shake{0%,18%{transform:translateX(0)}19%{transform:translateX(-5px)}21%{transform:translateX(5px)}23%{transform:translateX(-4px)}25%,100%{transform:translateX(0)}}
+@keyframes s2Crumb{0%,19%{opacity:0;transform:translate(0,0) scale(1)}21%{opacity:1}36%,100%{opacity:0;transform:translate(var(--cx),var(--cy)) scale(.5)}}
+@keyframes s2Glow{0%,22%{opacity:0}30%{opacity:1}100%{opacity:.75}}
+@keyframes s2Word{0%,26%{opacity:0;transform:translateY(22px)}38%,100%{opacity:1;transform:translateY(0)}}
+@keyframes s2Tag{0%,36%{opacity:0}47%,100%{opacity:1}}
+.s2-pop{animation:s2Pop 3.4s cubic-bezier(.3,1.4,.5,1) infinite}
+.s2-shake{animation:s2Shake 3.4s ease-out infinite}
+.s2-t1,.s2-t2,.s2-t3{transform-box:fill-box;transform-origin:center}
+.s2-t1{animation:s2T1 3.4s cubic-bezier(.3,1.6,.5,1) infinite}
+.s2-t2{animation:s2T2 3.4s cubic-bezier(.3,1.6,.5,1) infinite}
+.s2-t3{animation:s2T3 3.4s cubic-bezier(.3,1.6,.5,1) infinite}
+.s2-crumb{animation:s2Crumb 3.4s ease-out infinite}
+.s2-glow{animation:s2Glow 3.4s ease-out infinite}
+.s2-word{animation:s2Word 3.4s ease-out infinite}
+.s2-tag{animation:s2Tag 3.4s ease-out infinite}
+@media (prefers-reduced-motion:reduce){.s2-pop,.s2-shake,.s2-t1,.s2-t2,.s2-t3,.s2-crumb,.s2-glow,.s2-word,.s2-tag{animation:none}.s2-crumb{opacity:0}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; background: #0b0c18; color: #f5f2ff; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;">
+  <div class="s2-glow" aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(60% 34% at 50% 42%, rgba(255,120,50,0.32), transparent 70%);"></div>
+  <div class="s2-shake" style="position: relative;">
+    <div class="s2-pop" style="transform-origin: 50% 92%;">
+      <svg role="img" aria-label="Lokal bite pin" width="140" height="182" viewBox="0 0 100 130" style="display: block; filter: drop-shadow(0 0 24px rgba(255,90,60,0.5));">
+        <defs>
+          <linearGradient id="s2-grad" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#ffcc33"></stop><stop offset="0.55" stop-color="#ff7a45"></stop><stop offset="1" stop-color="#ff2d6f"></stop></linearGradient>
+          <mask id="s2-mask">
+            <rect width="100" height="130" fill="#fff"></rect>
+            <circle class="s2-t1" cx="79" cy="4" r="12" fill="#000"></circle>
+            <circle class="s2-t2" cx="94" cy="15" r="12" fill="#000"></circle>
+            <circle class="s2-t3" cx="101" cy="32" r="12" fill="#000"></circle>
+          </mask>
+        </defs>
+        <path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#s2-grad)" mask="url(#s2-mask)"></path>
+        <ellipse cx="32" cy="34" rx="10" ry="6" fill="#fff" opacity="0.45" transform="rotate(-35 32 34)"></ellipse>
+        <circle cx="46" cy="56" r="12" fill="#0b0c18"></circle>
+      </svg>
+    </div>
+    <span class="s2-crumb" style="--cx: 44px; --cy: -46px; position: absolute; right: 16px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: #ffcc33;"></span>
+    <span class="s2-crumb" style="--cx: 62px; --cy: -6px; position: absolute; right: 4px; top: 34px; width: 7px; height: 7px; border-radius: 50%; background: #ff7a45;"></span>
+    <span class="s2-crumb" style="--cx: 26px; --cy: -68px; position: absolute; right: 30px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #ffd65c;"></span>
+    <span class="s2-crumb" style="--cx: 58px; --cy: 26px; position: absolute; right: 2px; top: 50px; width: 6px; height: 6px; border-radius: 50%; background: #ff2d6f;"></span>
+  </div>
+  <span class="s2-word" style="position: relative; font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 54px; letter-spacing: -0.04em; line-height: 1;">Lokal</span>
+  <p class="s2-tag" style="position: relative; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: #ffcc33;">Only local. No chains.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

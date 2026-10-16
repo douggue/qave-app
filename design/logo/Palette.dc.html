@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bite pin: colors and versions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@800&amp;family=Figtree:wght@600;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ffcc33}a:hover{color:#ffe08a}
+</style>
+</helmet>
+<div style="width: 900px; height: 700px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 24px; background: #0d0e19; color: #f5f2ff; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;">
+  <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+    <defs>
+      <linearGradient id="p-grad" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#ffcc33"></stop><stop offset="0.55" stop-color="#ff7a45"></stop><stop offset="1" stop-color="#ff2d6f"></stop></linearGradient>
+      <mask id="p-v2"><rect width="100" height="130" fill="#fff"></rect><circle cx="79" cy="4" r="12" fill="#000"></circle><circle cx="94" cy="15" r="12" fill="#000"></circle><circle cx="101" cy="32" r="12" fill="#000"></circle></mask>
+    </defs>
+  </svg>
+  <h1 style="margin: 0; font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-size: 26px; letter-spacing: -0.02em;">Colors and versions</h1>
+
+  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;"><div style="height: 64px; border-radius: 16px; background: #ffcc33;"></div><b style="font-size: 14px;">Sun</b><span style="font-size: 13px; color: #9d9abb;">#FFCC33</span></div>
+    <div style="display: flex; flex-direction: column; gap: 8px;"><div style="height: 64px; border-radius: 16px; background: #ff7a45;"></div><b style="font-size: 14px;">Grill</b><span style="font-size: 13px; color: #9d9abb;">#FF7A45</span></div>
+    <div style="display: flex; flex-direction: column; gap: 8px;"><div style="height: 64px; border-radius: 16px; background: #ff2d6f;"></div><b style="font-size: 14px;">Chili</b><span style="font-size: 13px; color: #9d9abb;">#FF2D6F</span></div>
+    <div style="display: flex; flex-direction: column; gap: 8px;"><div style="height: 64px; border-radius: 16px; background: #0d0e19; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);"></div><b style="font-size: 14px;">Night</b><span style="font-size: 13px; color: #9d9abb;">#0D0E19</span></div>
+    <div style="display: flex; flex-direction: column; gap: 8px;"><div style="height: 64px; border-radius: 16px; background: #f5f2ff;"></div><b style="font-size: 14px;">Moon</b><span style="font-size: 13px; color: #9d9abb;">#F5F2FF</span></div>
+  </div>
+  <div style="height: 20px; border-radius: 10px; background: linear-gradient(90deg, #ffcc33, #ff7a45 55%, #ff2d6f);"></div>
+
+  <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+    <div style="border-radius: 20px; background: #14162d; display: flex; align-items: center; justify-content: center; gap: 14px;">
+      <svg role="img" aria-label="Logo on night background" width="50" height="65" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#p-grad)" mask="url(#p-v2)"></path><circle cx="46" cy="56" r="12" fill="#14162d"></circle></svg>
+      <span style="font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 42px; letter-spacing: -0.04em; color: #f5f2ff;">Lokal</span>
+    </div>
+    <div style="border-radius: 20px; background: #f5f2ff; display: flex; align-items: center; justify-content: center; gap: 14px;">
+      <svg role="img" aria-label="Logo on light background" width="50" height="65" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#p-grad)" mask="url(#p-v2)"></path><circle cx="46" cy="56" r="12" fill="#f5f2ff"></circle></svg>
+      <span style="font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 42px; letter-spacing: -0.04em; color: #16172b;">Lokal</span>
+    </div>
+    <div style="border-radius: 20px; background: linear-gradient(120deg, #ffcc33, #ff7a45 50%, #ff2d6f); display: flex; align-items: center; justify-content: center; gap: 14px;">
+      <svg role="img" aria-label="One-color white logo on the gradient" width="50" height="65" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#p-v2)"></path><circle cx="46" cy="56" r="12" fill="#ff6a4a"></circle></svg>
+      <span style="font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 42px; letter-spacing: -0.04em; color: #fff;">Lokal</span>
+    </div>
+    <div style="border-radius: 20px; background: #ffffff; display: flex; align-items: center; justify-content: center; gap: 14px;">
+      <svg role="img" aria-label="One-color dark logo" width="50" height="65" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#16172b" mask="url(#p-v2)"></path><circle cx="46" cy="56" r="12" fill="#ffffff"></circle></svg>
+      <span style="font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 42px; letter-spacing: -0.04em; color: #16172b;">Lokal</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":900,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
