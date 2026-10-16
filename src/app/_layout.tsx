@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { AnimatedSplash } from '@/components/animated-splash';
@@ -18,13 +18,19 @@ export default function RootLayout() {
   useLiveUpdates();
   const [fontsLoaded, fontError] = useFonts({ Unbounded_800ExtraBold, Figtree_700Bold });
   const [splashDone, setSplashDone] = useState(false);
+  // Never hold the app back for fonts: after 1.5 s, start with the fallback font.
+  const [fontWaitOver, setFontWaitOver] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setFontWaitOver(true), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const hideNativeSplash = useCallback(() => {
     SplashScreen.hide();
   }, []);
   const finishSplash = useCallback(() => setSplashDone(true), []);
 
-  if (!fontsLoaded && !fontError) {
+  if (!fontsLoaded && !fontError && !fontWaitOver) {
     return null;
   }
 

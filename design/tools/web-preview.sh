@@ -28,8 +28,10 @@ for f in $(grep -o '/_expo/static/js/web/[^"]*\.js' "$OUT/index.html"); do
 done
 {
   echo '<title>App Preview</title>'
-  echo '<style>html,body{height:100%;margin:0;background:#0b1020}body{overflow:hidden}#root{display:flex;height:100%;flex:1}</style>'
-  echo '<div id="root"></div>'
+  echo '<style>html,body{height:100%;margin:0;background:#0b0c18}body{overflow:hidden}#root{display:flex;height:100%;flex:1}</style>'
+  echo '<div id="root"><p id="lk-loading" style="margin:auto;color:#f5f2ff;font:600 15px system-ui,sans-serif">Loading Lokal…</p></div>'
+  # Show startup errors on screen, so a screenshot of a broken preview explains itself.
+  echo '<script>window.addEventListener("error",function(e){var d=document.createElement("pre");d.style.cssText="position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;white-space:pre-wrap;background:#3a0d14;color:#ffd7dc;padding:10px;border-radius:10px;font:12px monospace";d.textContent="Preview error: "+(e.message||e.error||"unknown")+(e.filename?" at "+e.filename+":"+e.lineno:"");document.body.appendChild(d)});window.addEventListener("unhandledrejection",function(e){var d=document.createElement("pre");d.style.cssText="position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;white-space:pre-wrap;background:#3a0d14;color:#ffd7dc;padding:10px;border-radius:10px;font:12px monospace";d.textContent="Preview error: "+(e.reason&&e.reason.message||e.reason);document.body.appendChild(d)})</script>'
   # Resolve script URLs first, then reset the path so the router opens on the home screen.
   printf '<script>(function(){var base=location.href;var srcs=%s;' "$(printf '%s
 ' $SCRIPTS | python3 -I -c 'import json,sys;print(json.dumps(sys.stdin.read().split()))')"
