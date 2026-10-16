@@ -1,11 +1,17 @@
+import * as Updates from 'expo-updates';
 import { StyleSheet, Text, View } from 'react-native';
 
 // Placeholder home screen. The real app screens replace this.
 export default function Home() {
+  const version = Updates.isEmbeddedLaunch
+    ? 'Installed build'
+    : `Live update ${Updates.updateId?.slice(0, 8)}`;
+
   return (
     <View style={styles.screen}>
       <Text style={styles.title}>qave-app</Text>
-      <Text style={styles.body}>The build pipeline works. The app's screens come next.</Text>
+      <Text style={styles.body}>{'Live updates are on. The real screens come next.'}</Text>
+      <Text style={styles.version}>{version}</Text>
     </View>
   );
 }
@@ -28,5 +34,10 @@ const styles = StyleSheet.create({
     color: '#a7b0cf',
     fontSize: 15,
     textAlign: 'center',
+  },
+  version: {
+    color: '#5d6690',
+    fontSize: 12,
+    marginTop: 16,
   },
 });

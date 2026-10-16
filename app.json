@@ -44,6 +44,12 @@
         "projectId": "c178712b-6eef-43c0-8d04-3bdfd78e1cb4"
       }
     },
-    "owner": "tjeangardy"
+    "owner": "tjeangardy",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c178712b-6eef-43c0-8d04-3bdfd78e1cb4"
+    }
   }
 }

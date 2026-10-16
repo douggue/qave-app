@@ -1,10 +1,17 @@
 name: Build Android app
 
 # Runs on every push to main, and from the "Run workflow" button in the Actions tab.
+# If the native side of the app is unchanged since the last build, it publishes a
+# live update instead of a new build, so the installed app updates on its next launch.
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      force_build:
+        description: Make a new installable build even if a live update would do
+        type: boolean
+        default: false
 
 permissions:
   contents: write # lets the first run commit the Expo project ID to app.json
@@ -43,6 +50,8 @@ jobs:
 
       - run: npx tsc --noEmit
 
+      - run: npx expo lint
+
       - name: Create the Expo project (first run only)
         run: |
           if ! grep -q '"projectId"' app.json; then
@@ -54,12 +63,40 @@ jobs:
             git push
           fi
 
-      - name: Start the Android build on Expo
+      - name: Decide between a new build and a live update
+        id: plan
+        run: |
+          RUNTIME=$(npx expo-updates runtimeversion:resolve --platform android | jq -r .runtimeVersion)
+          echo "runtime=$RUNTIME" >> "$GITHUB_OUTPUT"
+          EXISTING=0
+          for STATUS in finished in-progress in-queue new; do
+            N=$(eas build:list --platform android --channel preview --runtime-version "$RUNTIME" \
+                  --status "$STATUS" --limit 1 --json --non-interactive | jq length)
+            EXISTING=$((EXISTING + N))
+          done
+          if [ "$EXISTING" -gt 0 ] && [ "${{ inputs.force_build }}" != "true" ]; then
+            echo "mode=update" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=build" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish a live update
+        if: steps.plan.outputs.mode == 'update'
+        run: |
+          eas update --channel preview --environment preview --non-interactive \
+            --message "$(git log -1 --pretty=%s)"
+          {
+            echo "## Live update published"
+            echo "Close the app completely and open it again to load this version."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Start a new Android build on Expo
+        if: steps.plan.outputs.mode == 'build'
         run: |
           eas build --platform android --profile preview --non-interactive --no-wait | tee build.log
           {
-            echo "## Android build started"
-            echo "The build runs on Expo's servers and takes about 10-15 minutes."
-            echo "Open the link below on your phone to follow it and install the APK when it finishes."
+            echo "## New Android build started"
+            echo "Native code changed, so this version needs a fresh install."
+            echo "The build takes about 10-15 minutes. Open the link below on your phone and install it when it finishes."
             grep -o 'https://expo.dev/[^ ]*builds/[^ ]*' build.log | head -1
           } >> "$GITHUB_STEP_SUMMARY"
