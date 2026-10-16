@@ -1,7 +1,9 @@
 # Lokal: development plan
 
-"Lokal" is a placeholder name. A live, Waze-style map of small, independent food in the US:
+"Lokal" is a placeholder name. A live, Waze-style map of small, independent food:
 food trucks, carts, pop-ups, market stalls and small restaurants. No chains.
+
+**Launch markets: the United States and Canada**, then global.
 
 Related files: [`design/DESIGN_LOG.md`](design/DESIGN_LOG.md) (decisions and design changes),
 [`design/README.md`](design/README.md) (mockups, stack, AI plan), [`design/ASSETS.md`](design/ASSETS.md) (emoji and brand assets).
@@ -22,7 +24,31 @@ Timelines are estimates for steady work with the founder testing on a phone alon
 
 ---
 
-## 2. Version 1 scope
+## 2. Launching in the US and Canada
+
+What this means for version 1:
+
+| Area | US | Canada | What we build |
+|---|---|---|---|
+| Language | English | English and **French** (French is legally required for apps sold in Quebec) | Every word in translation files from day one; English and Canadian French at launch; store listings in both |
+| Units | miles, °F | kilometres, °C | Distance and temperature follow the phone's region |
+| Money | USD | CAD | Prices shown in the spot's local currency; payments later handle GST/HST and US sales tax |
+| Phone numbers | +1 | +1 | Same format; sign-in by phone works for both |
+| Privacy law | State laws (California CCPA/CPRA and others) | PIPEDA (federal) and **Quebec Law 25** (stricter) | Clear consent for location, privacy policy in English and French, data export and account deletion in the app, a named privacy contact, a privacy impact assessment because data is stored outside Quebec |
+| Accessibility | ADA | AODA (Ontario) | Screen reader labels, contrast, reduce motion (already planned) |
+| Time zones | 6 | 6 | All times stored in UTC and shown in the spot's local time |
+| Store availability | ✓ | ✓ | App Store and Google Play limited to the US and Canada at launch |
+
+**Pilot cities:** Austin (US) and **one Canadian city**, with Montreal the best fit to test French
+and Quebec rules (Toronto or Vancouver are alternatives with bigger food-truck scenes). Seed place data
+(Foursquare Open Source Places or Overture) covers both countries.
+
+Going global later mostly means more languages, more currencies and checking each new country's
+privacy and payment rules; the version 1 groundwork above (translations, units, UTC times, local currency) carries over.
+
+---
+
+## 3. Version 1 scope
 
 ### For eaters
 - Live night/day map of independent food near you, with sticker pins, glow, moving trucks.
@@ -53,7 +79,7 @@ avatar accessories, sounds.
 
 ---
 
-## 3. Architecture
+## 4. Architecture
 
 ```
 App (Expo, React Native, TypeScript)
@@ -97,7 +123,7 @@ Row-level security on every table: people can only change their own data; owners
 
 ---
 
-## 4. Phases
+## 5. Phases
 
 Each phase ends with something the founder can use on the phone. Every change passes typecheck, lint
 and `expo-doctor`, is checked in the browser preview, then reaches the phone as a live update or a new build.
@@ -105,6 +131,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 ### Phase 0 · Setup (1–3 days)
 - Founder creates accounts: **Supabase**, **Mapbox**, **Anthropic API**, **Apple Developer** ($99/year), **Google Play** ($25 once), **Sentry**, **PostHog**.
 - Keys stored as EAS environment variables and GitHub secrets (never in the code).
+- Translation setup (English, Canadian French), locale-aware units and currency, UTC time handling.
 - Supabase project, database schema v1, security rules, seed script skeleton.
 - Done when: the app on the phone reads one test spot from Supabase.
 
@@ -113,7 +140,8 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 - Sticker pins with glow or shadow, spot-type badge chips, clustering when zoomed out, live dot.
 - Pull-up sheet (trending, closest), filters, search.
 - Spot page (read-only first): photos, status, schedule, dishes, "not a chain".
-- **Seed data:** import Foursquare Open Source Places (or Overture) for the pilot city, filter out chains, map categories to our emoji. Pilot city: **Austin**.
+- **Seed data:** import Foursquare Open Source Places (or Overture) for the pilot cities, filter out chains, map categories to our emoji. Pilot cities: **Austin** and **Montreal** (or another Canadian city).
+- Distances in miles or kilometres by region; every screen in English and French.
 - Directions button hands off to Apple or Google Maps.
 - Done when: the founder browses real Austin spots on the night map.
 
@@ -146,13 +174,14 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 
 ### Phase 6 · Beta (about 2 weeks, overlaps phase 5)
 - iPhone TestFlight and Android internal testing.
-- **Austin pilot:** about 20 eaters and 5 trucks or small spots, onboarded in person.
+- **Two pilots:** about 20 eaters and 5 trucks or small spots in Austin, and the same in the Canadian city, including French-speaking testers.
 - Watch crashes (Sentry) and real usage (PostHog); fix the top issues each few days.
 - Done when: testers keep reporting and checking in without being asked.
 
 ### Phase 7 · Store launch (2–3 weeks, overlaps phase 6)
 - Final name, trademark search, designer-refined logo.
-- Store listings, screenshots, short video, privacy policy, terms, content policy, data safety forms.
+- Store listings and screenshots in English and French, short video, privacy policy and terms in both languages (US state laws, PIPEDA, Quebec Law 25), content policy, data safety forms.
+- Store availability set to the US and Canada only.
 - **Google Play:** new personal developer accounts must run a closed test with at least 12 testers for 14 days before going public (check the current rule at that time).
 - Apple review (usually 1–3 days), landing page on the web.
 - Done when: Lokal is downloadable in both stores.
@@ -162,7 +191,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 | Week | Milestone |
 |---|---|
 | 1 | Accounts ready, database live |
-| 2 | Real Austin spots on the night map |
+| 2 | Real Austin and Canadian pilot spots on the night map, in English and French |
 | 3 | Sign-in, check-ins, reports, add a spot |
 | 4–5 | Business mode working end to end |
 | 6 | Ask Lokal and notifications |
@@ -171,27 +200,29 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 
 ---
 
-## 5. After launch
+## 6. After launch
 
 1. Order ahead with payments (Stripe), pickup slots, "your order is ready".
 2. Hungry-people heatmap and AI parking tips for owners.
 3. Punch cards and loyalty.
 4. Lokal Pro for businesses (check Apple and Google payment rules before choosing how to charge).
 5. Staff accounts, multiple trucks, events and catering requests.
-6. More cities, chosen by where people start using it on their own.
+6. More US and Canadian cities, chosen by where people start using it on their own.
+7. Going global: new languages and currencies, each country's privacy and payment rules, local seed data.
 
 ---
 
-## 6. Parallel tracks (not blocking the build)
+## 7. Parallel tracks (not blocking the build)
 
 - **Design and emoji:** follow `design/DESIGN_LOG.md` (spot types redo, food sheets 2–4, reports, avatars, rewards, business icons).
 - **Name:** shortlist, then check app stores, domains, social handles and trademarks.
-- **Legal:** privacy policy, terms of use, content and review policy, location data disclosure.
-- **Vendor outreach:** list 30 Austin trucks and pop-ups, visit and invite them before beta.
+- **Legal:** privacy policy and terms in English and French, content and review policy, location data disclosure; Quebec Law 25 items (privacy contact, impact assessment, consent records). Have a lawyer review before launch.
+- **Translation:** French copy reviewed by a native Canadian French speaker, not only machine translated.
+- **Vendor outreach:** list 30 trucks and pop-ups in each pilot city, visit and invite them before beta.
 
 ---
 
-## 7. Running costs (rough, to verify when signing up)
+## 8. Running costs (rough, to verify when signing up)
 
 | Item | Early stage |
 |---|---|
@@ -205,7 +236,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 
 ---
 
-## 8. Main risks
+## 9. Main risks
 
 | Risk | What we do |
 |---|---|
@@ -214,16 +245,17 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 | Fake or unfair reviews | Check-in required to review, AI moderation, owner replies, report button |
 | Costs from AI use | Daily limits, caching, fast model for bulk work |
 | Store rejection | Follow guidelines early: Sign in with Apple, privacy labels, content moderation tools |
+| French or privacy requirements missed in Canada | Translations from day one, native French review, lawyer review of policies, Law 25 checklist |
 | Logo resembling another brand | Distinct three-tooth bite, trademark search, designer redraw |
 
 ---
 
-## 9. What the founder does in each phase
+## 10. What the founder does in each phase
 
 | Phase | You |
 |---|---|
 | 0 | Create the accounts, add keys to Expo and GitHub (guided step by step) |
 | 1–5 | Test each update on your phone, give feedback, make design calls |
 | 2–5 | Generate the remaining emoji sheets in ChatGPT |
-| 6 | Recruit beta testers and a few trucks in Austin |
-| 7 | Choose the final name, approve store listing, enroll 12+ testers for Google |
+| 6 | Recruit beta testers and a few trucks in Austin and the Canadian pilot city |
+| 7 | Choose the final name (check it works in English and French), approve store listings, enroll 12+ testers for Google, get the policies reviewed |
