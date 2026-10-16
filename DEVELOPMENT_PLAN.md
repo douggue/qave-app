@@ -231,7 +231,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 | Item | Early stage |
 |---|---|
 | Supabase | paid tier from launch (about $25/month to start, more as the nationwide data and users grow) |
-| Mapbox | free tier for early users |
+| Mapbox | free up to 25,000 monthly map users; then roughly $4 per 1,000 users (about $100/month at 50k, $400 at 125k; verify on mapbox.com/pricing). Cost depends on users, not cities or data. Map code stays swappable; reassess at ~20k monthly users (MapLibre + self-hosted tiles is the cheaper path). |
 | Claude API | about 1–2 cents per Ask Lokal question; small for summaries and moderation |
 | EAS (Expo) | free tier; paid plan if builds or updates exceed it |
 | Sentry, PostHog | free tiers |
