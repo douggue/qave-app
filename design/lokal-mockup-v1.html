@@ -1,0 +1,492 @@
+<title>Lokal Food Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: desktop = notes panel + phone frame; phone = app full screen.
+   Single bright daytime look by choice (a playful map), so colors are set explicitly. */
+:root{
+  --ink:#1d1b3a; --ink2:#5b5878; --page:#f5f3ff; --card:#ffffff; --line:#e7e4f3;
+  --land:#eef2e6; --park:#c9e8b2; --water:#9fd6f2; --road:#ffffff; --casing:#dcdfd2; --major:#ffd65c;
+  --tomato:#ff4d3d; --mustard:#ffc63a; --mint:#22c79a; --grape:#7b5cff; --sky:#2f8cff;
+  --font-d:'Fredoka',ui-rounded,system-ui,sans-serif; --font-b:'Nunito',ui-sans-serif,system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--page);color:var(--ink);font-family:var(--font-b);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible,input:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
+.stage{min-height:100%;display:flex;gap:56px;align-items:center;justify-content:center;padding:24px 16px;
+  background:radial-gradient(50% 50% at 80% 10%,#ffe3dc,transparent 70%),radial-gradient(40% 50% at 10% 90%,#dff3ff,transparent 70%),var(--page)}
+.panel{width:300px;display:flex;flex-direction:column;gap:16px}
+.panel h1{font:700 44px/1 var(--font-d);margin:0;color:var(--tomato);letter-spacing:-.01em}
+.panel .tag{font:600 18px var(--font-d);margin:0}
+.panel p{margin:0;color:var(--ink2);line-height:1.5;font-size:14px}
+.jump{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.jump button{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-weight:700;font-size:13px;text-align:left}
+.jump button.on{border-color:var(--ink)}
+.phone{width:390px;height:min(844px,calc(100vh - 48px));border-radius:46px;border:10px solid var(--ink);background:var(--land);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;flex:none;box-shadow:0 30px 70px -25px rgba(29,27,58,.45)}
+@media (max-width:760px){
+  .stage{padding:0;display:block;height:100%}
+  .panel{display:none}
+  .phone{width:100%;height:100%;border:0;border-radius:0}
+}
+.view{flex:1;position:relative;overflow:hidden}
+.page{position:absolute;inset:0;overflow-y:auto;background:var(--page);scrollbar-width:none}
+.page::-webkit-scrollbar{display:none}
+.pad{padding:16px 16px 28px;display:flex;flex-direction:column;gap:14px}
+h2{font:600 24px/1.15 var(--font-d);margin:0}
+h3{font:600 17px var(--font-d);margin:0}
+.muted{color:var(--ink2);font-size:13px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.btn{height:50px;border-radius:16px;font:600 16px var(--font-d);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  background:var(--ink);color:#fff;box-shadow:0 4px 0 #000}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #000}
+.btn.tomato{background:var(--tomato);box-shadow:0 4px 0 #c72a1d}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+.btn.sm{height:40px;font-size:14px;border-radius:13px}
+.chip{flex:none;height:36px;padding:0 14px;border-radius:999px;background:var(--card);border:2px solid var(--line);font-weight:800;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:#f0edff;color:var(--grape)}
+.badge.mint{background:#dcf7ee;color:#0f8a68}
+.badge.tomato{background:#ffe5e1;color:#c72a1d}
+.badge.mustard{background:#fff3cf;color:#8a6400}
+.back{width:42px;height:42px;border-radius:14px;background:var(--card);border:2px solid var(--line);display:grid;place-items:center;font-size:20px;font-weight:800}
+.hdr{display:flex;align-items:center;gap:10px;padding:14px 16px 6px}
+.hdr h2{flex:1}
+.pts{font:600 14px var(--font-d);background:var(--mustard);padding:7px 12px;border-radius:999px;box-shadow:0 3px 0 #c99a12;white-space:nowrap}
+/* Map */
+.world{position:absolute;left:0;top:0;width:1000px;height:1300px;touch-action:none;cursor:grab;will-change:transform}
+.world.drag{cursor:grabbing}
+.world svg{position:absolute;inset:0}
+.pin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;transition:opacity .25s,transform .25s}
+.pin .head{width:50px;height:50px;border-radius:50% 50% 50% 8px;transform:rotate(-45deg);background:var(--card);border:3px solid var(--ink);display:grid;place-items:center;box-shadow:0 5px 0 rgba(29,27,58,.25)}
+.pin .head span{transform:rotate(45deg);font-size:24px;line-height:1}
+.pin.truck .head{background:var(--mustard)}
+.pin.hot .head{background:#ffe5e1;animation:pulse 1.6s ease-in-out infinite}
+.pin.sel .head{background:var(--ink);} .pin.sel .head span{filter:drop-shadow(0 0 2px #fff)}
+.pin.dim{opacity:.18;pointer-events:none}
+.pin .mood{position:absolute;bottom:62px;white-space:nowrap;background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:3px 8px;font-size:12px;font-weight:800;box-shadow:0 3px 0 var(--ink)}
+.pin .mood::after{content:"";position:absolute;left:50%;bottom:-7px;width:10px;height:10px;background:var(--card);border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:translateX(-50%) rotate(45deg)}
+.pin .mood.pop{animation:pop .5s}
+@keyframes pulse{0%,100%{box-shadow:0 5px 0 rgba(29,27,58,.25),0 0 0 0 rgba(255,77,61,.5)}50%{box-shadow:0 5px 0 rgba(29,27,58,.25),0 0 0 12px rgba(255,77,61,0)}}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.me-dot{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:var(--sky);border:4px solid #fff;box-shadow:0 0 0 0 rgba(47,140,255,.5);animation:me 2s infinite}
+@keyframes me{0%{box-shadow:0 0 0 0 rgba(47,140,255,.45)}100%{box-shadow:0 0 0 26px rgba(47,140,255,0)}}
+.crowd{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;background:rgba(255,255,255,.92);border:2px solid var(--line);border-radius:999px;padding:3px 9px 3px 3px;font-size:12px;font-weight:800;gap:4px}
+.crowd i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:14px;margin-left:-8px;border:2px solid #fff}
+.crowd i:first-child{margin-left:0}
+.mtop{position:absolute;left:12px;right:12px;top:12px;display:flex;flex-direction:column;gap:10px;z-index:5}
+.ask{display:flex;align-items:center;gap:10px;height:54px;padding:0 8px 0 16px;border-radius:18px;background:var(--card);border:2px solid var(--ink);box-shadow:0 4px 0 var(--ink);font-weight:800;color:var(--ink2);text-align:left;width:100%}
+.ask .spark{font-size:20px}
+.ask .grow{font-size:15px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px 4px}
+.chips::-webkit-scrollbar{display:none}
+.chips .chip{border-color:var(--ink);box-shadow:0 2px 0 var(--ink)}
+.fab{position:absolute;right:14px;z-index:6;width:52px;height:52px;border-radius:18px;background:var(--card);border:2px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;font-size:22px}
+.peek{position:absolute;left:12px;right:12px;bottom:12px;z-index:6;background:var(--card);border:2px solid var(--ink);border-radius:22px;box-shadow:0 5px 0 var(--ink);padding:12px 14px;display:flex;gap:12px;align-items:center;text-align:left;animation:up .25s}
+.peek .emo{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:30px;flex:none}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.aibar{position:absolute;left:12px;right:12px;top:128px;z-index:5;background:var(--grape);color:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px}
+.aibar button{margin-left:auto;background:rgba(255,255,255,.2);border-radius:10px;padding:4px 10px;font-weight:800}
+/* Tab bar */
+.tabbar{display:flex;align-items:flex-end;background:var(--card);border-top:2px solid var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px));flex:none;position:relative;z-index:8}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--ink2);padding:4px 0}
+.tab .e{font-size:22px;filter:grayscale(1);opacity:.6}
+.tab.on{color:var(--ink)} .tab.on .e{filter:none;opacity:1}
+.tab.report{position:relative;top:-14px}
+.tab.report .big{width:62px;height:62px;border-radius:22px;background:var(--tomato);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;font-size:28px;color:#fff;font-weight:700}
+/* Sheets and toasts */
+.scrim{position:absolute;inset:0;z-index:30;background:rgba(29,27,58,.45);display:flex;align-items:flex-end;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.sheet{width:100%;background:var(--page);border-radius:28px 28px 0 0;border-top:3px solid var(--ink);padding:10px 16px 24px;display:flex;flex-direction:column;gap:14px;animation:up .25s;max-height:88%;overflow-y:auto}
+.grab{width:44px;height:5px;border-radius:3px;background:var(--line);align-self:center}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rbtn{background:var(--card);border:2px solid var(--ink);border-radius:20px;box-shadow:0 4px 0 var(--ink);padding:14px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:13px}
+.rbtn b{font-size:30px;line-height:1}
+.rbtn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--ink)}
+.toast{position:absolute;left:50%;top:90px;z-index:50;transform:translate(-50%,-10px);opacity:0;transition:.25s;background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;font-weight:800;font-size:14px;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.burst{position:absolute;z-index:51;font:700 22px var(--font-d);color:var(--tomato);pointer-events:none;animation:burst 1.1s forwards;text-shadow:0 2px 0 #fff}
+@keyframes burst{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:1;transform:translateY(-10px) scale(1.2)}100%{transform:translateY(-70px) scale(1);opacity:0}}
+/* Spot page */
+.hero{height:200px;display:grid;place-items:center;font-size:96px;position:relative}
+.hero .back{position:absolute;top:14px;left:14px}
+.hero .follow{position:absolute;top:14px;right:14px}
+.stats{display:flex;gap:14px;font-weight:800;font-size:14px;flex-wrap:wrap}
+.live{display:flex;align-items:center;gap:8px;font-weight:800;color:#0f8a68}
+.live::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px #dcf7ee}
+.ai{background:#f0edff;border:2px solid #d9d1ff;border-radius:18px;padding:12px 14px;font-size:14px;line-height:1.5}
+.ai b{color:var(--grape);font-family:var(--font-d);font-weight:600}
+.rep{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:2px dashed var(--line)}
+.rep:last-child{border-bottom:0}
+.rep .ic{font-size:22px}
+.vote{display:flex;gap:6px}
+.vote button{background:var(--page);border:2px solid var(--line);border-radius:10px;padding:3px 8px;font-weight:800;font-size:12px}
+.vote button.on{border-color:var(--ink);background:var(--mustard)}
+.menu .it{display:flex;justify-content:space-between;padding:8px 0;font-weight:700;border-bottom:1px solid var(--line)}
+.menu .it:last-child{border:0}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+/* Profile */
+.avatar{width:88px;height:88px;border-radius:30px;background:var(--mustard);border:3px solid var(--ink);display:grid;place-items:center;font-size:48px;box-shadow:0 5px 0 var(--ink)}
+.bar{height:14px;border-radius:7px;background:var(--line);overflow:hidden;border:2px solid var(--ink)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--tomato),var(--mustard));border-radius:5px;transition:width .5s}
+.bgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.bdg{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:800;text-align:center}
+.bdg span{width:58px;height:58px;border-radius:20px;display:grid;place-items:center;font-size:28px;background:var(--card);border:2px solid var(--ink);box-shadow:0 3px 0 var(--ink)}
+.bdg.lock span{filter:grayscale(1);opacity:.35;border-style:dashed;box-shadow:none}
+.lb{display:flex;align-items:center;gap:10px;padding:9px 4px;font-weight:800;border-bottom:1px solid var(--line)}
+.lb:last-child{border:0}
+.lb .n{width:24px;font-family:var(--font-d);color:var(--ink2)}
+.lb.you{background:#fff3cf;border-radius:12px;padding:9px 8px}
+/* Quests */
+.quest .prog{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}
+.quest .prog i{display:block;height:100%;background:var(--mint)}
+.opt{display:flex;flex-direction:column;gap:6px;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 12px;font-weight:800}
+.opt.on{border-color:var(--ink)}
+.opt .vb{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.opt .vb i{display:block;height:100%;background:var(--grape);transition:width .5s}
+/* Chat */
+.chat{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--page)}
+.msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;scrollbar-width:none}
+.msg{max-width:85%;padding:10px 14px;border-radius:18px;font-size:14.5px;line-height:1.45;font-weight:600}
+.msg.me{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:6px}
+.msg.bot{align-self:flex-start;background:var(--card);border:2px solid var(--line);border-bottom-left-radius:6px}
+.mini{display:flex;gap:10px;align-items:center;background:var(--page);border-radius:14px;padding:8px;margin-top:8px;width:100%;text-align:left}
+.mini .e{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex:none}
+.sugs{display:flex;gap:8px;overflow-x:auto;padding:0 16px 8px;scrollbar-width:none}
+.composer{display:flex;gap:8px;padding:8px 12px 12px;border-top:2px solid var(--line);background:var(--card)}
+.composer input{flex:1;min-width:0;height:46px;border-radius:15px;border:2px solid var(--ink);padding:0 14px;font:700 15px var(--font-b);color:var(--ink);background:var(--card)}
+.composer button{width:46px;height:46px;border-radius:15px;background:var(--grape);color:#fff;font-size:20px;font-weight:800}
+.typing{display:inline-flex;gap:4px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink2);animation:dot 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes dot{50%{transform:translateY(-4px);opacity:.4}}
+/* Share card */
+.share{border-radius:26px;padding:22px;color:#fff;background:linear-gradient(150deg,var(--tomato),#ff8a3d 55%,var(--mustard));border:3px solid var(--ink);box-shadow:0 6px 0 var(--ink);display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.share .big{font-size:80px;line-height:1}
+.share h2{font-size:28px}
+.share .brand{font:700 20px var(--font-d);display:flex;justify-content:space-between;align-items:center}
+.owner-hero{background:var(--ink);color:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.here{height:72px;border-radius:22px;background:var(--mint);color:var(--ink);font:700 22px var(--font-d);border:3px solid #fff;box-shadow:0 5px 0 #0f8a68;width:100%}
+.here.done{background:#fff}
+input.txt,select.txt{width:100%;height:48px;border-radius:14px;border:2px solid var(--ink);padding:0 12px;font:700 15px var(--font-b);color:var(--ink);background:var(--card)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="stage">
+  <aside class="panel">
+    <h1>Lokal</h1>
+    <p class="tag">Only local. No chains.</p>
+    <p>Clickable mockup of a live, Waze-style map for food trucks, pop-ups and small independent spots. Drag the map, tap pins, report, earn points. All spots and people are fictional sample data in Austin, TX. "Lokal" is a placeholder name.</p>
+    <div class="jump" id="jump"></div>
+  </aside>
+  <div class="phone" id="phone">
+    <main class="view" id="view"></main>
+    <nav class="tabbar" id="tabbar"></nav>
+    <div class="toast" id="toast"></div>
+    <div id="sheet"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- Sample data (fictional) ---------- */
+const SPOTS=[
+ {id:'guera',n:'Taquería La Güera',k:'truck',e:'🌮',c:'tacos',x:800,y:480,p:'$',r:4.8,rv:212,hood:'East 6th',open:true,status:'Here now · until 10pm',mood:'🔥 Hot right now',hot:1,bg:'#ffe1d6',badges:['Family-owned','Food truck'],own:'Rosa & Miguel',
+  ai:'Locals rave about the al pastor and the green salsa. Short line after 7pm, moves fast. Takes cash and cards.',menu:[['Al pastor taco',3.5],['Birria plate',13],['Horchata',4]]},
+ {id:'smoke',n:'Smoke Signal BBQ',k:'trailer',e:'🍖',c:'bbq',x:885,y:575,p:'$$',r:4.7,rv:388,hood:'East Cesar Chavez',open:true,status:'Open · until it sells out',mood:'⏳ 25-min line',bg:'#f6e2cf',badges:['Trailer','Pitmaster-owned'],own:'Dez',
+  ai:'Brisket is the star: peppery bark, very tender. Lines peak noon to 1pm. Sells out of ribs most days by 2pm.',menu:[['Brisket (½ lb)',16],['Pork ribs (3)',14],['Jalapeño mac',5]]},
+ {id:'dough',n:'Little Dough Bakery',k:'restaurant',e:'🥐',c:'sweets',x:360,y:880,p:'$',r:4.9,rv:146,hood:'Bouldin',open:true,status:'Open · until 3pm',mood:'🆕 Pecan croissant',bg:'#fff0c9',badges:['Women-owned','Small bakery'],own:'June',
+  ai:'Tiny counter, huge flavor. The pecan croissant is new this week and people love it. Come before 10am for the full case.',menu:[['Pecan croissant',5],['Kolache box (6)',14],['Cold brew',4.5]]},
+ {id:'pho',n:'Phở Bà Năm',k:'restaurant',e:'🍜',c:'asian',x:720,y:250,p:'$$',r:4.6,rv:301,hood:'Cherrywood',open:true,status:'Open · until 9pm',mood:'',bg:'#e3f1ff',badges:['Family-owned','12 tables'],own:'The Nguyen family',
+  ai:'Rich, slow-cooked broth and generous portions. Quiet spot, great for rainy days. Grandma still makes the broth.',menu:[['Phở tái',13],['Bánh mì',8],['Iced coffee',5]]},
+ {id:'smash',n:'Smash Bros. Burgers',k:'truck',e:'🍔',c:'burgers',x:610,y:520,p:'$',r:4.5,rv:97,hood:'Downtown',open:true,status:'Here now · until 11pm',mood:'🚚 Just parked',bg:'#ffe9b8',badges:['Food truck','Brothers-owned'],own:'Leo & Sam',
+  ai:'Crispy-edged smash burgers and very fast service. Late-night favorite. Fries are just okay; get the onion rings.',menu:[['Double smash',11],['Onion rings',5],['Shake',6]]},
+ {id:'kolache',n:'Kolache Corner',k:'restaurant',e:'🥟',c:'sweets',x:560,y:330,p:'$',r:4.4,rv:80,hood:'Downtown',open:true,status:'Open · until 1pm',mood:'🛑 Sausage sold out',bg:'#f9e5d0',badges:['Since 1998'],own:'Hana',
+  ai:'Classic Czech-Texan kolaches. Fruit ones last all morning; sausage ones sell out by about 10am.',menu:[['Fruit kolache',2.5],['Sausage klobasnek',3],['Coffee',2]]},
+ {id:'jerk',n:'Island Jerk Pit',k:'truck',e:'🍗',c:'caribbean',x:600,y:1040,p:'$$',r:4.7,rv:174,hood:'South Congress',open:true,status:'Here now · until 9pm',mood:'💸 $10 lunch deal',bg:'#dff5d8',badges:['Food truck','Immigrant-owned'],own:'Andre',
+  ai:'Smoky jerk chicken with real heat. The $10 lunch plate is the best deal on South Congress. Ask for extra sauce.',menu:[['Jerk chicken plate',14],['Lunch deal',10],['Festival (3)',5]]},
+ {id:'paleta',n:'Paleta Pop',k:'cart',e:'🍦',c:'sweets',x:240,y:820,p:'$',r:4.8,rv:66,hood:'Zilker',open:true,status:'Here now · until sunset',mood:'',bg:'#ffe0f0',badges:['Cart','Family-owned'],own:'Lupe',
+  ai:'Fresh fruit paletas, mango-chile is the favorite. Parks by the Zilker entrance on warm days.',menu:[['Mango-chile paleta',4],['Strawberry cream',4],['Elote cup',6]]},
+ {id:'supper',n:'Sunday Supper Club',k:'popup',e:'🍲',c:'popup',x:930,y:770,p:'$$$',r:4.9,rv:41,hood:'Holly',open:false,status:'Pop-up · Sunday 6pm',mood:'🎟️ 8 seats left',bg:'#efe3ff',badges:['Pop-up','Chef-run'],own:'Chef Ama',
+  ai:'Monthly family-style dinner in a backyard. West African and Texan menu. Book early; it fills up in a day.',menu:[['Family dinner',45],['Jollof add-on',8]]},
+ {id:'curry',n:'Curry Cart',k:'cart',e:'🍛',c:'asian',x:470,y:1000,p:'$',r:4.6,rv:58,hood:'South 1st',open:true,status:'Here now · until 8pm',mood:'',bg:'#fff1d6',badges:['Cart','Vegan options'],own:'Priya',
+  ai:'Big bowls of chana masala and butter chicken. Very good value, and lots of vegan choices.',menu:[['Butter chicken bowl',11],['Chana masala',9],['Mango lassi',4]]},
+];
+const getS=id=>SPOTS.find(s=>s.id===id);
+const REPORTS={
+ guera:[['🔥','Al pastor is on point tonight','@tacotania','4 min',12],['⏳','Line is ~8 people','@ellie.eats','15 min',5]],
+ smoke:[['⏳','25 min line, worth it','@brisketbrad','6 min',9],['🛑','Ribs gone already','@k.lo','40 min',3]],
+ dough:[['🆕','Pecan croissant just came out','@june_bakes (owner)','10 min',14]],
+ smash:[['🚚','Just parked on Congress','@leo (owner)','2 min',7]],
+ kolache:[['🛑','Out of sausage ones','@hungryhank','22 min',6]],
+ jerk:[['💸','$10 lunch plate today only','@andre (owner)','1 hr',18]],
+};
+const QUESTS=[
+ {e:'🚚',t:'Truck Chaser',d:'Try 5 different food trucks this month',p:3,n:5,r:100},
+ {e:'🌮',t:'Taco Tuesday',d:'Check in at a taquería on a Tuesday',p:0,n:1,r:30},
+ {e:'🕵️',t:'First to Find',d:'Add a spot nobody has posted yet',p:0,n:1,r:50},
+ {e:'🦉',t:'Night Owl',d:'3 check-ins after 10pm',p:1,n:3,r:40},
+];
+const BATTLE={q:'Best smash burger in Austin?',opts:[['Smash Bros. Burgers',46],['Patty Wagon',31],['Bun Voyage',23]]};
+const LEVELS=[['Snacker',0],['Foodie',100],['Taste Scout',250],['Spot Hunter',500],['Street Food Legend',1000]];
+const BADGES=[['🌮','Taco Hunter',1],['🚚','Truck Chaser',1],['🦉','Night Owl',1],['🕵️','First to Find',0],['🔥','Hot Spotter',1],['🧁','Sweet Tooth',0],['📸','Food Paparazzi',1],['👑','Local Legend',0]];
+const LEADERS=[['🦄','@tacotania',1240],['🤠','@brisketbrad',1105],['🐙','@ellie.eats',980],['🦊','@k.lo',760],['🐼','@hungryhank',655],['🐸','@noodle.nina',512]];
+
+const S={tab:'map',screen:'map',spot:null,sel:null,filter:'all',aiPicks:null,points:340,checkins:new Set(),follows:new Set(['guera']),votes:{},battleVote:null,
+  pan:{x:-420,y:-260},chat:[{who:'bot',t:"Hey! I know every local spot in Austin. What are you craving? 🌮🍔🍜"}],ownerHere:false};
+
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1900)}
+function award(n,why){
+  S.points+=n;const b=document.createElement('div');b.className='burst';b.textContent='+'+n+' pts';
+  b.style.left='50%';b.style.top='45%';b.style.transform='translateX(-50%)';$('#phone').appendChild(b);setTimeout(()=>b.remove(),1100);
+  if(why)toast(why);const p=$('#ptsVal');if(p)p.textContent=S.points;
+}
+const level=()=>{let i=0;LEVELS.forEach((l,k)=>{if(S.points>=l[1])i=k});return i};
+function sheet(html){$('#sheet').innerHTML=html?`<div class="scrim" onclick="if(event.target===this)sheet()"><div class="sheet" role="dialog"><div class="grab"></div>${html}</div></div>`:''}
+const kindLabel=k=>({truck:'Food truck',trailer:'Trailer',restaurant:'Small restaurant',cart:'Cart',popup:'Pop-up'}[k]);
+
+/* ---------- Map ---------- */
+function mapSVG(){
+  let minor='';
+  for(let x=-200;x<1200;x+=74)minor+=`M${x} -200V1500`;
+  for(let y=-200;y<1500;y+=74)minor+=`M-200 ${y}H1200`;
+  return `<svg width="1000" height="1300" viewBox="0 0 1000 1300" aria-hidden="true">
+  <rect width="1000" height="1300" fill="var(--land)"/>
+  <g transform="rotate(-6 500 650)"><path d="${minor}" stroke="var(--casing)" stroke-width="10" fill="none"/><path d="${minor}" stroke="var(--road)" stroke-width="6" fill="none"/></g>
+  <ellipse cx="180" cy="770" rx="150" ry="85" fill="var(--park)"/><ellipse cx="420" cy="735" rx="60" ry="32" fill="var(--park)"/>
+  <ellipse cx="150" cy="250" rx="70" ry="120" fill="var(--park)"/><ellipse cx="900" cy="980" rx="80" ry="50" fill="var(--park)"/>
+  <path d="M-30 705 C 180 640, 330 735, 520 665 S 820 600, 1030 640" stroke="var(--water)" stroke-width="72" fill="none" stroke-linecap="round"/>
+  <g stroke-linecap="round" fill="none">
+   <path d="M520 -10V1310 M300 -10L280 1310 M450 690V1310 M520 470H1010 M-10 600H1010 M700 -10L690 1310" stroke="#e8c04a" stroke-width="16"/>
+   <path d="M520 -10V1310 M300 -10L280 1310 M450 690V1310 M520 470H1010 M-10 600H1010" stroke="var(--major)" stroke-width="11"/>
+   <path d="M700 -10L690 1310" stroke="#ffb35c" stroke-width="12"/>
+  </g>
+  <g font-family="Nunito,sans-serif" font-weight="800" fill="#7d7a99" font-size="13" letter-spacing="2">
+   <text x="560" y="420">DOWNTOWN</text><text x="800" y="380">EAST AUSTIN</text><text x="545" y="960">SOUTH CONGRESS</text>
+   <text x="125" y="780">ZILKER PARK</text><text x="470" y="120">HYDE PARK</text><text x="340" y="930">BOULDIN</text><text x="840" y="1000">HOLLY</text>
+  </g>
+  <g font-family="Nunito,sans-serif" font-weight="700" font-size="11" fill="#8c7a2f">
+   <text x="528" y="200">Congress Ave</text><text x="706" y="160" fill="#a3611a">I-35</text><text x="900" y="462">E 6th St</text><text x="60" y="592">Cesar Chavez</text><text x="306" y="300">Lamar</text>
+  </g>
+  <text x="250" y="700" font-family="Nunito,sans-serif" font-style="italic" font-weight="700" font-size="13" fill="#3f86b0">Lady Bird Lake</text>
+  </svg>`;
+}
+function matches(s){
+  if(S.aiPicks)return S.aiPicks.includes(s.id);
+  const f=S.filter;
+  return f==='all'||(f==='open'&&s.open)||(f==='trucks'&&['truck','cart','trailer'].includes(s.k))||(f==='popup'&&s.k==='popup')||s.c===f||(f==='cheap'&&s.p==='$');
+}
+function pinHTML(s){
+  return `<button class="pin ${s.k==='truck'?'truck':''} ${s.hot?'hot':''} ${S.sel===s.id?'sel':''} ${matches(s)?'':'dim'}" id="pin-${s.id}" style="left:${s.x}px;top:${s.y}px" onclick="selectSpot('${s.id}')" aria-label="${esc(s.n)}">
+    ${s.mood?`<span class="mood">${esc(s.mood)}</span>`:''}<span class="head"><span>${s.e}</span></span></button>`;
+}
+function crowd(x,y,faces,n){return `<div class="crowd" style="left:${x}px;top:${y}px">${faces.map((f,i)=>`<i style="background:${['#ffd65c','#c9b8ff','#9fe3c8','#ffc0b5'][i%4]}">${f}</i>`).join('')}${n} foodies</div>`}
+const FILTERS=[['all','All'],['open','Open now'],['trucks','🚚 Trucks & carts'],['tacos','🌮 Tacos'],['bbq','🍖 BBQ'],['sweets','🧁 Sweets'],['asian','🍜 Asian'],['popup','🎟️ Pop-ups'],['cheap','$ Cheap eats']];
+
+const SCR={
+map:()=>{const s=S.sel&&getS(S.sel);
+ return `<div class="world" id="world" style="transform:translate(${S.pan.x}px,${S.pan.y}px)">${mapSVG()}
+   ${crowd(700,410,['😋','🤤','😎'],8)}${crowd(560,1095,['🥳','😋'],5)}${crowd(300,850,['🤠','😄'],3)}
+   <div class="me-dot" style="left:640px;top:610px"></div>
+   ${SPOTS.map(pinHTML).join('')}</div>
+  <div class="mtop">
+   <button class="ask" onclick="tabTo('ai')"><span class="spark">✨</span><span class="grow">Ask Lokal: "tacos open now under $10"</span><span class="pts" id="ptsVal">${S.points}</span></button>
+   <div class="chips">${FILTERS.map(([k,l])=>`<button class="chip ${S.filter===k&&!S.aiPicks?'on':''}" onclick="setFilter('${k}')">${l}</button>`).join('')}</div>
+  </div>
+  ${S.aiPicks?`<div class="aibar">✨ ${S.aiPicks.length} AI picks on the map<button onclick="S.aiPicks=null;render()">Clear</button></div>`:''}
+  <button class="fab" style="bottom:${s?150:86}px" onclick="recenter()" aria-label="Center on me">📍</button>
+  ${s?`<button class="peek" onclick="openSpot('${s.id}')"><span class="emo" style="background:${s.bg}">${s.e}</span><span class="grow"><h3>${esc(s.n)}</h3><span class="muted">⭐ ${s.r} · ${s.p} · ${kindLabel(s.k)} · ${s.hood}</span><br><span class="live" style="font-size:13px">${esc(s.status)}</span></span><span style="font-size:22px">›</span></button>`
+   :`<div class="peek" style="animation:none"><span class="emo" style="background:#fff3cf">🗺️</span><span class="grow"><h3>24 local spots near you</h3><span class="muted">3 trucks just parked · 0 chains, ever</span></span></div>`}`},
+
+spot:(id)=>{const s=getS(id);const reps=REPORTS[id]||[];const fol=S.follows.has(id);const inn=S.checkins.has(id);
+ return `<div class="page"><div class="hero" style="background:${s.bg}"><button class="back" onclick="back()" aria-label="Back">‹</button>
+  <button class="btn sm ${fol?'':'tomato'} follow" style="width:auto;padding:0 14px" onclick="toggleFollow('${id}')">${fol?'✓ Following':'+ Follow'}</button>${s.e}</div>
+  <div class="pad">
+   <div><h2>${esc(s.n)}</h2><div class="stats" style="margin-top:6px"><span>⭐ ${s.r} <span class="muted">(${s.rv})</span></span><span>${s.p}</span><span>${kindLabel(s.k)}</span><span class="muted">${s.hood}</span></div></div>
+   <div class="row" style="flex-wrap:wrap;gap:6px">${s.badges.map((b,i)=>`<span class="badge ${['mint','mustard','tomato'][i%3]}">${esc(b)}</span>`).join('')}<span class="badge">🚫 Not a chain</span></div>
+   <div class="live">${esc(s.status)}</div>
+   <div class="ai"><b>✨ What people say</b><br>${esc(s.ai)}</div>
+   <div class="acts">
+    <button class="btn sm ${inn?'ghost':''}" onclick="checkIn('${id}')">${inn?'✓ Checked in':'📍 Check in'}</button>
+    <button class="btn sm ghost" onclick="openReport('${id}')">⚡ Report</button>
+    <button class="btn sm ghost" onclick="go('share','${id}')">📤 Share</button>
+   </div>
+   <button class="btn ghost" onclick="toast('Opens Apple Maps or Google Maps for directions')">🧭 Directions</button>
+   <div class="card"><h3>Live reports</h3>${reps.length?reps.map((r,i)=>{const v=S.votes[id+i];return `<div class="rep"><span class="ic">${r[0]}</span><div class="grow"><b style="font-size:14px">${esc(r[1])}</b><div class="muted">${esc(r[2])} · ${r[3]} ago</div></div>
+     <div class="vote"><button class="${v===1?'on':''}" onclick="vote('${id}',${i},1)">👍 ${r[4]+(v===1?1:0)}</button><button class="${v===-1?'on':''}" onclick="vote('${id}',${i},-1)">👎</button></div></div>`}).join('')
+     :'<p class="muted" style="margin:8px 0 0">No live reports yet. Be the first and earn 5 points.</p>'}</div>
+   <div class="card menu"><h3 style="margin-bottom:4px">Fan favorites</h3>${s.menu.map(m=>`<div class="it"><span>${esc(m[0])}</span><span>$${m[1].toFixed(m[1]%1?2:0)}</span></div>`).join('')}</div>
+   <p class="muted" style="text-align:center">Run by ${esc(s.own)} · Owners update hours and specials</p>
+  </div></div>`},
+
+ai:()=>`<div class="chat"><div class="hdr"><h2>✨ Ask Lokal</h2><span class="pts">${S.points} pts</span></div>
+ <div class="msgs" id="msgs">${S.chat.map(chatMsg).join('')}</div>
+ <div class="sugs">${['Spicy under $12, open now','Something sweet nearby','Best BBQ without a huge line','Late-night food'].map(q=>`<button class="chip" onclick="ask('${q}')">${q}</button>`).join('')}</div>
+ <form class="composer" onsubmit="event.preventDefault();ask($('#q').value)"><input id="q" placeholder="What are you craving?" autocomplete="off"><button aria-label="Send">↑</button></form></div>`,
+
+quests:()=>`<div class="page"><div class="hdr"><h2>Quests</h2><span class="pts">${S.points} pts</span></div><div class="pad">
+ ${QUESTS.map(q=>`<div class="card quest"><div class="row"><span style="font-size:30px">${q.e}</span><div class="grow"><h3>${q.t}</h3><div class="muted">${q.d}</div></div><span class="badge mustard">+${q.r}</span></div>
+  <div class="prog"><i style="width:${q.p/q.n*100}%"></i></div><div class="muted" style="margin-top:4px">${q.p} of ${q.n}</div></div>`).join('')}
+ <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="row"><span style="font-size:28px">⚔️</span><div class="grow"><h3>Battle of the week</h3><div class="muted">${BATTLE.q}</div></div></div>
+  ${BATTLE.opts.map((o,i)=>{const total=BATTLE.opts.reduce((a,b)=>a+b[1],0)+(S.battleVote!=null?1:0);const v=o[1]+(S.battleVote===i?1:0);const pct=Math.round(v/total*100);
+   return `<button class="opt ${S.battleVote===i?'on':''}" onclick="battle(${i})"><span class="row"><span class="grow">${esc(o[0])}</span>${S.battleVote!=null?`<span>${pct}%</span>`:''}</span>${S.battleVote!=null?`<span class="vb"><i style="width:${pct}%"></i></span>`:''}</button>`}).join('')}
+  ${S.battleVote==null?'<p class="muted" style="margin:0">Vote to see results and earn 5 points.</p>':''}</div>
+ </div></div>`,
+
+me:()=>{const li=level();const cur=LEVELS[li],nxt=LEVELS[li+1];const pct=nxt?Math.min(100,(S.points-cur[1])/(nxt[1]-cur[1])*100):100;
+ const board=[...LEADERS,['😋','You',S.points]].sort((a,b)=>b[2]-a[2]);
+ return `<div class="page"><div class="pad" style="padding-top:22px">
+  <div class="row" style="gap:16px"><div class="avatar">😋</div><div class="grow"><h2>@you</h2><div class="badge mustard" style="margin-top:6px">🏅 ${cur[0]}</div><div class="muted" style="margin-top:6px">🔥 4-week streak · Austin</div></div></div>
+  <div class="card"><div class="row"><b class="grow">${S.points} pts</b><span class="muted">${nxt?`${nxt[1]-S.points} to ${nxt[0]}`:'Max level!'}</span></div><div class="bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div>
+  <div class="row" style="gap:10px">${[['37','Spots tried'],['12','Spots added'],[String(S.follows.size),'Following']].map(([n,l])=>`<div class="card grow" style="text-align:center"><h2>${n}</h2><div class="muted">${l}</div></div>`).join('')}</div>
+  <h3>Badges</h3><div class="bgrid">${BADGES.map(b=>`<div class="bdg ${b[2]?'':'lock'}"><span>${b[0]}</span>${b[1]}</div>`).join('')}</div>
+  <div class="card"><h3 style="margin-bottom:6px">🏆 Top foodies in Austin this week</h3>${board.slice(0,7).map((l,i)=>`<div class="lb ${l[1]==='You'?'you':''}"><span class="n">${i+1}</span><span>${l[0]}</span><span class="grow">${l[1]}</span><span>${l[2].toLocaleString('en-US')}</span></div>`).join('')}</div>
+  <button class="btn ghost" onclick="go('owner')">🚚 Switch to owner view (demo)</button>
+ </div></div>`},
+
+owner:()=>{const s=getS('smash');
+ return `<div class="page"><div class="hdr"><button class="back" onclick="back()" aria-label="Back">‹</button><h2>Owner view</h2></div><div class="pad">
+  <div class="owner-hero"><div class="row"><span style="font-size:40px">🍔</span><div class="grow"><h3>${esc(s.n)}</h3><div style="opacity:.75;font-size:13px">128 followers · ⭐ ${s.r}</div></div></div>
+   <div style="font-weight:800">😋 15 foodies nearby are hungry right now</div>
+   <label class="muted" for="loc" style="color:#cfcbe8">Where are you parked?</label>
+   <select class="txt" id="loc"><option value="0">Congress Ave & 2nd St (Downtown)</option><option value="1">E 6th St & Waller (East Austin)</option><option value="2">S Congress & Elizabeth (SoCo)</option></select>
+   <button class="here ${S.ownerHere?'done':''}" onclick="weAreHere()">${S.ownerHere?'✓ You’re live on the map':'📍 We’re here now'}</button></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>⚡ Flash special</h3>
+   <input class="txt" id="special" value="Free onion rings for the next 20 people" aria-label="Special">
+   <button class="btn tomato" onclick="toast('Special sent to 128 followers')">Send to followers</button></div>
+  <div class="card"><h3>This week</h3><div class="row" style="margin-top:8px">${[['412','Map views'],['86','Check-ins'],['+23','New followers']].map(([n,l])=>`<div class="grow" style="text-align:center"><h2>${n}</h2><div class="muted">${l}</div></div>`).join('')}</div></div>
+ </div></div>`},
+
+share:(id)=>{const s=getS(id);
+ return `<div class="page"><div class="hdr"><button class="back" onclick="back()" aria-label="Back">‹</button><h2>Share</h2></div><div class="pad">
+  <div class="share"><div class="brand">Lokal<span style="font-size:13px;opacity:.9">Only local. No chains.</span></div><div class="big">${s.e}</div>
+   <h2>I just found the best ${esc(s.menu[0][0].toLowerCase())} in Austin</h2><div style="font-weight:800">${esc(s.n)} · ${s.hood}</div><div style="font-weight:800">⭐ ${s.r} · ${kindLabel(s.k)}</div></div>
+  <p class="muted" style="text-align:center;margin:0">Card sized for TikTok and Instagram stories.</p>
+  <button class="btn tomato" onclick="toast('Card saved, ready to post')">Post to my story</button>
+  <button class="btn ghost" onclick="copyLink('${id}')">Copy link</button>
+ </div></div>`},
+};
+
+/* ---------- Chat ---------- */
+function chatMsg(m){
+  if(m.typing)return `<div class="msg bot"><span class="typing"><i></i><i></i><i></i></span></div>`;
+  if(m.who==='me')return `<div class="msg me">${esc(m.t)}</div>`;
+  return `<div class="msg bot">${esc(m.t)}${(m.picks||[]).map(id=>{const s=getS(id);return `<button class="mini" onclick="openSpot('${id}')"><span class="e" style="background:${s.bg}">${s.e}</span><span class="grow"><b>${esc(s.n)}</b><br><span class="muted">⭐ ${s.r} · ${s.p} · ${esc(s.status)}</span></span></button>`}).join('')}
+  ${m.picks?`<button class="btn sm" style="margin-top:10px" onclick="showPicks(${JSON.stringify(m.picks).replace(/"/g,'&quot;')})">🗺️ Show on map</button>`:''}</div>`;
+}
+function answer(q){
+  q=q.toLowerCase();
+  if(/spic|hot|jerk|heat/.test(q))return['Spicy and open now, all under $12 for a main:',['jerk','guera','curry']];
+  if(/sweet|dessert|bak|ice|paleta|croissant/.test(q))return['Sweet tooth? These are loved right now:',['dough','paleta','kolache']];
+  if(/bbq|brisket|rib/.test(q))return['Smoke Signal has the best brisket nearby. The line is about 25 min, so here are shorter waits too:',['smoke','jerk']];
+  if(/late|night|midnight/.test(q))return['Still open late near you:',['smash','guera']];
+  if(/taco|mex|burrito/.test(q))return['Tacos nearby, freshest reports first:',['guera','curry']];
+  if(/cheap|\$|budget|under/.test(q))return['Big flavor, small price:',['jerk','curry','guera']];
+  if(/burger/.test(q))return['Burger time:',['smash']];
+  if(/pho|noodle|soup|asian|curry/.test(q))return['Warm bowls nearby:',['pho','curry']];
+  return['Here’s what locals are loving near you right now:',['guera','dough','jerk']];
+}
+function ask(q){
+  q=(q||'').trim();if(!q)return;
+  S.chat.push({who:'me',t:q},{typing:1});render();scrollChat();
+  setTimeout(()=>{S.chat.pop();const [t,picks]=answer(q);S.chat.push({who:'bot',t,picks});if(S.screen==='ai'){render();scrollChat()}},900);
+}
+function scrollChat(){const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight}
+function showPicks(p){S.aiPicks=p;S.sel=p[0];tabTo('map');const s=getS(p[0]);centerOn(s.x,s.y);render()}
+
+/* ---------- Actions ---------- */
+function selectSpot(id){if(dragMoved)return;S.sel=S.sel===id?null:id;render()}
+function openSpot(id){go('spot',id)}
+function setFilter(k){S.filter=k;S.aiPicks=null;S.sel=null;render()}
+function toggleFollow(id){
+  if(S.follows.has(id)){S.follows.delete(id);toast('Unfollowed')}else{S.follows.add(id);toast('You’ll get an alert when they’re nearby')}
+  render();
+}
+function checkIn(id){if(S.checkins.has(id))return;S.checkins.add(id);render();award(10,'Checked in! 🎉')}
+function vote(id,i,v){const k=id+i;if(S.votes[k]===v)return;const first=S.votes[k]==null;S.votes[k]=v;render();if(first)award(2,'Thanks for confirming')}
+function battle(i){if(S.battleVote!=null)return;S.battleVote=i;render();award(5,'Vote counted')}
+function copyLink(id){const t='https://lokal.example/spot/'+id;try{navigator.clipboard.writeText(t).then(()=>toast('Link copied'),()=>toast(t))}catch(e){toast(t)}}
+const RTYPES=[['🔥','Amazing'],['⏳','Long line'],['💸','Good deal'],['🛑','Sold out'],['📸','Photo'],['🆕','New spot']];
+function openReport(id){
+  const near=id||S.sel||'guera';
+  sheet(`<h2>What’s happening?</h2><p class="muted" style="margin:-6px 0 0">One tap. Everyone nearby sees it.</p>
+   <div class="chips" style="margin:0;padding:0 0 4px">${SPOTS.slice(0,6).map(s=>`<button class="chip ${s.id===near?'on':''}" onclick="openReport('${s.id}')">${s.e} ${esc(s.n.split(' ')[0])}</button>`).join('')}</div>
+   <div class="rgrid">${RTYPES.map(([e,l])=>`<button class="rbtn" onclick="doReport('${near}','${e}','${l}')"><b>${e}</b>${l}</button>`).join('')}</div>
+   <p class="muted" style="text-align:center;margin:0">+5 points per report · Reports fade after a few hours</p>`);
+}
+function doReport(id,e,l){
+  const s=getS(id);sheet();
+  if(l==='New spot'){toast('Drop a pin to add a new spot (next version)');return}
+  if(l==='Photo'){toast('Camera opens here in the real app');award(5);return}
+  s.mood=e+' '+l;(REPORTS[id]=REPORTS[id]||[]).unshift([e,l,'@you','just now',0]);
+  S.sel=id;S.aiPicks=null;S.filter='all';
+  if(S.screen!=='map'&&S.screen!=='spot')tabTo('map');
+  if(S.screen==='map')centerOn(s.x,s.y);
+  render();const m=document.querySelector('#pin-'+id+' .mood');if(m)m.classList.add('pop');
+  award(5,'Reported! Nearby foodies can see it');
+}
+function weAreHere(){
+  const spots=[[610,520],[860,440],[600,980]];const i=+$('#loc').value;const s=getS('smash');
+  [s.x,s.y]=spots[i];s.hood=['Downtown','East Austin','South Congress'][i];s.mood='🚚 Just parked';S.ownerHere=true;
+  render();toast('You’re live. 128 followers notified');
+}
+
+/* ---------- Navigation ---------- */
+const TABS=[['map','🗺️','Map'],['quests','🏆','Quests'],['report','',''],['ai','✨','Ask'],['me','😋','Me']];
+let stack=[];
+function go(screen,param){stack.push([S.screen,S.spot]);S.screen=screen;S.spot=param||null;render()}
+function back(){const p=stack.pop()||['map',null];S.screen=p[0];S.spot=p[1];render()}
+function tabTo(t){if(t==='report'){openReport();return}stack=[];S.tab=t;S.screen=t;S.spot=null;render();if(t==='ai')scrollChat()}
+function render(){
+  $('#view').innerHTML=SCR[S.screen](S.spot);
+  const t={map:'map',spot:'map',share:'map',quests:'quests',ai:'ai',me:'me',owner:'me'}[S.screen];
+  $('#tabbar').innerHTML=TABS.map(([k,e,l])=>k==='report'
+    ?`<button class="tab report" onclick="tabTo('report')" aria-label="Report"><span class="big">⚡</span></button>`
+    :`<button class="tab ${k===t?'on':''}" onclick="tabTo('${k}')"><span class="e">${e}</span>${l}</button>`).join('');
+  document.querySelectorAll('#jump button').forEach(b=>b.classList.toggle('on',b.dataset.k===S.screen));
+  if(S.screen==='map')bindMap();
+}
+
+/* ---------- Map panning ---------- */
+let dragMoved=false;
+function clampPan(){const v=$('#view');const w=v.clientWidth,h=v.clientHeight;S.pan.x=Math.min(0,Math.max(w-1000,S.pan.x));S.pan.y=Math.min(0,Math.max(h-1300,S.pan.y))}
+function centerOn(x,y){const v=$('#view');S.pan.x=v.clientWidth/2-x;S.pan.y=v.clientHeight/2-y+60;clampPan();const w=$('#world');if(w)w.style.transform=`translate(${S.pan.x}px,${S.pan.y}px)`}
+function recenter(){centerOn(640,610);toast('📍 You’re in Downtown Austin')}
+function bindMap(){
+  const w=$('#world');clampPan();w.style.transform=`translate(${S.pan.x}px,${S.pan.y}px)`;
+  let start=null;
+  w.onpointerdown=e=>{start={x:e.clientX,y:e.clientY,px:S.pan.x,py:S.pan.y};dragMoved=false;w.classList.add('drag')};
+  w.onpointermove=e=>{if(!start)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;
+    if(!dragMoved&&Math.hypot(dx,dy)>6){dragMoved=true;try{w.setPointerCapture(e.pointerId)}catch(_){}}
+    if(dragMoved){S.pan.x=start.px+dx;S.pan.y=start.py+dy;clampPan();w.style.transform=`translate(${S.pan.x}px,${S.pan.y}px)`}};
+  const end=()=>{start=null;w.classList.remove('drag');setTimeout(()=>dragMoved=false,0)};
+  w.onpointerup=end;w.onpointercancel=end;
+}
+
+/* Truck drives to a new spot every so often, like a live update */
+const ROUTE=[[610,520],[700,500],[780,440],[860,440]];let leg=0,dir=1;
+setInterval(()=>{
+  if(S.ownerHere)return;const s=getS('smash');leg+=dir;if(leg===ROUTE.length-1||leg===0)dir*=-1;
+  [s.x,s.y]=ROUTE[leg];s.mood=leg===ROUTE.length-1||leg===0?'🚚 Just parked':'🚚 On the move';
+  const p=document.getElementById('pin-smash');
+  if(p&&S.screen==='map'){p.style.transition='left 1.6s ease-in-out, top 1.6s ease-in-out, opacity .25s';p.style.left=s.x+'px';p.style.top=s.y+'px';const m=p.querySelector('.mood');if(m)m.textContent=s.mood}
+},4000);
+
+/* ---------- Screen jumper (desktop) ---------- */
+const JUMP=[['map','🗺️ Live map'],['spot','🌮 Spot page'],['report','⚡ Report'],['ai','✨ Ask AI'],['quests','🏆 Quests'],['me','😋 Profile'],['owner','🚚 Owner view'],['share','📤 Share card']];
+$('#jump').innerHTML=JUMP.map(([k,l])=>`<button data-k="${k}" onclick="jumpTo('${k}')">${l}</button>`).join('');
+function jumpTo(k){sheet();
+  if(k==='report'){tabTo('map');openReport('guera');return}
+  if(k==='spot'||k==='share'){stack=[['map',null]];S.screen=k;S.spot='guera';render();return}
+  if(k==='owner'){stack=[['me',null]];S.screen='owner';S.spot=null;render();return}
+  tabTo(k);
+}
+render();requestAnimationFrame(()=>{centerOn(680,560);});
+</script>

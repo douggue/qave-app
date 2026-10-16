@@ -6,6 +6,9 @@ name: Build Android app
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'design/**'
+      - '**.md'
   workflow_dispatch:
     inputs:
       force_build:
