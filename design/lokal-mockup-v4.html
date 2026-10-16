@@ -1,0 +1,1194 @@
+<title>Lokal Food Map v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Figtree:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: desktop = notes panel + phone frame; phone = the app full screen.
+   Night street-food look first (dark map, neon glow, glass cards); the app's own sun button switches to a day map. */
+:root{
+  --ink:#f5f2ff; --ink2:#9d9abb; --paper:#0d0e19; --card:#171a2c; --card2:#1f2338; --line:rgba(255,255,255,.09); --glass:rgba(16,18,34,.78);
+  --hot:#ff5a3c; --hot2:#ff2d6f; --neon:#ffcc33; --mint:#34e0a1; --grape:#a585ff; --sky:#4aa8ff;
+  --road:#262a46; --block:#151829; --bldg:#1b1f36; --park:#13291f; --tree:#1d4632; --water:#0e2546; --bank:#133158; --ave:#d9a134; --ave-o:#8f6417; --hwy:#ff7a45; --hwy-o:#9c3f17; --label:#68668c; --wl:#4e86c4;
+  --font-d:'Unbounded',ui-sans-serif,system-ui,sans-serif; --font-b:'Figtree',ui-sans-serif,system-ui,sans-serif;
+  color-scheme:dark;
+}
+.phone.day{
+  --ink:#16172b; --ink2:#62607f; --paper:#f3f4f8; --card:#ffffff; --card2:#f0f0f6; --line:rgba(22,23,43,.10); --glass:rgba(255,255,255,.86);
+  --road:#fdfdfb; --block:#eceee4; --bldg:#e0e3d4; --park:#cfe9b9; --tree:#a9d68d; --water:#a8dcf5; --bank:#d3edf9; --ave:#ffd866; --ave-o:#efbd3c; --hwy:#ff9f59; --hwy-o:#e57f35; --label:#86839e; --wl:#4f95bf;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#07080f;color:#f5f2ff;font-family:var(--font-b);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible,input:focus-visible,select:focus-visible,label:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.stage{min-height:100%;display:flex;gap:64px;align-items:center;justify-content:center;padding:24px 16px;
+  background:radial-gradient(40% 45% at 82% 12%,rgba(255,45,111,.22),transparent 70%),radial-gradient(40% 50% at 10% 90%,rgba(74,168,255,.16),transparent 70%),#07080f}
+.panel{width:310px;display:flex;flex-direction:column;gap:14px}
+.panel .logo{font:800 46px/1 var(--font-d);letter-spacing:-.02em;color:#fff;text-shadow:0 0 18px rgba(255,90,60,.8),0 0 2px #ff5a3c}
+.panel .tag{font:700 18px var(--font-b);margin:0;color:#ffcc33}
+.panel p{margin:0;color:#a9a6c6;line-height:1.55;font-size:14px}
+.panel ul{margin:0;padding-left:18px;color:#a9a6c6;font-size:13.5px;line-height:1.6}
+.jump{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.jump button{background:#14162a;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;font-weight:800;font-size:12.5px;text-align:left;color:#e9e6ff}
+.jump button.on{border-color:#ffcc33;color:#ffcc33}
+.phone{width:390px;height:min(844px,calc(100vh - 48px));border-radius:50px;border:9px solid #24263a;background:var(--paper);color:var(--ink);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;flex:none;box-shadow:0 40px 90px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.06),0 0 80px -30px rgba(255,90,60,.5)}
+@media (max-width:760px){
+  .stage{padding:0;display:block;height:100%}
+  .panel{display:none}
+  .phone{width:100%;height:100%;border:0;border-radius:0}
+}
+.view{flex:1;position:relative;overflow:hidden}
+.page{position:absolute;inset:0;overflow-y:auto;background:var(--paper);scrollbar-width:none}
+.page::-webkit-scrollbar{display:none}
+.pad{padding:16px 16px 28px;display:flex;flex-direction:column;gap:14px}
+h1,h2{font-family:var(--font-d);margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:25px;line-height:1.12;font-weight:700}
+h2{font-size:19px;line-height:1.2;font-weight:700}
+h3{font:800 16px var(--font-b);margin:0}
+.muted{color:var(--ink2);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.btn{height:50px;border-radius:16px;font:800 15px var(--font-b);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  background:var(--ink);color:var(--paper);transition:transform .1s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn.tomato{background:linear-gradient(135deg,var(--hot),var(--hot2));color:#fff;box-shadow:0 10px 26px -10px rgba(255,60,80,.8)}
+.btn.mint{background:var(--mint);color:#062a1d;box-shadow:0 10px 24px -12px rgba(52,224,161,.8)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{height:42px;font-size:14px;border-radius:14px}
+.btn:disabled{opacity:.4;pointer-events:none}
+.chip{flex:none;height:36px;padding:0 14px;border-radius:999px;background:var(--glass);border:1px solid var(--line);font-weight:800;font-size:13px;display:inline-flex;align-items:center;gap:6px;color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.chip.on{background:var(--neon);color:#1a1300;border-color:transparent;box-shadow:0 0 18px -4px rgba(255,204,51,.8)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:rgba(165,133,255,.16);color:var(--grape)}
+.badge.mint{background:rgba(52,224,161,.14);color:var(--mint)}
+.badge.tomato{background:rgba(255,90,60,.16);color:#ff7b62}
+.badge.mustard{background:rgba(255,204,51,.15);color:var(--neon)}
+.day .badge.mint{color:#0d8a62}.day .badge.mustard{color:#8a6500}.day .badge{color:#6a48e8}.day .badge.tomato{color:#d23a1f}
+.iconbtn{width:44px;height:44px;border-radius:15px;background:var(--glass);border:1px solid var(--line);display:grid;place-items:center;font-size:19px;font-weight:800;color:var(--ink);position:relative;flex:none;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.iconbtn .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--hot);color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center;padding:0 4px;box-shadow:0 0 10px var(--hot)}
+.hdr{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;position:sticky;top:0;z-index:3;background:linear-gradient(var(--paper) 75%,transparent)}
+.hdr h2{flex:1}
+.pts{font:800 13px var(--font-b);background:rgba(255,204,51,.14);color:var(--neon);padding:6px 11px;border-radius:999px;white-space:nowrap;display:inline-flex;gap:4px;align-items:center}
+.day .pts{color:#8a6500}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- Map ---------- */
+.mapwrap{position:absolute;inset:0;overflow:hidden;background:var(--road);touch-action:none}
+.world{position:absolute;left:0;top:0;width:1400px;height:1800px;transform-origin:0 0;cursor:grab;will-change:transform}
+.world.drag{cursor:grabbing}
+.world svg{position:absolute;inset:0;display:block}
+.m-road{fill:var(--road)} .m-blk{fill:var(--block)} .m-bld{fill:var(--bldg)} .m-park{fill:var(--park)} .m-tree{fill:var(--tree)}
+.m-bank{stroke:var(--bank)} .m-water{stroke:var(--water)} .m-ave-o{stroke:var(--ave-o)} .m-ave{stroke:var(--ave)} .m-hwy-o{stroke:var(--hwy-o)} .m-hwy{stroke:var(--hwy)}
+.m-lbl{fill:var(--label);font-family:var(--font-b);font-weight:900;letter-spacing:4px;font-size:15px}
+.m-st{fill:var(--label);font-family:var(--font-b);font-weight:800;font-size:12px}
+.m-wl{fill:var(--wl);font-family:var(--font-b);font-weight:800;font-style:italic;font-size:15px}
+.m-glow{filter:blur(6px);opacity:.55}
+.day .m-glow{opacity:0}
+.anchor{position:absolute;width:0;height:0;transform:scale(var(--inv,1));transform-origin:0 0}
+.pin{position:absolute;left:-30px;bottom:0;width:60px;display:flex;flex-direction:column;align-items:center;transition:opacity .25s}
+.pin .head{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:28px;position:relative;transition:transform .25s cubic-bezier(.2,1.4,.4,1);
+  background:radial-gradient(circle at 35% 28%,var(--c1),var(--c2));border:2px solid rgba(255,255,255,.92);box-shadow:0 0 0 4px rgba(0,0,0,.28),0 0 26px 2px var(--glow)}
+.day .pin .head{box-shadow:0 0 0 3px rgba(22,23,43,.15),0 8px 18px -6px rgba(22,23,43,.45)}
+.pin .tail{width:10px;height:10px;border-radius:50%;background:#fff;margin-top:4px;box-shadow:0 0 12px var(--glow)}
+.pin .live{position:absolute;right:-2px;top:-2px;width:15px;height:15px;border-radius:50%;background:var(--mint);border:3px solid var(--paper);box-shadow:0 0 10px var(--mint)}
+.pin .live.off{background:#77748f;box-shadow:none}
+.pin .kind{position:absolute;left:-7px;bottom:-5px;font-size:15px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.pin .name{margin-top:4px;font-size:12px;font-weight:900;white-space:nowrap;color:var(--ink);text-shadow:0 0 4px var(--paper),0 0 4px var(--paper),0 0 4px var(--paper);display:none}
+.world.labels .pin .name{display:block}
+.pin.hot .head{animation:bob 2.4s ease-in-out infinite}
+.pin.hot .head::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--hot);box-shadow:0 0 16px var(--hot);animation:ring 1.8s ease-out infinite}
+@keyframes ring{0%{transform:scale(.85);opacity:1}100%{transform:scale(1.45);opacity:0}}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.pin .spark{position:absolute;left:50%;top:0;font-size:14px;pointer-events:none;animation:spark 2.6s ease-out infinite;opacity:0}
+.pin .spark:nth-of-type(2){animation-delay:.9s;font-size:11px}.pin .spark:nth-of-type(3){animation-delay:1.7s;font-size:12px}
+@keyframes spark{0%{transform:translate(-50%,10px);opacity:0}15%{opacity:1}100%{transform:translate(calc(-50% + var(--dx,10px)),-46px);opacity:0}}
+.pin.sel .head{transform:scale(1.2) translateY(-5px)}
+.pin.dim{opacity:.14;pointer-events:none}
+.mood{position:absolute;bottom:76px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(12,13,26,.88);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.day .mood{background:#fff;color:#16172b;border-color:rgba(22,23,43,.12);box-shadow:0 6px 14px -8px rgba(22,23,43,.5)}
+.mood.pop{animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:translateX(-50%) scale(.2)}100%{transform:translateX(-50%) scale(1)}}
+.me{position:absolute;left:-12px;top:-12px;width:24px;height:24px;border-radius:50%;background:var(--sky);border:4px solid #fff;animation:me 2s infinite}
+@keyframes me{0%{box-shadow:0 0 0 0 rgba(74,168,255,.6)}100%{box-shadow:0 0 0 32px rgba(74,168,255,0)}}
+.foodie{position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:17px;border:2px solid rgba(255,255,255,.9);cursor:pointer;box-shadow:0 4px 12px -4px rgba(0,0,0,.6)}
+.float-emo{position:absolute;z-index:4;font-size:26px;pointer-events:none;animation:floatup 1.6s ease-out forwards}
+@keyframes floatup{0%{transform:translate(-50%,0) scale(.4);opacity:0}20%{opacity:1;transform:translate(-50%,-20px) scale(1.2)}100%{transform:translate(calc(-50% + var(--dx)),-120px) scale(.9);opacity:0}}
+.mtop{position:absolute;left:12px;right:12px;top:12px;display:flex;flex-direction:column;gap:9px;z-index:5;pointer-events:none}
+.mtop > *{pointer-events:auto}
+.search{display:flex;align-items:center;gap:8px}
+.ask{flex:1;display:flex;align-items:center;gap:8px;height:50px;padding:0 14px;border-radius:17px;background:var(--glass);border:1px solid var(--line);font-weight:700;color:var(--ink2);text-align:left;min-width:0;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px -14px rgba(0,0,0,.7)}
+.ask span:last-child{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:14.5px}
+.ticker{align-self:flex-start;max-width:100%;background:var(--glass);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 5px;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.ticker .av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex:none;border:0}
+.ticker .txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticker.slide .txt,.ticker.slide .av{animation:tick .45s}
+@keyframes tick{from{transform:translateY(14px);opacity:0}}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px 4px}
+.chips::-webkit-scrollbar{display:none}
+.rail{position:absolute;right:12px;z-index:5;display:flex;flex-direction:column;gap:9px;transition:bottom .25s}
+.aibar{align-self:flex-start;background:var(--grape);color:#140c33;border-radius:14px;padding:7px 8px 7px 12px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 0 20px -4px var(--grape)}
+.aibar button{background:rgba(0,0,0,.18);border-radius:10px;padding:4px 10px;font-weight:900}
+
+/* Bottom sheet over the map */
+.bsheet{position:absolute;left:0;right:0;bottom:0;z-index:6;background:var(--paper);border-radius:28px 28px 0 0;border-top:1px solid var(--line);
+  box-shadow:0 -20px 40px -16px rgba(0,0,0,.6);display:flex;flex-direction:column;transition:height .3s cubic-bezier(.2,.8,.2,1)}
+.bsheet.dragging{transition:none}
+.bgrab{padding:10px 0 6px;display:grid;place-items:center;cursor:grab;touch-action:none;flex:none}
+.bgrab i{width:42px;height:5px;border-radius:3px;background:var(--line)}
+.bbody{flex:1;overflow-y:auto;padding:0 16px 20px;display:flex;flex-direction:column;gap:14px;scrollbar-width:none}
+.bbody::-webkit-scrollbar{display:none}
+.hs{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:2px 16px 6px;scrollbar-width:none;scroll-snap-type:x mandatory}
+.hs::-webkit-scrollbar{display:none}
+.tcard{flex:none;width:168px;scroll-snap-align:start;text-align:left;display:flex;flex-direction:column;gap:6px}
+.tcard b{font-size:14px;line-height:1.2}
+.lrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:9px 0}
+.lrow + .lrow{border-top:1px solid var(--line)}
+.dist{font:800 12px var(--font-b);color:var(--ink2);white-space:nowrap;text-align:right}
+.live-t{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:13px;color:var(--mint)}
+.day .live-t{color:#0d8a62}
+.live-t::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint)}
+.live-t.off{color:var(--ink2)} .live-t.off::before{background:#77748f;box-shadow:none}
+.friends{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink2)}
+.friends .stack{display:flex}
+.friends .stack i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;margin-left:-7px;border:2px solid var(--paper)}
+.friends .stack i:first-child{margin-left:0}
+
+/* Food art: illustrated "photos" on dark plates */
+.art{position:relative;overflow:hidden;display:grid;place-items:center;border-radius:18px;flex:none;isolation:isolate}
+.art .plate{position:absolute;width:72%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.35),rgba(255,255,255,.08) 70%);box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+.art .dish{position:relative;z-index:1;line-height:1;filter:drop-shadow(0 8px 10px rgba(0,0,0,.35))}
+.art .side{position:absolute;z-index:1;line-height:1;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))}
+.art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 35%,rgba(0,0,0,.18));z-index:2;pointer-events:none}
+
+/* Tab bar */
+.tabbar{display:flex;align-items:flex-end;background:var(--card);border-top:1px solid var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px));flex:none;position:relative;z-index:12}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:800;color:var(--ink2);padding:4px 0;position:relative}
+.tab .e{font-size:22px;opacity:.5;transition:transform .25s,opacity .2s}
+.tab.on{color:var(--ink)} .tab.on .e{opacity:1;transform:translateY(-2px) scale(1.08)}
+.tab.on::after{content:"";position:absolute;bottom:-4px;width:5px;height:5px;border-radius:50%;background:var(--neon);box-shadow:0 0 8px var(--neon)}
+.tab.report{position:relative;top:-16px}
+.tab.report .big{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--hot),var(--hot2));display:grid;place-items:center;font-size:28px;transition:transform .25s;box-shadow:0 0 0 5px var(--paper),0 0 28px -2px rgba(255,60,90,.9)}
+.tab.report.open .big{transform:rotate(45deg)}
+
+/* Radial report menu */
+.radial{position:absolute;inset:0;z-index:11;background:rgba(5,6,14,.7);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.radial .rb{position:absolute;left:50%;bottom:44px;width:78px;margin-left:-39px;display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;font-weight:800;font-size:12.5px;
+  transform:translate(var(--tx),var(--ty));animation:fly .4s cubic-bezier(.2,1.5,.4,1) backwards}
+.radial .rb span{width:62px;height:62px;border-radius:50%;background:#1d2036;border:1px solid rgba(255,255,255,.2);display:grid;place-items:center;font-size:29px;box-shadow:0 0 22px -6px rgba(255,204,51,.7);transition:transform .15s}
+.radial .rb:hover span,.radial .rb:focus-visible span{transform:scale(1.12)}
+@keyframes fly{from{transform:translate(0,0) scale(.2);opacity:0}}
+.radial .hint{position:absolute;left:0;right:0;top:24%;text-align:center;color:#fff}
+.radial .hint h2{color:#fff}
+
+/* Overlays */
+.scrim{position:absolute;inset:0;z-index:30;background:rgba(5,6,14,.6);display:flex;align-items:flex-end;animation:fade .2s}
+.sheet{width:100%;background:var(--paper);border-radius:28px 28px 0 0;border-top:1px solid var(--line);padding:10px 16px 24px;display:flex;flex-direction:column;gap:14px;animation:up .3s cubic-bezier(.2,.8,.2,1);max-height:88%;overflow-y:auto}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--line);align-self:center}
+.modal{position:absolute;inset:0;z-index:40;background:rgba(5,6,14,.7);display:grid;place-items:center;padding:24px;animation:fade .2s}
+.modal .box{background:var(--card);border:1px solid var(--line);border-radius:30px;padding:26px 20px 20px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;animation:boing .55s cubic-bezier(.2,1.5,.4,1);box-shadow:0 30px 60px -20px rgba(0,0,0,.8)}
+@keyframes boing{from{transform:scale(.6);opacity:0}}
+.medal{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;font-size:62px;background:radial-gradient(circle at 35% 30%,#ffe08a,#ff8a3d);position:relative;overflow:hidden;box-shadow:0 0 50px -6px rgba(255,170,60,.9)}
+.medal::after{content:"";position:absolute;top:-40%;left:-60%;width:40%;height:180%;background:rgba(255,255,255,.5);transform:rotate(25deg);animation:shine 1.6s .3s ease-in-out}
+@keyframes shine{to{left:130%}}
+#confetti{position:absolute;inset:0;z-index:45;pointer-events:none}
+.toast{position:absolute;left:50%;top:148px;z-index:50;transform:translate(-50%,-10px);opacity:0;transition:.25s;background:#f5f2ff;color:#16172b;padding:10px 16px;border-radius:14px;font-weight:800;font-size:14px;pointer-events:none;max-width:88%;text-align:center;box-shadow:0 14px 30px -12px rgba(0,0,0,.8)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.burst{position:absolute;z-index:51;left:50%;top:44%;display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;animation:burst 1.3s forwards}
+.burst b{font-size:46px;line-height:1;filter:drop-shadow(0 0 16px rgba(255,204,51,.7))}
+.burst span{font:800 14px var(--font-b);color:var(--neon);background:rgba(12,13,26,.85);padding:3px 10px;border-radius:999px}
+@keyframes burst{0%{transform:translate(-50%,0) scale(.4);opacity:0}25%{opacity:1;transform:translate(-50%,-10px) scale(1.2)}100%{transform:translate(-50%,-90px) scale(1);opacity:0}}
+
+/* Splash and onboarding */
+.splash{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:pointer;
+  background:radial-gradient(60% 40% at 50% 40%,rgba(255,60,90,.25),transparent 70%),#08091a;color:#fff}
+.splash .bigpin{font-size:84px;animation:drop .9s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 0 24px rgba(255,90,60,.8))}
+@keyframes drop{from{transform:translateY(-220px)}}
+.splash .word{font:800 56px/1 var(--font-d);letter-spacing:-.02em;color:#fff;text-shadow:0 0 6px #fff,0 0 20px #ff5a3c,0 0 44px #ff2d6f;animation:neon 2.2s .6s both}
+@keyframes neon{0%,18%,22%,26%{opacity:.15}20%,24%,30%,100%{opacity:1}}
+.splash p{margin:0;font:700 17px var(--font-b);color:#ffcc33;text-shadow:0 0 12px rgba(255,204,51,.6)}
+.crave{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cv{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px 4px;display:flex;flex-direction:column;align-items:center;gap:7px;font-weight:800;font-size:13px;transition:transform .2s cubic-bezier(.2,1.5,.4,1),box-shadow .2s}
+.cv b{font-size:34px;line-height:1;transition:transform .3s cubic-bezier(.2,1.6,.4,1)}
+.cv.on{border-color:var(--neon);box-shadow:0 0 22px -6px rgba(255,204,51,.9);transform:translateY(-3px)}
+.cv.on b{transform:scale(1.18) rotate(-8deg)}
+
+/* Spot page */
+.gallery{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.gallery::-webkit-scrollbar{display:none}
+.gallery .art{width:100%;height:260px;border-radius:0;scroll-snap-align:start;flex:none}
+.gtools{position:absolute;top:14px;left:14px;right:14px;display:flex;gap:8px;z-index:3}
+.gdots{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:3}
+.gdots i{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.5);transition:width .2s}
+.gdots i.on{width:20px;background:#fff}
+.stars{color:var(--neon)}
+.sched{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+.sched div{border-radius:11px;padding:6px 2px;text-align:center;font-size:11px;font-weight:800;background:var(--card2);color:var(--ink2)}
+.sched div.today{background:var(--neon);color:#1a1300}
+.sched div small{display:block;font-size:10px;font-weight:700;opacity:.85;margin-top:2px}
+.ai{background:linear-gradient(135deg,rgba(165,133,255,.16),rgba(74,168,255,.08));border:1px solid rgba(165,133,255,.3);border-radius:20px;padding:12px 14px;font-size:14px;line-height:1.5}
+.ai b{color:var(--grape);font-weight:900}
+.day .ai b{color:#6a48e8}
+.chart{position:relative}
+.bars{display:flex;align-items:flex-end;gap:2px;height:96px;padding-top:6px;border-bottom:1px solid var(--line)}
+.bars button{flex:1;border-radius:4px 4px 0 0;background:rgba(165,133,255,.45);min-height:4px}
+.day .bars button{background:#c9c0f5}
+.bars button.now{background:var(--hot);box-shadow:0 0 14px -2px var(--hot)}
+.bars button:hover,.bars button.peek{filter:brightness(1.3)}
+.axis{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--ink2);margin-top:4px}
+.tip{position:absolute;transform:translate(-50%,-100%);background:#f5f2ff;color:#16172b;font-size:12px;font-weight:800;padding:5px 9px;border-radius:9px;white-space:nowrap;pointer-events:none}
+.dishes .d{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.dishes .d:last-child{border:0}
+.lk{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--ink2)}
+.lk i{display:block;height:6px;border-radius:3px;background:var(--mint)}
+.lk span:first-child{flex:1;height:6px;border-radius:3px;background:var(--card2);overflow:hidden}
+.rep{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.rep:last-child{border-bottom:0}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:19px;flex:none}
+.vote{display:flex;gap:6px}
+.vote button{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:3px 8px;font-weight:800;font-size:12px}
+.vote button.on{background:var(--neon);color:#1a1300;border-color:transparent}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+/* Add a spot */
+.addmap{position:relative;height:300px;border-radius:24px;overflow:hidden;border:1px solid var(--line)}
+.cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);font-size:44px;pointer-events:none;filter:drop-shadow(0 0 14px rgba(255,90,60,.8));animation:hover 1.4s ease-in-out infinite}
+@keyframes hover{50%{transform:translate(-50%,calc(-100% - 6px))}}
+.steps{display:flex;gap:6px}
+.steps i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.steps i.on{background:var(--hot);box-shadow:0 0 8px var(--hot)}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg .chip{backdrop-filter:none;background:var(--card)}
+.seg .chip.on{background:var(--neon)}
+.inp{width:100%;height:50px;border-radius:15px;border:1px solid var(--line);padding:0 14px;font:700 15px var(--font-b);color:var(--ink);background:var(--card)}
+.inp:focus{border-color:var(--neon);outline:none}
+.photo{height:190px;border-radius:24px;border:2px dashed var(--line);display:grid;place-items:center;text-align:center;color:var(--ink2);font-weight:800;position:relative;overflow:hidden;cursor:pointer;background:var(--card)}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.warn{background:rgba(255,90,60,.14);color:#ff8b74;border-radius:16px;padding:10px 12px;font-size:13px;font-weight:800}
+.day .warn{color:#b9271a}
+
+/* Chat */
+.chat{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--paper)}
+.msgs{flex:1;overflow-y:auto;padding:10px 16px 12px;display:flex;flex-direction:column;gap:10px;scrollbar-width:none}
+.msg{max-width:86%;padding:10px 14px;border-radius:20px;font-size:14.5px;line-height:1.45;font-weight:600}
+.msg.me{align-self:flex-end;background:linear-gradient(135deg,var(--hot),var(--hot2));color:#fff;border-bottom-right-radius:6px}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
+.msg.cards{max-width:100%;width:100%;background:none;border:0;padding:0}
+.typing{display:inline-flex;gap:4px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink2);animation:dot 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes dot{50%{transform:translateY(-4px);opacity:.4}}
+.sugs{display:flex;gap:8px;overflow-x:auto;padding:0 16px 8px;scrollbar-width:none}
+.sugs .chip{backdrop-filter:none;background:var(--card)}
+.composer{display:flex;gap:8px;padding:8px 12px 12px;border-top:1px solid var(--line);background:var(--card)}
+.composer input{flex:1;min-width:0;height:48px;border-radius:16px;border:1px solid var(--line);padding:0 14px;font:700 15px var(--font-b);color:var(--ink);background:var(--paper)}
+.composer input:focus{border-color:var(--grape);outline:none}
+.composer button{width:48px;height:48px;border-radius:16px;font-size:20px;font-weight:900;flex:none}
+.mic{background:var(--card2)}
+.mic.on{background:var(--hot);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,90,60,.25)}}
+.send{background:var(--grape);color:#140c33}
+
+/* You */
+.youhead{display:flex;gap:16px;align-items:center}
+.bigav{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;font-size:48px;flex:none;position:relative;box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--neon),0 0 30px -4px rgba(255,204,51,.7)}
+.bigav .md{position:absolute;right:-4px;bottom:-4px;width:34px;height:34px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:18px;border:2px solid var(--paper)}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat3 .card{text-align:center;padding:12px 6px}
+.stat3 h2{font-size:20px}
+.hbar{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;padding:6px 0;font-weight:800;font-size:13.5px}
+.hbar .tr{height:8px;border-radius:4px;background:var(--card2);overflow:hidden}
+.hbar .tr i{display:block;height:100%;border-radius:4px;background:var(--neon);box-shadow:0 0 10px -2px var(--neon);transition:width .8s}
+.hbar.hood .tr i{background:var(--hot);box-shadow:0 0 10px -2px var(--hot)}
+.list{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 0;border-bottom:1px solid var(--line)}
+.list:last-child{border:0}
+.list .emos{display:flex;font-size:20px;gap:2px}
+.perk{border-radius:22px;padding:16px;background:linear-gradient(135deg,rgba(255,204,51,.16),rgba(255,90,60,.12));border:1px solid rgba(255,204,51,.3)}
+.agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.agrid button{aspect-ratio:1;border-radius:22px;font-size:34px;border:2px solid transparent}
+.agrid button.on{border-color:var(--neon);box-shadow:0 0 18px -4px var(--neon)}
+
+/* Drops */
+.drop{display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.drop.live{border-color:rgba(255,90,60,.5);box-shadow:0 0 30px -14px var(--hot)}
+.drop .top{display:flex;gap:12px;align-items:center}
+.timer{font:700 20px var(--font-d);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.livepill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;color:#fff;background:var(--hot);padding:4px 10px;border-radius:999px;box-shadow:0 0 14px -2px var(--hot)}
+.livepill::before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.left{height:8px;border-radius:4px;background:var(--card2);overflow:hidden}
+.left i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--hot),var(--neon));transition:width .6s}
+.event{border-radius:24px;padding:18px;color:#fff;background:radial-gradient(80% 120% at 100% 0%,rgba(255,45,111,.55),transparent 60%),radial-gradient(80% 100% at 0% 100%,rgba(74,168,255,.45),transparent 60%),#1a1b33;border:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column;gap:10px}
+.event h2{color:#fff}
+
+/* Inbox, owner, share */
+.note{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.note:last-child{border:0}
+.note .av{border-radius:14px}
+.unread{width:9px;height:9px;border-radius:50%;background:var(--hot);flex:none;margin-top:6px;box-shadow:0 0 8px var(--hot)}
+.ohero{background:linear-gradient(135deg,#1f2240,#2a1530);color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:26px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.ohero .inp{background:rgba(255,255,255,.08);color:#fff}
+.here{height:74px;border-radius:24px;background:var(--mint);color:#062a1d;font:700 19px var(--font-d);width:100%;box-shadow:0 0 30px -8px var(--mint)}
+.here.done{background:#fff;box-shadow:none}
+.share{border-radius:28px;padding:22px;color:#fff;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+  background:radial-gradient(90% 70% at 100% 0%,rgba(255,45,111,.7),transparent 60%),radial-gradient(80% 70% at 0% 100%,rgba(255,204,51,.45),transparent 60%),#15162b;border:1px solid rgba(255,255,255,.12)}
+.share h1{color:#fff;font-size:26px}
+.share .brand{font:800 18px var(--font-d);display:flex;justify-content:space-between;align-items:center}
+.wr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wr div{background:rgba(255,255,255,.08);border-radius:16px;padding:12px}
+.wr b{display:block;font:700 26px var(--font-d)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- Business mode ---------- */
+.bizhdr{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;position:sticky;top:0;z-index:3;background:linear-gradient(var(--paper) 78%,transparent)}
+.acct{display:flex;align-items:center;gap:10px;flex:1;min-width:0;text-align:left}
+.acct b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.verified{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--sky);color:#fff;font-size:11px;font-weight:900;margin-left:4px;vertical-align:2px}
+.bizpill{font-size:11px;font-weight:900;letter-spacing:.06em;color:var(--mint);background:rgba(52,224,161,.14);padding:3px 8px;border-radius:999px}
+.day .bizpill{color:#0d8a62}
+.livecard{border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);background:var(--card)}
+.livecard.on{background:radial-gradient(90% 120% at 100% 0%,rgba(52,224,161,.28),transparent 60%),var(--card);border-color:rgba(52,224,161,.45);box-shadow:0 0 34px -16px var(--mint)}
+.bigdot{width:14px;height:14px;border-radius:50%;background:#77748f;flex:none}
+.livecard.on .bigdot{background:var(--mint);box-shadow:0 0 0 0 rgba(52,224,161,.6);animation:livedot 1.6s infinite}
+@keyframes livedot{100%{box-shadow:0 0 0 14px rgba(52,224,161,0)}}
+.qs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qs button{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:11px 10px;font-weight:800;font-size:13px;text-align:left;display:flex;gap:8px;align-items:center}
+.qs button.on{background:var(--neon);color:#1a1300;border-color:transparent}
+.stat4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat4 .card{padding:10px 4px;text-align:center}
+.stat4 b{display:block;font:700 18px var(--font-d)}
+.stat4 small{font-size:11px;font-weight:800;color:var(--ink2)}
+.stat4 em{font-style:normal;font-size:11px;font-weight:900;color:var(--mint)}
+.hungry{border-radius:20px;padding:14px;display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,rgba(255,90,60,.2),rgba(255,204,51,.1));border:1px solid rgba(255,90,60,.35)}
+.reply{display:flex;gap:8px;margin-top:8px}
+.reply input{flex:1;min-width:0;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:0 12px;font:700 14px var(--font-b)}
+.reply input:focus{border-color:var(--neon);outline:none}
+.ownerreply{margin-top:8px;padding:8px 10px;border-radius:12px;background:var(--card2);font-size:13px;font-weight:700}
+.tog{width:48px;height:28px;border-radius:14px;background:var(--card2);border:1px solid var(--line);position:relative;flex:none;transition:background .2s}
+.tog i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.tog.on{background:var(--mint);border-color:transparent}
+.tog.on i{left:23px}
+.tog.red.on{background:var(--hot)}
+.mitem{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.mitem:last-child{border:0}
+.mitem.out .grow{opacity:.45}
+.mitem.out .grow b{text-decoration:line-through}
+.scanbox{position:relative;height:220px;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:var(--card2)}
+.scanbox img{width:100%;height:100%;object-fit:cover}
+.scanbox .board{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:18px 26px;background:#1e2a22;color:#f1f1e6;font:700 15px/1.3 'Courier New',monospace}
+.scanbox .board span{display:flex;justify-content:space-between;border-bottom:1px dashed rgba(255,255,255,.2);padding-bottom:4px}
+.scanline{position:absolute;left:0;right:0;height:3px;background:var(--mint);box-shadow:0 0 18px 4px var(--mint);animation:scan 1.1s ease-in-out infinite alternate}
+@keyframes scan{from{top:4%}to{top:94%}}
+.found{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-weight:800;animation:up .3s backwards}
+.found:last-child{border:0}
+.found input{width:22px;height:22px;accent-color:#34e0a1}
+.heatwrap{position:relative;height:330px;border-radius:24px;overflow:hidden;border:1px solid var(--line)}
+.heatwrap .mapwrap{position:absolute;inset:0}
+.heat{position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:opacity .5s,width .5s,height .5s;mix-blend-mode:screen}
+.day .heat{mix-blend-mode:multiply}
+.heatlbl{position:absolute;left:0;top:0;transform:translate(-50%,-50%);white-space:nowrap;background:rgba(12,13,26,.88);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:900}
+.legend{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--ink2)}
+.legend i{flex:1;max-width:140px;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(255,204,51,.25),#ffcc33,#ff5a3c,#ff2d6f)}
+.schedrow{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.schedrow:last-child{border:0}
+.schedrow select{height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--ink);font:700 13px var(--font-b);padding:0 8px;min-width:0;width:100%}
+.locopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--card)}
+.locopt.on{border-color:var(--mint);box-shadow:0 0 18px -8px var(--mint)}
+.golive-big{height:84px;border-radius:26px;background:var(--mint);color:#062a1d;font:700 21px var(--font-d);width:100%;box-shadow:0 0 40px -10px var(--mint);position:relative;overflow:hidden}
+.golive-big::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45),transparent 70%);transform:translateX(-100%);animation:sweep 2.2s infinite}
+@keyframes sweep{to{transform:translateX(100%)}}
+.tab.golive .big{width:62px;height:62px;border-radius:50%;background:var(--mint);display:grid;place-items:center;font-size:26px;box-shadow:0 0 0 5px var(--paper),0 0 26px -2px var(--mint);color:#062a1d}
+.tab.golive.is-live .big{background:var(--hot);box-shadow:0 0 0 5px var(--paper),0 0 26px -2px var(--hot);color:#fff;animation:livedot2 1.6s infinite}
+@keyframes livedot2{50%{box-shadow:0 0 0 5px var(--paper),0 0 36px 4px var(--hot)}}
+.tab.golive{position:relative;top:-16px;font-size:10.5px}
+.bars7{display:flex;align-items:flex-end;gap:8px;height:120px;border-bottom:1px solid var(--line);padding-top:6px}
+.bars7 button{flex:1;border-radius:4px 4px 0 0;background:rgba(255,204,51,.55);position:relative}
+.day .bars7 button{background:#f2c84b}
+.bars7 button.now{background:var(--neon);box-shadow:0 0 14px -2px var(--neon)}
+.bars7 button:hover,.bars7 button.peek{filter:brightness(1.2)}
+.qr{display:grid;grid-template-columns:repeat(21,1fr);width:150px;aspect-ratio:1;background:#fff;padding:8px;border-radius:12px;gap:0}
+.qr i{aspect-ratio:1}
+.qr i.k{background:#111}
+.poster{border-radius:22px;padding:18px;display:flex;gap:16px;align-items:center;background:radial-gradient(90% 90% at 100% 0%,rgba(255,45,111,.5),transparent 60%),#15162b;color:#fff;border:1px solid rgba(255,255,255,.12)}
+.pro{border-radius:24px;padding:18px;background:linear-gradient(135deg,rgba(165,133,255,.25),rgba(74,168,255,.12));border:1px solid rgba(165,133,255,.4);display:flex;flex-direction:column;gap:10px}
+.pro ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6}
+.code{display:flex;gap:8px;justify-content:center}
+.code input{width:44px;height:54px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center;font:700 22px var(--font-d)}
+.code input:focus{border-color:var(--neon);outline:none}
+.claimrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
+.claimrow.on{border-color:var(--neon);box-shadow:0 0 18px -8px var(--neon)}
+.soldtag{font-size:11px;font-weight:900;color:#fff;background:var(--hot);padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.d.out b:first-child{text-decoration:line-through;opacity:.6}
+</style>
+
+<div class="stage">
+  <aside class="panel">
+    <div class="logo">Lokal</div>
+    <p class="tag">Only local. No chains.</p>
+    <p>Clickable mockup, version 4: version 3 plus Business mode, where owners run their truck or spot from the same app. Switch in the You tab. All spots and people are fictional sample data in Austin, TX. "Lokal" is a placeholder name.</p>
+    <ul>
+      <li>Night map with neon glow; ☀️ switches to day</li>
+      <li>🔥 sparks rise from hot spots; trucks drive</li>
+      <li>Drops: limited specials with live countdowns</li>
+      <li>Your food map: neighborhoods, taste, lists, friends</li>
+      <li>Emoji rain on check-ins; "Your week in food" recap</li>
+      <li><b style="color:#34e0a1">New:</b> Business mode: go live, heatmap, menu scan, drops, replies, insights</li>
+    </ul>
+    <div class="jump" id="jump"></div>
+  </aside>
+  <div class="phone" id="phone">
+    <main class="view" id="view"></main>
+    <nav class="tabbar" id="tabbar"></nav>
+    <div id="overlay"></div>
+    <div id="sheet"></div>
+    <div id="modal"></div>
+    <canvas id="confetti"></canvas>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+</div>
+
+<script>
+/* ======================= Sample data (all fictional) ======================= */
+const SPOTS=[
+ {id:'guera',n:'Taquería La Güera',k:'truck',e:'🌮',side:['🌶️','🍋','🥤'],c:'tacos',x:1080,y:600,p:'$',r:4.8,rv:212,hood:'East 6th',open:true,until:'10pm',mood:'🔥 Hot right now',hot:1,col:['#ffb48f','#ff6f4f'],badges:['Family-owned','Food truck'],own:'Rosa & Miguel',vibe:['Late night','Picnic tables','Cash or card'],
+  ai:'Locals rave about the al pastor and the green salsa. A short line after 7pm, but it moves fast.',dishes:[['Al pastor taco',3.5,96],['Birria plate',13,91],['Horchata',4,88]],
+  busy:[1,1,2,3,5,4,3,3,4,6,8,9,7,5,3,2],sched:['E 6th','E 6th','—','E 6th','E 6th','Rainey','Rainey']},
+ {id:'smoke',n:'Smoke Signal BBQ',k:'trailer',e:'🍖',side:['🔥','🥒','🍞'],c:'bbq',x:1185,y:770,p:'$$',r:4.7,rv:388,hood:'East Cesar Chavez',open:true,until:'sold out',mood:'⏳ 25-min line',col:['#d9a77c','#8a4b2a'],badges:['Trailer','Pitmaster-owned'],own:'Dez',vibe:['Worth the wait','Shaded seating','BYOB'],
+  ai:'The brisket is the star: peppery bark, very tender. Lines peak from noon to 1pm, and ribs usually sell out by 2pm.',dishes:[['Brisket (½ lb)',16,97],['Pork ribs (3)',14,90],['Jalapeño mac',5,85]],
+  busy:[0,0,3,6,9,10,8,5,3,2,1,0,0,0,0,0],sched:['—','—','E Cesar Chavez','E Cesar Chavez','E Cesar Chavez','E Cesar Chavez','E Cesar Chavez']},
+ {id:'dough',n:'Little Dough Bakery',k:'restaurant',e:'🥐',side:['☕','🧈','🍓'],c:'sweets',x:520,y:1150,p:'$',r:4.9,rv:146,hood:'Bouldin',open:true,until:'3pm',mood:'🆕 Pecan croissant',col:['#ffe6a3','#f5b94e'],badges:['Women-owned','Tiny bakery'],own:'June',vibe:['Morning favorite','Dog friendly','Cozy'],
+  ai:'Tiny counter, huge flavor. The new pecan croissant is a hit. Come before 10am to see the full case.',dishes:[['Pecan croissant',5,98],['Kolache box (6)',14,92],['Cold brew',4.5,87]],
+  busy:[6,9,10,8,6,4,3,2,1,0,0,0,0,0,0,0]},
+ {id:'pho',n:'Phở Bà Năm',k:'restaurant',e:'🍜',side:['🌿','🍋','🥢'],c:'asian',x:1000,y:330,p:'$$',r:4.6,rv:301,hood:'Cherrywood',open:true,until:'9pm',mood:'',col:['#bfe2ff','#5ea8e8'],badges:['Family-owned','12 tables'],own:'The Nguyen family',vibe:['Rainy day pick','Quiet','Big portions'],
+  ai:'Rich, slow-cooked broth and generous bowls. Grandma still makes the broth every morning.',dishes:[['Phở tái',13,95],['Bánh mì',8,90],['Iced coffee',5,93]],
+  busy:[0,0,1,3,6,7,4,2,2,4,6,7,5,3,1,0]},
+ {id:'smash',n:'Smash Bros. Burgers',k:'truck',e:'🍔',side:['🍟','🧅','🥤'],c:'burgers',x:780,y:690,p:'$',r:4.5,rv:97,hood:'Downtown',open:true,until:'11pm',mood:'🚚 Just parked',col:['#ffd68a','#ff9f2e'],badges:['Food truck','Brothers-owned'],own:'Leo & Sam',vibe:['Late night','Fast','Cheap eats'],
+  ai:'Crispy-edged smash burgers and very fast service. A late-night favorite. Skip the fries; get the onion rings.',dishes:[['Double smash',11,94],['Onion rings',5,92],['Fries',4,71]],
+  busy:[0,0,0,1,3,4,2,1,2,4,6,7,8,9,8,6],sched:['Downtown','Downtown','E 6th','Downtown','SoCo','SoCo','—']},
+ {id:'kolache',n:'Kolache Corner',k:'restaurant',e:'🥯',side:['🍑','🌭','☕'],c:'sweets',x:720,y:450,p:'$',r:4.4,rv:80,hood:'Downtown',open:true,until:'1pm',mood:'🛑 Sausage sold out',col:['#ffd9b8','#f0995a'],badges:['Since 1998'],own:'Hana',vibe:['Grab and go','Early bird'],
+  ai:'Classic Czech-Texan kolaches. Fruit ones last all morning; sausage ones sell out by about 10am.',dishes:[['Fruit kolache',2.5,90],['Sausage klobasnek',3,93],['Coffee',2,80]],
+  busy:[8,10,7,5,3,2,0,0,0,0,0,0,0,0,0,0]},
+ {id:'jerk',n:'Island Jerk Pit',k:'truck',e:'🍗',side:['🌶️','🍚','🍍'],c:'caribbean',x:800,y:1320,p:'$$',r:4.7,rv:174,hood:'South Congress',open:true,until:'9pm',mood:'💸 $10 lunch deal',col:['#b7ec9f','#3fb36b'],badges:['Food truck','Immigrant-owned'],own:'Andre',vibe:['Spicy','Great value','Music on'],
+  ai:'Smoky jerk chicken with real heat. The $10 lunch plate is the best deal on South Congress.',dishes:[['Jerk chicken plate',14,96],['Lunch deal',10,94],['Festival (3)',5,89]],
+  busy:[0,0,2,5,8,7,4,2,2,3,5,6,4,2,0,0],sched:['SoCo','SoCo','SoCo','—','SoCo','Market','Market']},
+ {id:'paleta',n:'Paleta Pop',k:'cart',e:'🍦',side:['🥭','🍓','🌶️'],c:'sweets',x:330,y:1010,p:'$',r:4.8,rv:66,hood:'Zilker',open:true,until:'sunset',mood:'',col:['#ffc2de','#ff7fb3'],badges:['Cart','Family-owned'],own:'Lupe',vibe:['Kid friendly','Park side'],
+  ai:'Fresh fruit paletas; mango-chile is the favorite. Parks by the Zilker entrance on warm days.',dishes:[['Mango-chile paleta',4,97],['Strawberry cream',4,93],['Elote cup',6,90]],
+  busy:[0,0,0,1,3,5,7,8,9,8,6,3,0,0,0,0],sched:['—','Zilker','Zilker','Zilker','Zilker','Zilker','Zilker']},
+ {id:'supper',n:'Sunday Supper Club',k:'popup',e:'🍲',side:['🍷','🕯️','🌿'],c:'popup',x:1260,y:1000,p:'$$$',r:4.9,rv:41,hood:'Holly',open:false,until:'Sun 6pm',mood:'🎟️ 8 seats left',col:['#d9c8ff','#8f6bff'],badges:['Pop-up','Chef-run'],own:'Chef Ama',vibe:['Book ahead','Family style','Backyard'],
+  ai:'A monthly family-style dinner in a backyard, with a West African and Texan menu. It usually fills up in a day.',dishes:[['Family dinner',45,98],['Jollof add-on',8,95]],
+  busy:[0,0,0,0,0,0,0,0,0,0,9,10,8,0,0,0]},
+ {id:'curry',n:'Curry Cart',k:'cart',e:'🍛',side:['🫓','🥭','🌶️'],c:'asian',x:640,y:1290,p:'$',r:4.6,rv:58,hood:'South 1st',open:true,until:'8pm',mood:'',col:['#ffe1a1','#f2a33a'],badges:['Cart','Vegan options'],own:'Priya',vibe:['Vegan friendly','Big bowls'],
+  ai:'Big bowls of chana masala and butter chicken. Very good value, with lots of vegan choices.',dishes:[['Butter chicken bowl',11,95],['Chana masala',9,93],['Mango lassi',4,91]],
+  busy:[0,0,1,4,7,6,3,2,3,5,6,4,2,0,0,0],sched:['S 1st','S 1st','S 1st','S 1st','S 1st','—','—']},
+ {id:'dumpling',n:'Dumpling Dojo',k:'popup',e:'🥟',side:['🥢','🌶️','🍵'],c:'asian',x:1210,y:1250,p:'$$',r:4.8,rv:73,hood:'Saturday market',open:false,until:'Sat 9am',mood:'',col:['#ffe3d1','#ff9f80'],badges:['Market stall','Pop-up'],own:'Kenji & Mae',vibe:['Market only','Sells out fast'],
+  ai:'Hand-folded pork and chive dumplings at the Saturday market. Arrive early; they often sell out by noon.',dishes:[['Pork & chive (8)',10,97],['Chili crisp jar',9,94]],
+  busy:[4,8,10,9,6,0,0,0,0,0,0,0,0,0,0,0]},
+ {id:'bean',n:'Bean Bike',k:'cart',e:'☕',side:['🥛','🍪','🍯'],c:'sweets',x:560,y:640,p:'$',r:4.7,rv:52,hood:'Lady Bird Lake',open:true,until:'2pm',mood:'',col:['#e9d3bd','#a8774f'],badges:['Bike cart','Solo-owned'],own:'Marco',vibe:['Trail side','Oat milk','Quick'],
+  ai:'Cold brew and honey lattes from a bike by the lake trail. A quick, friendly stop on a run or walk.',dishes:[['Honey latte',5,95],['Cold brew',4,92]],
+  busy:[7,9,8,6,4,3,2,1,0,0,0,0,0,0,0,0],sched:['Trail','Trail','Trail','Trail','Trail','Trail','—']},
+];
+const getS=id=>SPOTS.find(s=>s.id===id);
+const FRIENDS={guera:[['🦄','Maya','#ffd6ec'],['🐙','Ellie','#d8f6ea'],['🤠','Brad','#ffe7b0']],smoke:[['🤠','Brad','#ffe7b0']],dough:[['🐙','Ellie','#d8f6ea'],['🦊','Kai','#ffe0cc']],jerk:[['🦄','Maya','#ffd6ec']],dumpling:[['🐼','Hank','#e7e4ff'],['🐙','Ellie','#d8f6ea']]};
+function friendsRow(id){const f=FRIENDS[id];if(!f)return'';return `<div class="friends"><span class="stack">${f.map(x=>`<i style="background:${x[2]}">${x[0]}</i>`).join('')}</span><span>${f[0][1]}${f.length>1?` and ${f.length-1} friend${f.length>2?'s':''}`:''} love${f.length>1?'':'s'} this</span></div>`}
+const ME={x:820,y:700};
+const PEOPLE=[['🦄','@tacotania','#ffd6ec'],['🤠','@brisketbrad','#ffe7b0'],['🐙','@ellie.eats','#d8f6ea'],['🦊','@k.lo','#ffe0cc'],['🐼','@hungryhank','#e7e4ff'],['🐸','@noodle.nina','#dff5d0']];
+const REPORTS={
+ guera:[['🔥','Al pastor is on point tonight',0,'4 min',12],['⏳','About 8 people in line',2,'15 min',5]],
+ smoke:[['⏳','25-min line, worth it',1,'6 min',9],['🛑','Ribs are gone already',3,'40 min',3]],
+ dough:[['🆕','Pecan croissants just came out','owner','10 min',14]],
+ smash:[['🚚','Just parked on Congress','owner','2 min',7]],
+ kolache:[['🛑','Out of the sausage ones',4,'22 min',6]],
+ jerk:[['💸','$10 lunch plate today only','owner','1 hr',18]],
+};
+const TICKS=[[0,'reported 🔥 Hot at Taquería La Güera'],[4,'checked in at Kolache Corner'],[2,'added a new spot: Dumpling Dojo'],[1,'says the line at Smoke Signal is 25 min'],[5,'earned the Night Owl badge 🦉'],[3,'confirmed the $10 deal at Island Jerk Pit']];
+const LEVELS=[['Newcomer',0],['Regular',100],['Local',250],['Insider',500],['Legend',1000]];
+const now0=Date.now();
+const DROPS=[
+ {id:'guera',t:'Birria drop',d:'Only 40 portions of birria with consommé, tonight only.',at:now0+72*60e3+14e3,left:40,of:40},
+ {id:'smash',t:'Free onion rings',d:'For the next 20 people who show this in the app.',at:now0-5*60e3,left:12,of:20},
+ {id:'dough',t:'Pecan croissants, round two',d:'A second bake comes out of the oven soon.',at:now0+24*60e3+40e3,left:24,of:24},
+ {id:'supper',t:'Sunday Supper seats',d:'West African and Texan family dinner this Sunday.',at:now0+2*864e5+3*36e5,left:8,of:24},
+];
+const HOODS=[['Downtown',6,14],['East Austin',9,20],['S Congress',4,12],['Zilker',2,6],['Holly',1,8]];
+const TASTE=[['🌮','Tacos',38],['🍖','BBQ',21],['🍜','Noodles',17],['🧁','Sweets',14],['☕','Coffee',10]];
+const LISTS=[['🌙','Late-night eats',['🍔','🌮','🍗'],8],['💘','Date night',['🍲','🥟','🍜'],5],['💸','Cheap & great',['🍛','🌮','☕'],11]];
+const FEED=[['🦄','Maya','#ffd6ec','tried Smoke Signal BBQ and said the brisket is 🔥','2 hr'],['🐙','Ellie','#d8f6ea','saved Dumpling Dojo to "Weekend plans"','5 hr'],['🤠','Brad','#ffe7b0','was first to find Tia’s Tamales','1 day']];
+function countdown(ms){if(ms<=0)return'now';const t=Math.floor(ms/1000),d=Math.floor(t/86400),h=Math.floor(t%86400/3600),m=Math.floor(t%3600/60),s=t%60;
+  return d?`${d}d ${h}h`:`${h?h+':':''}${String(m).padStart(h?2:1,'0')}:${String(s).padStart(2,'0')}`}
+function remind(id){S.reminders.has(id)?S.reminders.delete(id):S.reminders.add(id);render();if(S.reminders.has(id))toast('We’ll ping you 15 min before')}
+function claimDrop(i){const d=DROPS[i];if(d.left>0)d.left--;burstEmoji=getS(d.id).e;render();award(5,'Saved one for you. Show this at the truck.')}
+function focusFrom(id){S.screen='map';stack=[];S.filter='all';S.aiPicks=null;render();focusSpot(id)}
+setInterval(()=>{document.querySelectorAll('[data-at]').forEach(e=>e.textContent=countdown(+e.dataset.at-Date.now()));
+  const live=DROPS.findIndex(d=>d.at<=Date.now()&&d.left>2);if(live>=0&&Math.random()<.25){DROPS[live].left--;const b=document.querySelector(`[data-left="${live}"]`);if(b){b.textContent=DROPS[live].left;document.querySelector(`[data-bar="${live}"]`).style.width=DROPS[live].left/DROPS[live].of*100+'%'}}},1000);
+const AVATARS=['😋','🤠','🦊','🐼','🐸','🦄','👽','🤖'];
+const AVBG=['#ffe7b0','#ffd6ec','#ffe0cc','#e7e4ff','#dff5d0','#d8f6ea','#d6ecff','#f0f0f0'];
+const MOODS=[['🤤','Hungry'],['🧭','Exploring'],['🍿','Snacking'],['😴','Food coma']];
+const CRAVES=[['🌮','Tacos'],['🍖','BBQ'],['🍔','Burgers'],['🍜','Noodles'],['🧁','Sweets'],['☕','Coffee'],['🍗','Caribbean'],['🌱','Vegan'],['🎟️','Pop-ups']];
+const NOTES=[
+ {e:'🍔',bg:'#ffe7b0',t:'Smash Bros. Burgers just parked 0.3 mi away',d:'2 min ago',go:'smash',u:1},
+ {e:'🎉',bg:'#d8f6ea',t:'Your report at Smoke Signal helped 23 foodies',d:'1 hr ago',u:1},
+ {e:'⏳',bg:'#ffe3d1',t:'Birria drop at La Güera starts in about an hour',d:'3 hr ago',go:'drops'},
+ {e:'🥟',bg:'#ffe3d1',t:'New pop-up near you: Dumpling Dojo (Sat 9am)',d:'Yesterday',go:'dumpling'},
+ {e:'🌮',bg:'#ffe0cc',t:'Taco Tuesday quest starts tomorrow: +30 pts',d:'Yesterday'},
+];
+
+/* ======================= State ======================= */
+const S={screen:'splash',param:null,sel:null,filter:'all',aiPicks:null,points:340,checkins:new Set(),follows:new Set(['guera','jerk']),votes:{},
+  night:true,biz:false,reminders:new Set(['guera']),sheetH:'peek',zoom:1,pan:{x:0,y:0},avatar:0,mood:0,crave:new Set(['🌮','🍔']),
+  chat:[{who:'bot',t:"Hey! I know every local spot in Austin, and no chains, ever. What are you craving?"}],ownerHere:false,
+  add:{step:1,x:820,y:760,name:'',kind:'Food truck',cuisine:'Tacos',price:'$',chain:false,photo:null},notes:NOTES.map(n=>({...n})),earned:new Set()};
+let stack=[];
+
+/* ======================= Helpers ======================= */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2000)}
+const level=()=>{let i=0;LEVELS.forEach((l,k)=>{if(S.points>=l[1])i=k});return i};
+let burstEmoji='✨';
+function award(n,why){
+  const before=level();S.points+=n;
+  const b=document.createElement('div');b.className='burst';b.innerHTML=`<b>${burstEmoji}</b>${n?`<span>+${n} rep</span>`:''}`;$('#phone').appendChild(b);setTimeout(()=>b.remove(),1300);burstEmoji='✨';
+  if(why)toast(why);document.querySelectorAll('.ptsv').forEach(e=>e.textContent=S.points);
+  if(level()>before)setTimeout(()=>celebrate('🏅','Level up!',`You're now a ${LEVELS[level()][0]} in Austin. Insiders get early access to drops.`),700);
+}
+const kindLabel=k=>({truck:'Food truck',trailer:'Trailer',restaurant:'Small restaurant',cart:'Cart',popup:'Pop-up'}[k]);
+const kindIcon=k=>({truck:'🚚',trailer:'🛻',cart:'🛒',popup:'🎪',restaurant:'🏠'}[k]);
+const miles=s=>Math.hypot(s.x-ME.x,s.y-ME.y)/600;
+const distTxt=s=>{const m=miles(s);return m<0.25?Math.max(1,Math.round(m*20))+' min walk':m.toFixed(1)+' mi'};
+const statusTxt=s=>s.open?(['truck','cart','trailer'].includes(s.k)?'Here now':'Open')+' · until '+s.until:'Next: '+s.until;
+const pAv=i=>i==='owner'?['👩‍🍳','Owner','#fff1c9']:i==='you'?[AVATARS[S.avatar],'You',AVBG[S.avatar]]:PEOPLE[i];
+function art(s,w,h,size,variant=0){
+  const dish=variant===0?s.e:s.side[(variant-1)%s.side.length];
+  const others=[s.e,...s.side].filter(d=>d!==dish).slice(0,2);
+  const bg=`radial-gradient(120% 90% at 20% 10%,${s.col[0]},${s.col[1]})`;
+  return `<div class="art" style="width:${w};height:${h};background:${bg}"><span class="plate"></span><span class="dish" style="font-size:${size}px">${dish}</span>
+    <span class="side" style="font-size:${size*.42}px;left:9%;bottom:10%">${others[0]}</span><span class="side" style="font-size:${size*.36}px;right:10%;top:12%">${others[1]||''}</span></div>`;
+}
+function sheet(html){$('#sheet').innerHTML=html?`<div class="scrim" onclick="if(event.target===this)sheet()"><div class="sheet" role="dialog"><div class="grab"></div>${html}</div></div>`:''}
+function modal(html){$('#modal').innerHTML=html?`<div class="modal" onclick="if(event.target===this)modal()"><div class="box" role="dialog">${html}</div></div>`:''}
+function celebrate(icon,title,body,rain){
+  confetti(rain||[icon,'✨','🔥']);modal(`<div class="medal">${icon}</div><h1>${esc(title)}</h1><p class="muted" style="margin:0;font-size:15px">${esc(body)}</p><button class="btn" onclick="modal()">Nice!</button>`);
+}
+function confetti(emojis=['🌮','🔥','✨']){
+  const c=$('#confetti'),ph=$('#phone');c.width=ph.clientWidth;c.height=ph.clientHeight;const x=c.getContext('2d');
+  const P=Array.from({length:46},()=>({x:Math.random()*c.width,y:-40-Math.random()*c.height*.6,vy:2+Math.random()*3.5,vx:(Math.random()-.5)*1.2,s:18+Math.random()*20,a:Math.random()*6,va:(Math.random()-.5)*.08,e:emojis[Math.random()*emojis.length|0]}));
+  x.textAlign='center';x.textBaseline='middle';let f=0;
+  (function tick(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.06;p.y+=p.vy;p.x+=p.vx;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.font=p.s+'px serif';x.fillText(p.e,0,0);x.restore()});
+    if(++f<170)requestAnimationFrame(tick);else x.clearRect(0,0,c.width,c.height)})();
+}
+function floatFrom(id,emo){const a=$('#a-'+id);if(!a)return;[0,1,2].forEach(k=>{const e=document.createElement('span');e.className='float-emo';e.textContent=emo;e.style.setProperty('--dx',((k-1)*26)+'px');e.style.left='0';e.style.top='-70px';e.style.animationDelay=(k*120)+'ms';a.appendChild(e);setTimeout(()=>e.remove(),1900)})}
+/* ======================= Map drawing ======================= */
+let MAPSVG='';
+function rng(seed){return()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646}}
+function inPark(x,y){return(((x-240)/200)**2+((y-1060)/150)**2<1)||(((x-170)/90)**2+((y-330)/190)**2<1)||(((x-1250)/110)**2+((y-1500)/80)**2<1)||(((x-610)/90)**2+((y-980)/40)**2<1)}
+function region(id,x0,y0,x1,y1,cell,rot,r){
+  let g=`<clipPath id="${id}"><rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}"/></clipPath><g clip-path="url(#${id})"><g transform="rotate(${rot} ${(x0+x1)/2} ${(y0+y1)/2})">`;
+  const gap=15;
+  for(let x=x0-200;x<x1+200;x+=cell)for(let y=y0-200;y<y1+200;y+=cell){
+    const cx=x+cell/2,cy=y+cell/2,w=cell-gap;
+    if(inPark(cx,cy)){g+=`<rect class="m-park" x="${x}" y="${y}" width="${cell+1}" height="${cell+1}"/>`;
+      for(let t=0;t<3;t++)g+=`<circle class="m-tree" cx="${x+10+r()*(cell-20)}" cy="${y+10+r()*(cell-20)}" r="${6+r()*5}"/>`;continue}
+    g+=`<rect class="m-blk" x="${x}" y="${y}" width="${w}" height="${w}" rx="9"/>`;
+    const n=1+(r()*4|0);
+    for(let b=0;b<n;b++){const bw=12+r()*(w/2-10),bh=12+r()*(w/2-10);g+=`<rect class="m-bld" x="${x+6+r()*(w-bw-12)}" y="${y+6+r()*(w-bh-12)}" width="${bw}" height="${bh}" rx="3"/>`}
+  }
+  return g+'</g></g>';
+}
+function buildMap(){
+  if(MAPSVG)return MAPSVG;const r=rng(42);
+  const river='M-40 905 C 160 840, 330 960, 560 880 S 900 800, 1120 870 S 1350 930, 1460 880';
+  MAPSVG=`<svg width="1400" height="1800" viewBox="0 0 1400 1800" aria-hidden="true"><rect class="m-road" width="1400" height="1800"/>
+   ${region('rnw',0,0,780,880,76,-8,r)}${region('rne',780,0,1400,880,82,0,r)}${region('rs',0,900,1400,1800,86,5,r)}
+   <path class="m-bank" d="${river}" stroke-width="122" fill="none" stroke-linecap="round"/><path class="m-water" d="${river}" stroke-width="92" fill="none" stroke-linecap="round"/>
+   <g fill="none" stroke-linecap="round">
+    <path class="m-ave m-glow" d="M780 -20V1820 M400 -20L370 1820 M620 960V1820 M780 600H1420 M-20 790C300 770 500 800 780 790S1200 800 1420 780 M-20 1000C300 980 500 1010 760 990S1200 1010 1420 990" stroke-width="34"/>
+    <path class="m-ave-o" d="M780 -20V1820 M400 -20L370 1820 M620 960V1820 M780 600H1420 M-20 790C300 770 500 800 780 790S1200 800 1420 780 M-20 1000C300 980 500 1010 760 990S1200 1010 1420 990" stroke-width="20"/>
+    <path class="m-ave" d="M780 -20V1820 M400 -20L370 1820 M620 960V1820 M780 600H1420 M-20 790C300 770 500 800 780 790S1200 800 1420 780 M-20 1000C300 980 500 1010 760 990S1200 1010 1420 990" stroke-width="13"/>
+    <path class="m-hwy-o" d="M1010 -20C1000 400 990 800 1000 1100S990 1500 985 1820" stroke-width="30"/>
+    <path class="m-hwy" d="M1010 -20C1000 400 990 800 1000 1100S990 1500 985 1820" stroke-width="20"/>
+   </g>
+   <g><rect x="990" y="250" width="34" height="26" rx="6" fill="#2f6fd6" stroke="#fff" stroke-width="3"/><text x="1007" y="268" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="12" fill="#fff">35</text></g>
+   <text class="m-lbl" x="560" y="520">DOWNTOWN</text><text class="m-lbl" x="1090" y="470">EAST AUSTIN</text><text class="m-lbl" x="690" y="1215">SOUTH CONGRESS</text>
+   <text class="m-lbl" x="170" y="1070">ZILKER PARK</text><text class="m-lbl" x="560" y="160">HYDE PARK</text><text class="m-lbl" x="420" y="1240">BOULDIN</text><text class="m-lbl" x="1150" y="1110">HOLLY</text><text class="m-lbl" x="90" y="340">PEASE PARK</text>
+   <text class="m-st" x="790" y="230">Congress Ave</text><text class="m-st" x="1230" y="590">E 6th St</text><text class="m-st" x="80" y="772">Cesar Chavez St</text><text class="m-st" x="1040" y="1020">Riverside Dr</text><text class="m-st" x="630" y="1560">S 1st St</text>
+   <text class="m-st" transform="rotate(-87 392 420)" x="392" y="420">N Lamar Blvd</text>
+   <text class="m-wl" x="200" y="900">Lady Bird Lake</text>
+  </svg>`;
+  return MAPSVG;
+}
+function matches(s){
+  if(S.aiPicks)return S.aiPicks.includes(s.id);
+  const f=S.filter;
+  return f==='all'||(f==='open'&&s.open)||(f==='trucks'&&['truck','cart','trailer'].includes(s.k))||(f==='popup'&&s.k==='popup')||s.c===f||(f==='cheap'&&s.p==='$');
+}
+function pinHTML(s){
+  return `<div class="anchor" style="left:${s.x}px;top:${s.y}px;z-index:${S.sel===s.id?20:Math.round(s.y/10)}" id="a-${s.id}">
+   <button class="pin ${s.hot?'hot':''} ${S.sel===s.id?'sel':''} ${matches(s)?'':'dim'}" onclick="pinTap('${s.id}')" aria-label="${esc(s.n)}">
+    ${s.mood?`<span class="mood" id="m-${s.id}">${esc(s.mood)}</span>`:''}
+    ${s.hot?'<span class="spark" style="--dx:-14px">🔥</span><span class="spark" style="--dx:12px">✨</span><span class="spark" style="--dx:4px">🔥</span>':''}<span class="head" style="--c1:${s.col[0]};--c2:${s.col[1]};--glow:${s.col[1]}aa">${s.e}<span class="live ${s.open?'':'off'}"></span><span class="kind">${kindIcon(s.k)}</span></span><span class="tail"></span>
+    <span class="name">${esc(s.n)}</span></button></div>`;
+}
+const FILTERS=[['all','All'],['open','Open now'],['trucks','🚚 Trucks & carts'],['tacos','🌮 Tacos'],['bbq','🍖 BBQ'],['sweets','🧁 Sweets & coffee'],['asian','🍜 Asian'],['popup','🎪 Pop-ups'],['cheap','$ Cheap eats']];
+const FOODIES=[{p:0,x:1040,y:640},{p:2,x:760,y:520},{p:4,x:700,y:1300},{p:1,x:1150,y:800},{p:5,x:360,y:1050},{p:3,x:560,y:1180}];
+
+/* ======================= Screens ======================= */
+const SCR={
+splash:()=>`<div class="splash" onclick="go('onboard',null,true)"><div class="bigpin">📍</div><div class="word">Lokal</div><p>Only local. No chains.</p></div>`,
+
+onboard:()=>`<div class="page"><div class="pad" style="padding-top:28px;min-height:100%">
+  <span class="badge tomato" style="align-self:flex-start">Step 1 of 1</span>
+  <h1>What are you craving lately?</h1><p class="muted" style="margin:-6px 0 0;font-size:15px">Pick a few. We'll show those spots first.</p>
+  <div class="crave">${CRAVES.map(([e,l])=>`<button class="cv ${S.crave.has(e)?'on':''}" onclick="toggleCrave('${e}')"><b>${e}</b>${l}</button>`).join('')}</div>
+  <div style="flex:1"></div>
+  <button class="btn tomato" onclick="startMap()" ${S.crave.size?'':'disabled'}>📍 Find food near me</button>
+  <p class="muted" style="text-align:center;margin:0">We only use your location to show spots near you.</p></div></div>`,
+
+map:()=>{const s=S.sel&&getS(S.sel);const unread=S.notes.filter(n=>n.u).length;
+ return `<div class="mapwrap" id="mapwrap"><div class="world ${S.zoom>1.15?'labels':''}" id="world" style="--inv:${1/S.zoom}">${buildMap()}
+   ${FOODIES.map((f,i)=>`<div class="anchor" id="f-${i}" style="left:${f.x}px;top:${f.y}px;z-index:2"><button class="foodie" style="background:${PEOPLE[f.p][2]}" onclick="foodieTap(${i})" aria-label="${PEOPLE[f.p][1]}">${PEOPLE[f.p][0]}</button></div>`).join('')}
+   <div class="anchor" style="left:${ME.x}px;top:${ME.y}px;z-index:3"><span class="me"></span></div>
+   ${SPOTS.map(pinHTML).join('')}</div></div>
+  <div class="mtop">
+   <div class="search"><button class="ask" onclick="tab('ai')"><span>✨</span><span>Ask Lokal: "tacos open now under $10"</span></button>
+    <button class="iconbtn" onclick="go('inbox')" aria-label="Inbox">🔔${unread?`<span class="dot">${unread}</span>`:''}</button></div>
+   ${S.aiPicks?`<div class="aibar">✨ ${S.aiPicks.length} AI picks on the map<button onclick="S.aiPicks=null;render()">Clear</button></div>`
+     :`<div class="chips">${FILTERS.map(([k,l])=>`<button class="chip ${S.filter===k?'on':''}" onclick="setFilter('${k}')">${l}</button>`).join('')}</div>`}
+   <div class="ticker" id="ticker"></div>
+  </div>
+  <div class="rail" id="rail">
+   <button class="iconbtn" onclick="toggleNight()" aria-label="Day or night map">${S.night?'☀️':'🌙'}</button>
+   <button class="iconbtn" onclick="zoomBy(1.25)" aria-label="Zoom in">＋</button>
+   <button class="iconbtn" onclick="zoomBy(.8)" aria-label="Zoom out">－</button>
+   <button class="iconbtn" onclick="recenter()" aria-label="Center on me">📍</button>
+  </div>
+  <section class="bsheet" id="bsheet"><div class="bgrab" id="bgrab"><i></i></div><div class="bbody" id="bbody">${s?sheetSpot(s):sheetExplore()}</div></section>`},
+
+spot:(id)=>{const s=getS(id);const fol=S.follows.has(id);const inn=S.checkins.has(id);const reps=REPORTS[id]||[];const nowI=9;
+ const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],today=3;
+ return `<div class="page"><div style="position:relative">
+  <div class="gallery" id="gal" onscroll="galDots(this)">${[0,1,2].map(v=>art(s,'100%','250px',110,v)).join('')}</div>
+  <div class="gtools"><button class="iconbtn" onclick="back()" aria-label="Back">‹</button><span class="grow"></span>
+   <button class="iconbtn" onclick="go('share','${id}')" aria-label="Share">📤</button>
+   <button class="btn sm ${fol?'ghost':'tomato'}" style="width:auto;padding:0 14px" onclick="toggleFollow('${id}')">${fol?'✓ Following':'+ Follow'}</button></div>
+  <div class="gdots" id="gdots"><i class="on"></i><i></i><i></i></div></div>
+  <div class="pad">
+   <div><h1>${esc(s.n)}</h1>
+    <div class="row" style="margin-top:8px;flex-wrap:wrap;gap:6px 12px;font-weight:900;font-size:14px"><span><span class="stars">★★★★★</span> ${s.r} <span class="muted">(${s.rv})</span></span><span>${s.p}</span><span>${kindIcon(s.k)} ${kindLabel(s.k)}</span><span class="muted">${distTxt(s)}</span></div></div>
+   ${friendsRow(id)}
+   <div class="row" style="flex-wrap:wrap;gap:6px">${s.badges.map((b,i)=>`<span class="badge ${['mint','mustard','tomato'][i%3]}">${esc(b)}</span>`).join('')}<span class="badge">🚫 Not a chain</span></div>
+   <div class="card"><div class="row"><span class="live-t ${s.open?'':'off'} grow">${esc(statusTxt(s))}</span><span class="muted">${s.hood}</span></div>
+    ${s.sched?`<div class="sched">${days.map((d,i)=>`<div class="${i===today?'today':''}">${d}<small>${esc(s.sched[i])}</small></div>`).join('')}</div><p class="muted" style="margin:8px 0 0">Usual spots, updated by ${esc(s.own)}. Follow to get pinged when they park.</p>`:''}</div>
+   <div class="ai"><b>✨ What people say</b><br>${esc(s.ai)}
+    <button class="btn sm ghost" style="margin-top:10px" onclick="askAbout('${id}')">Ask about this spot</button></div>
+   <div class="acts">
+    <button class="btn sm ${inn?'ghost':'mint'}" onclick="checkIn('${id}')">${inn?'✓ Here':'📍 Check in'}</button>
+    <button class="btn sm ghost" onclick="openRadial('${id}')">⚡ Report</button>
+    <button class="btn sm ghost" onclick="toast('Opens Apple Maps or Google Maps')">🧭 Go</button>
+   </div>
+   <div class="card chart"><div class="row"><h3 class="grow">Busy times</h3><span class="badge tomato">Live: busier than usual</span></div>
+    <div class="bars" id="bars">${s.busy.map((v,i)=>`<button class="${i===nowI?'now':''}" style="height:${Math.max(4,v*9)}px" aria-label="${hourLbl(i)}: ${busyWord(v)}" onpointerenter="barTip(${i},'${id}')" onclick="barTip(${i},'${id}')"></button>`).join('')}</div>
+    <div class="axis"><span>8a</span><span>12p</span><span>4p</span><span>8p</span><span>11p</span></div><div id="tip"></div></div>
+   <div class="card dishes"><h3 style="margin-bottom:2px">Top dishes</h3>${s.dishes.map(d=>`<div class="d ${id==='smash'&&B.soldOut.has(d[0])?'out':''}"><b>${esc(d[0])}${id==='smash'&&B.soldOut.has(d[0])?'<span class="soldtag">Sold out today</span>':''}</b><b>$${d[1].toFixed(d[1]%1?2:0)}</b><div class="lk"><span><i style="width:${d[2]}%"></i></span><span>${d[2]}% liked it</span></div></div>`).join('')}</div>
+   <div class="row" style="flex-wrap:wrap;gap:6px">${s.vibe.map(v=>`<span class="chip" style="height:32px">${esc(v)}</span>`).join('')}</div>
+   <div class="card"><h3>Live reports</h3>${reps.length?reps.map((r,i)=>{const v=S.votes[id+i];const a=pAv(r[2]);return `<div class="rep"><span class="av" style="background:${a[2]}">${a[0]}</span><div class="grow"><b style="font-size:14px">${r[0]} ${esc(r[1])}</b><div class="muted">${esc(a[1])} · ${r[3]} ago</div></div>
+     <div class="vote"><button class="${v===1?'on':''}" onclick="vote('${id}',${i},1)">👍 ${r[4]+(v===1?1:0)}</button><button class="${v===-1?'on':''}" onclick="vote('${id}',${i},-1)">👎</button></div></div>`}).join('')
+     :'<p class="muted" style="margin:8px 0 0">No live reports yet. Be the first and earn 5 points.</p>'}</div>
+   <p class="muted" style="text-align:center;margin:0">Run by ${esc(s.own)} · Owners update hours, menu and specials</p>
+  </div></div>`},
+
+add:()=>{const a=S.add;
+ return `<div class="page"><div class="hdr"><button class="iconbtn" onclick="a_back()" aria-label="Back">‹</button><h2>Add a spot</h2><span class="muted">${a.step}/3</span></div>
+ <div class="pad"><div class="steps">${[1,2,3].map(i=>`<i class="${i<=a.step?'on':''}"></i>`).join('')}</div>
+ ${a.step===1?`<h3>Where is it?</h3><p class="muted" style="margin:-8px 0 0">Drag the map so the pin sits on the spot.</p>
+   <div class="addmap mapwrap" id="addwrap"><div class="world" id="aworld">${buildMap()}${SPOTS.map(s=>`<div class="anchor" style="left:${s.x}px;top:${s.y}px"><span style="position:absolute;left:-12px;top:-12px;font-size:20px;opacity:.6">${s.e}</span></div>`).join('')}</div><div class="cross">📍</div></div>
+   <button class="btn tomato" onclick="a_next()">This is the spot</button>`
+ :a.step===2?`<h3>What is it?</h3>
+   <input class="inp" id="aname" placeholder="Name, like 'Tia's Tamales'" value="${esc(a.name)}" oninput="S.add.name=this.value" aria-label="Spot name">
+   <div><p class="muted" style="margin:0 0 8px;font-weight:900">Type</p><div class="seg">${['Food truck','Cart','Small restaurant','Pop-up','Market stall'].map(k=>`<button class="chip ${a.kind===k?'on':''}" onclick="S.add.kind='${k}';render()">${k}</button>`).join('')}</div></div>
+   <div><p class="muted" style="margin:0 0 8px;font-weight:900">What do they sell?</p><div class="seg">${['Tacos','BBQ','Burgers','Asian','Sweets','Coffee','Caribbean','Other'].map(k=>`<button class="chip ${a.cuisine===k?'on':''}" onclick="S.add.cuisine='${k}';render()">${k}</button>`).join('')}</div></div>
+   <div><p class="muted" style="margin:0 0 8px;font-weight:900">Price</p><div class="seg">${['$','$$','$$$'].map(k=>`<button class="chip ${a.price===k?'on':''}" onclick="S.add.price='${k}';render()">${k}</button>`).join('')}</div></div>
+   <label class="row card" style="cursor:pointer"><span class="grow"><b>Is it part of a chain?</b><br><span class="muted">Lokal only lists independent spots.</span></span><input type="checkbox" id="achain" ${a.chain?'checked':''} onchange="S.add.chain=this.checked;render()" style="width:24px;height:24px"></label>
+   ${a.chain?'<div class="warn">Chains can’t be added to Lokal. Think of a local spot instead!</div>':''}
+   <button class="btn tomato" onclick="a_next()" ${a.chain?'disabled':''}>Next</button>`
+ :`<h3>Add a photo</h3><p class="muted" style="margin:-8px 0 0">A real photo helps people find it. You can skip this.</p>
+   <label class="photo" for="aphoto">${a.photo?`<img src="${a.photo}" alt="Your photo">`:`<span>📸<br>Tap to add a photo</span>`}</label>
+   <input type="file" id="aphoto" accept="image/*" class="sr" onchange="a_photo(this)">
+   <div class="card row">${art({e:cuisineEmoji(a.cuisine),side:['✨','📍'],col:['#ffe0cc','#ff9f80']},'60px','60px',30)}<div class="grow"><b>${esc(a.name||'New spot')}</b><div class="muted">${a.kind} · ${a.cuisine} · ${a.price}</div></div></div>
+   <button class="btn tomato" onclick="a_publish()">Publish spot</button>`}
+ </div></div>`},
+
+ai:()=>`<div class="chat"><div class="hdr"><h2>✨ Ask Lokal</h2><span class="pts">Your food guide</span></div>
+ <div class="msgs" id="msgs">${S.chat.map(chatMsg).join('')}</div>
+ <div class="sugs">${['Spicy under $12, open now','Something sweet nearby','BBQ without a huge line','Late-night food','Coffee by the lake'].map(q=>`<button class="chip" onclick="ask('${q}')">${q}</button>`).join('')}</div>
+ <form class="composer" onsubmit="event.preventDefault();ask($('#q').value)"><button type="button" class="mic" id="mic" onclick="voice()" aria-label="Speak">🎙️</button>
+  <input id="q" placeholder="What are you craving?" autocomplete="off"><button class="send" aria-label="Send">↑</button></form></div>`,
+
+drops:()=>{const now=Date.now();
+ return `<div class="page"><div class="hdr"><h2>Drops</h2><span class="pts">⏳ Live specials</span></div><div class="pad">
+ <p class="muted" style="margin:-6px 0 0">Limited food from local spots. When it's gone, it's gone.</p>
+ ${DROPS.map((d,i)=>{const s=getS(d.id);const live=d.at<=now;const rem=S.reminders.has(d.id);
+  return `<div class="card drop ${live?'live':''}"><div class="top">${art(s,'64px','64px',34)}<div class="grow"><h3>${esc(d.t)}</h3><div class="muted">${esc(s.n)} · ${distTxt(s)}</div></div></div>
+   <p style="margin:0;font-size:14px">${esc(d.d)}</p>
+   <div class="row">${live?'<span class="livepill">LIVE NOW</span>':`<span class="muted" style="font-weight:800">Starts in</span><span class="timer" data-at="${d.at}">${countdown(d.at-now)}</span>`}<span class="grow"></span><span class="muted" style="font-weight:800"><b data-left="${i}" style="color:var(--ink)">${d.left}</b> of ${d.of} left</span></div>
+   <div class="left"><i data-bar="${i}" style="width:${d.left/d.of*100}%"></i></div>
+   <div class="row">${live?`<button class="btn sm tomato" onclick="claimDrop(${i})">I’m on my way</button>`:`<button class="btn sm ${rem?'ghost':''}" onclick="remind('${d.id}')">${rem?'✓ We’ll ping you':'🔔 Remind me'}</button>`}<button class="btn sm ghost" style="width:auto;padding:0 14px" onclick="focusFrom('${d.id}')">🗺️</button></div></div>`}).join('')}
+ <div class="event"><span class="badge mustard" style="align-self:flex-start">Tonight · 6–10pm</span><h2>🎪 Food truck rally on Rainey St</h2>
+  <p style="margin:0;opacity:.85;font-size:14px">12 trucks, live music, and the first 100 people get a free taste card.</p>
+  <div class="friends" style="color:#d9d6f2"><span class="stack"><i style="background:#ffd6ec">🦄</i><i style="background:#d8f6ea">🐙</i><i style="background:#e7e4ff">🐼</i></span><span>Maya, Ellie and 211 others are going</span></div>
+  <button class="btn" style="background:#fff;color:#16172b" onclick="this.textContent='✓ You’re going';burstEmoji='🎪';award(5,'See you tonight!')">I’m going</button></div>
+ </div></div>`},
+
+you:()=>{const li=level();const cur=LEVELS[li],nxt=LEVELS[li+1];
+ return `<div class="page"><div class="pad" style="padding-top:22px">
+  <div class="youhead"><button class="bigav" style="background:${AVBG[S.avatar]}" onclick="avatarSheet()" aria-label="Change avatar">${AVATARS[S.avatar]}<span class="md">${MOODS[S.mood][0]}</span></button>
+   <div class="grow"><h2>@you</h2><div class="muted" style="margin-top:4px;font-weight:800">Austin · ${MOODS[S.mood][1]}</div>
+    <div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap"><span class="badge mustard">✦ ${cur[0]}</span><span class="badge"><span class="ptsv">${S.points}</span>&nbsp;rep</span></div></div></div>
+  <div class="stat3">${[[String(37+S.checkins.size),'Spots tried'],['12','Spots found'],['2','First to find']].map(([n,l])=>`<div class="card"><h2>${n}</h2><div class="muted">${l}</div></div>`).join('')}</div>
+  <button class="card row" style="text-align:left;width:100%;background:linear-gradient(135deg,rgba(255,45,111,.22),rgba(255,204,51,.12))" onclick="go('wrapped')"><span style="font-size:32px">🎁</span><span class="grow"><h3>Your week in food</h3><span class="muted">4 spots, 3 trucks, one very good taco</span></span><span style="font-size:20px">›</span></button>
+  <div class="card"><h3 style="margin-bottom:4px">🗺️ Your Austin food map</h3><p class="muted" style="margin:0 0 6px">Neighborhoods you've explored</p>
+   ${HOODS.map(h=>`<div class="hbar hood"><span>${h[0]}</span><span class="tr"><i style="width:${h[1]/h[2]*100}%"></i></span><span class="muted">${h[1]}/${h[2]}</span></div>`).join('')}</div>
+  <div class="card"><h3 style="margin-bottom:4px">👅 Your taste</h3><p class="muted" style="margin:0 0 6px">Based on your check-ins</p>
+   ${TASTE.map(t=>`<div class="hbar"><span>${t[0]} ${t[1]}</span><span class="tr"><i style="width:${t[2]}%"></i></span><span class="muted">${t[2]}%</span></div>`).join('')}</div>
+  <div class="card"><div class="row"><h3 class="grow">📋 Your lists</h3><button class="chip" style="height:30px;backdrop-filter:none" onclick="toast('New list created')">＋ New</button></div>
+   ${LISTS.map(l=>`<button class="list" onclick="toast('Opens your ${esc(l[1])} list')"><span style="font-size:24px">${l[0]}</span><span class="grow"><b>${esc(l[1])}</b><br><span class="muted">${l[3]} spots</span></span><span class="emos">${l[2].join('')}</span></button>`).join('')}</div>
+  <div class="card"><h3 style="margin-bottom:4px">👯 Friends lately</h3>${FEED.map(f=>`<div class="rep"><span class="av" style="background:${f[2]}">${f[0]}</span><div class="grow"><b style="font-size:14px">${f[1]}</b> <span style="font-size:14px">${esc(f[3])}</span><div class="muted">${f[4]} ago</div></div></div>`).join('')}</div>
+  <div class="perk"><div class="row"><span style="font-size:28px">🔑</span><div class="grow"><h3>Insider perks</h3><div class="muted">${nxt?`${nxt[1]-S.points} rep to ${nxt[0]}. `:''}Insiders get early access to drops and secret menu items.</div></div></div></div>
+  <button class="card row" style="text-align:left;width:100%" onclick="enterBiz()"><span style="font-size:30px">🏪</span><span class="grow"><h3>${B.claimed?'Switch to Business':'Own a food truck or small spot?'}</h3><span class="muted">${B.claimed?'Smash Bros. Burgers':'Claim it free: go live, post drops, see who’s hungry nearby'}</span></span><span>›</span></button>
+ </div></div>`},
+
+wrapped:()=>`<div class="page"><div class="hdr"><button class="iconbtn" onclick="back()" aria-label="Back">‹</button><h2>Your week in food</h2></div><div class="pad">
+  <div class="share"><div class="brand">Lokal<span style="font-size:12px;font-family:var(--font-b);color:#ffcc33">Oct 12–18</span></div>
+   <h1>You ate like a local this week 🌮</h1>
+   <div class="wr"><div><b>4</b>spots tried</div><div><b>3</b>food trucks</div><div><b>🌮</b>top craving</div><div><b>#1</b>to find Tia's Tamales</div></div>
+   <p style="margin:0;font-weight:700;opacity:.9">Most loved: Taquería La Güera's al pastor. You and 3 friends went this week.</p></div>
+  <button class="btn tomato" onclick="burstEmoji='📤';award(5,'Saved. Ready to post')">Post to my story</button>
+  <button class="btn ghost" onclick="back()">Done</button>
+ </div></div>`,
+
+inbox:()=>`<div class="page"><div class="hdr"><button class="iconbtn" onclick="back()" aria-label="Back">‹</button><h2>Inbox</h2><button class="chip" onclick="S.notes.forEach(n=>n.u=0);render()">Mark all read</button></div><div class="pad" style="gap:0">
+ ${S.notes.map((n,i)=>`<button class="note" onclick="noteTap(${i})"><span class="av" style="background:${n.bg}">${n.e}</span><span class="grow"><b style="font-size:14.5px">${esc(n.t)}</b><br><span class="muted">${n.d}</span></span>${n.u?'<span class="unread"></span>':''}</button>`).join('')}
+ </div></div>`,
+
+owner:()=>{const s=getS('smash');
+ return `<div class="page"><div class="hdr"><button class="iconbtn" onclick="back()" aria-label="Back">‹</button><h2>Owner view</h2></div><div class="pad">
+  <div class="ohero"><div class="row">${art(s,'62px','62px',32)}<div class="grow"><h3 style="color:#fff">${esc(s.n)}</h3><div style="opacity:.75;font-size:13px">128 followers · ★ ${s.r}</div></div></div>
+   <div style="font-weight:900">😋 15 foodies nearby are hungry right now</div>
+   <label for="loc" style="font-size:13px;font-weight:800;color:#cfcbe8">Where are you parked?</label>
+   <select class="inp" id="loc"><option value="0">Congress Ave & 2nd St (Downtown)</option><option value="1">E 6th St & Waller (East Austin)</option><option value="2">S Congress & Elizabeth (SoCo)</option></select>
+   <button class="here ${S.ownerHere?'done':''}" onclick="weAreHere()">${S.ownerHere?'✓ You’re live on the map':'📍 We’re here now'}</button></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>⚡ Flash special</h3>
+   <input class="inp" id="special" value="Free onion rings for the next 20 people" aria-label="Special">
+   <button class="btn tomato" onclick="toast('Special sent to 128 followers')">Send to followers</button></div>
+  <div class="card"><h3>This week</h3><div class="row" style="margin-top:8px">${[['412','Map views'],['86','Check-ins'],['+23','Followers']].map(([n,l])=>`<div class="grow" style="text-align:center"><h2>${n}</h2><div class="muted">${l}</div></div>`).join('')}</div></div>
+ </div></div>`},
+
+share:(id)=>{const s=getS(id);
+ return `<div class="page"><div class="hdr"><button class="iconbtn" onclick="back()" aria-label="Back">‹</button><h2>Share</h2></div><div class="pad">
+  <div class="share"><div class="brand">📍 Lokal<span style="font-size:13px;opacity:.95">Only local. No chains.</span></div>
+   ${art(s,'100%','190px',100)}
+   <h1>I just found the best ${esc(s.dishes[0][0].toLowerCase())} in Austin</h1><div style="font-weight:900">${esc(s.n)} · ${s.hood} · ★ ${s.r}</div></div>
+  <p class="muted" style="text-align:center;margin:0">Sized for TikTok and Instagram stories.</p>
+  <button class="btn tomato" onclick="toast('Card saved, ready to post')">Post to my story</button>
+  <button class="btn ghost" onclick="copyLink('${id}')">Copy link</button>
+ </div></div>`},
+};
+
+/* Bottom sheet contents */
+function sheetExplore(){
+  const near=[...SPOTS].filter(matches).sort((a,b)=>miles(a)-miles(b));
+  const trending=SPOTS.filter(s=>s.hot||s.mood).slice(0,6);
+  return `<div class="row"><div class="grow"><h2>Live near you</h2><div class="muted">${near.length} local spots · 3 trucks just parked · 0 chains</div></div><button class="btn sm tomato" style="width:auto;padding:0 14px" onclick="go('add')">＋ Add</button></div>
+   <h3>🔥 Trending right now</h3>
+   <div class="hs">${trending.map(s=>`<button class="tcard" onclick="openSpot('${s.id}')">${art(s,'168px','112px',54)}<b>${esc(s.n)}</b><span class="muted" style="font-weight:900">${esc(s.mood||statusTxt(s))}</span></button>`).join('')}</div>
+   <h3>Closest to you</h3><div>${near.map(s=>`<button class="lrow" onclick="focusSpot('${s.id}')">${art(s,'56px','56px',28)}<span class="grow"><b style="font-size:15px">${esc(s.n)}</b><br><span class="live-t ${s.open?'':'off'}">${esc(statusTxt(s))}</span><br><span class="muted">★ ${s.r} · ${s.p} · ${kindLabel(s.k)}</span></span><span class="dist">${distTxt(s)}</span></button>`).join('')}</div>`;
+}
+function sheetSpot(s){const inn=S.checkins.has(s.id);
+  return `<div class="row">${art(s,'72px','72px',38)}<div class="grow"><h2 style="font-size:20px">${esc(s.n)}</h2><div class="muted" style="font-weight:800">★ ${s.r} (${s.rv}) · ${s.p} · ${kindLabel(s.k)}</div><span class="live-t ${s.open?'':'off'}">${esc(statusTxt(s))}</span></div>
+     <button class="iconbtn" onclick="S.sel=null;S.sheetH='peek';render()" aria-label="Close">✕</button></div>
+   ${friendsRow(s.id)}
+   ${s.mood?`<div class="row"><span class="badge tomato">${esc(s.mood)}</span><span class="muted">${distTxt(s)} · ${s.hood}</span></div>`:`<span class="muted">${distTxt(s)} · ${s.hood}</span>`}
+   <div class="acts"><button class="btn sm ${inn?'ghost':'mint'}" onclick="checkIn('${s.id}')">${inn?'✓ Here':'📍 Check in'}</button><button class="btn sm ghost" onclick="openRadial('${s.id}')">⚡ Report</button><button class="btn sm ghost" onclick="toast('Opens Apple Maps or Google Maps')">🧭 Go</button></div>
+   <button class="btn" onclick="openSpot('${s.id}')">See menu, busy times & reviews</button>
+   <div class="ai"><b>✨ In short</b><br>${esc(s.ai)}</div>`;
+}
+
+/* ======================= Small pieces ======================= */
+const hourLbl=i=>{const h=8+i;return h===12?'12pm':h>12?(h-12)+'pm':h+'am'};
+const busyWord=v=>v>=9?'as busy as it gets':v>=6?'usually busy':v>=3?'a little busy':v>0?'usually quiet':'closed';
+function barTip(i,id){const s=getS(id);const bars=$('#bars');if(!bars)return;const b=bars.children[i];
+  bars.querySelectorAll('.peek').forEach(x=>x.classList.remove('peek'));b.classList.add('peek');
+  const left=b.offsetLeft+b.offsetWidth/2+14;$('#tip').innerHTML=`<div class="tip" style="left:${left}px;top:${b.offsetTop+20}px">${hourLbl(i)}${i===9?' (now)':''}: ${busyWord(s.busy[i])}</div>`}
+function galDots(g){const i=Math.round(g.scrollLeft/g.clientWidth);document.querySelectorAll('#gdots i').forEach((d,k)=>d.classList.toggle('on',k===i))}
+const cuisineEmoji=c=>({Tacos:'🌮',BBQ:'🍖',Burgers:'🍔',Asian:'🍜',Sweets:'🧁',Coffee:'☕',Caribbean:'🍗'}[c]||'🍽️');
+
+/* ======================= Chat ======================= */
+function chatMsg(m){
+  if(m.typing)return `<div class="msg bot"><span class="typing"><i></i><i></i><i></i></span></div>`;
+  if(m.who==='me')return `<div class="msg me">${esc(m.t)}</div>`;
+  if(m.picks)return `<div class="msg bot">${esc(m.shown??m.t)}</div>${m.done?`<div class="msg cards"><div class="hs" style="margin:0 -16px">${m.picks.map(id=>{const s=getS(id);return `<button class="tcard" onclick="openSpot('${id}')">${art(s,'168px','104px',50)}<b>${esc(s.n)}</b><span class="muted" style="font-weight:900">★ ${s.r} · ${s.p} · ${distTxt(s)}</span></button>`}).join('')}</div>
+    <button class="btn sm" style="margin-top:8px" onclick="showPicks('${m.picks.join(',')}')">🗺️ Show these on the map</button></div>`:''}`;
+  return `<div class="msg bot">${esc(m.t)}</div>`;
+}
+function answer(q){
+  q=q.toLowerCase();
+  if(/spic|hot|jerk|heat/.test(q))return['Spicy and open now, all under $12 for a main. Island Jerk Pit has real heat and a $10 lunch plate.',['jerk','guera','curry']];
+  if(/sweet|dessert|bak|ice|paleta|croissant/.test(q))return['For a sweet tooth, Little Dough just pulled pecan croissants out of the oven. Paleta Pop is great if you want something cold.',['dough','paleta','kolache']];
+  if(/coffee|latte|lake|trail/.test(q))return['Bean Bike is parked by the lake trail until 2pm. Honey latte is the move.',['bean','dough']];
+  if(/bbq|brisket|rib/.test(q))return['Smoke Signal has the best brisket nearby, but the line is about 25 min right now. Island Jerk Pit is a smoky, faster option.',['smoke','jerk']];
+  if(/late|night|midnight/.test(q))return['Still open late near you: Smash Bros. until 11pm and La Güera until 10pm.',['smash','guera']];
+  if(/taco|mex|burrito/.test(q))return['La Güera is hot right now, with fresh reports from 4 minutes ago. The al pastor is the favorite.',['guera','curry']];
+  if(/cheap|\$|budget|under/.test(q))return['Big flavor, small price. All three have mains under $12.',['jerk','curry','guera']];
+  if(/burger/.test(q))return['Smash Bros. just parked downtown. Get the onion rings.',['smash']];
+  if(/pho|noodle|soup|asian|curry|dumpling/.test(q))return['Warm bowls nearby. Dumpling Dojo is only at the Saturday market.',['pho','curry','dumpling']];
+  return['Here’s what locals are loving near you right now:',['guera','dough','jerk']];
+}
+function ask(q){
+  q=(q||'').trim();if(!q)return;
+  S.chat.push({who:'me',t:q},{typing:1});render();scrollChat();
+  setTimeout(()=>{S.chat.pop();const [t,picks]=answer(q);const m={who:'bot',t,picks,shown:''};S.chat.push(m);
+    const words=t.split(' ');let i=0;const iv=setInterval(()=>{i++;m.shown=words.slice(0,i).join(' ');if(i>=words.length){clearInterval(iv);m.done=true;m.shown=null}
+      if(S.screen==='ai'){const box=$('#msgs');if(box){box.innerHTML=S.chat.map(chatMsg).join('');scrollChat()}}},45)},850);
+}
+function scrollChat(){const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight}
+function voice(){const mic=$('#mic');if(!mic||mic.classList.contains('on'))return;mic.classList.add('on');
+  const q=$('#q');q.value='';q.placeholder='Listening…';
+  const phrase='tacos open now that are not too spicy';let i=0;
+  const iv=setInterval(()=>{q.value=phrase.slice(0,i+=3);if(i>=phrase.length){clearInterval(iv);setTimeout(()=>{mic.classList.remove('on');q.placeholder='What are you craving?';ask(q.value)},400)}},70)}
+function askAbout(id){const s=getS(id);tab('ai');ask('Tell me about '+s.n)}
+function showPicks(list){const p=list.split(',');S.aiPicks=p;S.sel=null;S.sheetH='peek';tab('map');fitTo(p.map(getS))}
+
+/* ======================= Actions ======================= */
+function toggleCrave(e){S.crave.has(e)?S.crave.delete(e):S.crave.add(e);render()}
+function startMap(){stack=[];S.screen='map';render();requestAnimationFrame(()=>{centerOn(ME.x,ME.y+60);setTimeout(()=>toast('📍 24 local spots near you. 0 chains.'),400)})}
+function pinTap(id){if(dragMoved)return;S.sel=id;S.sheetH='half';render();const s=getS(id);centerOn(s.x,s.y+120)}
+function focusSpot(id){S.sel=id;S.sheetH='half';render();const s=getS(id);centerOn(s.x,s.y+120)}
+function openSpot(id){go('spot',id)}
+function setFilter(k){S.filter=k;S.sel=null;render()}
+function foodieTap(i){const f=FOODIES[i];const near=[...SPOTS].sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y))[0];toast(`${PEOPLE[f.p][1]} is eating at ${near.n} ${near.e}`)}
+function toggleFollow(id){if(S.follows.has(id)){S.follows.delete(id);toast('Unfollowed')}else{S.follows.add(id);toast('We’ll ping you when they’re nearby')}render()}
+function checkIn(id){if(S.checkins.has(id))return;const s=getS(id);S.checkins.add(id);render();burstEmoji=s.e;award(10,'Checked in at '+s.n);confetti([s.e,...s.side.slice(0,1),'✨']);floatFrom(id,s.e);
+  if(S.checkins.size===2&&!S.earned.has('Explorer')){S.earned.add('Explorer');setTimeout(()=>celebrate('🧭','Explorer','Two new spots in one day. Your food map is filling in.'),1100)}}
+function vote(id,i,v){const k=id+i;if(S.votes[k]===v)return;const first=S.votes[k]==null;S.votes[k]=v;render();if(first)award(2,'Thanks for confirming')}
+function copyLink(id){const t='https://lokal.example/spot/'+id;try{navigator.clipboard.writeText(t).then(()=>toast('Link copied'),()=>toast(t))}catch(e){toast(t)}}
+function noteTap(i){const n=S.notes[i];n.u=0;if(n.go==='drops'){tab('drops')}else if(n.go){S.screen='map';stack=[];focusSpot(n.go)}else render()}
+function toggleNight(){S.night=!S.night;render();toast(S.night?'🌙 Night map on':'☀️ Day map on')}
+function avatarSheet(){sheet(`<h2>Your foodie</h2><p class="muted" style="margin:-8px 0 0">Friends see this on the map.</p>
+  <div class="agrid">${AVATARS.map((a,i)=>`<button class="${S.avatar===i?'on':''}" style="background:${AVBG[i]}" onclick="S.avatar=${i};avatarSheet();render()">${a}</button>`).join('')}</div>
+  <h3>Mood</h3><div class="seg">${MOODS.map((m,i)=>`<button class="chip ${S.mood===i?'on':''}" onclick="S.mood=${i};avatarSheet();render()">${m[0]} ${m[1]}</button>`).join('')}</div>
+  <button class="btn" onclick="sheet()">Done</button>`)}
+function weAreHere(){
+  const spots=[[780,690],[1150,600],[800,1240]];const i=+$('#loc').value;const s=getS('smash');
+  [s.x,s.y]=spots[i];s.hood=['Downtown','East Austin','South Congress'][i];s.mood='🚚 Just parked';S.ownerHere=true;
+  render();toast('You’re live. 128 followers notified.');
+}
+
+/* Report: Waze-style radial menu */
+const RTYPES=[['🔥','Amazing'],['⏳','Long line'],['💸','Good deal'],['🛑','Sold out'],['📸','Photo'],['🆕','New spot']];
+function openRadial(id){
+  const target=id||S.sel||nearest().id;
+  const R=132,angles=[180,144,108,72,36,0];
+  $('#overlay').innerHTML=`<div class="radial" onclick="if(event.target===this)closeRadial()"><div class="hint"><h2>What’s happening?</h2><p style="margin:6px 0 0;font-weight:800;opacity:.9">at ${esc(getS(target).n)} ${getS(target).e}</p></div>
+   ${RTYPES.map(([e,l],i)=>{const a=angles[i]*Math.PI/180;const tx=Math.cos(a)*R,ty=-Math.sin(a)*R*1.25-70;return `<button class="rb" style="--tx:${tx.toFixed(1)}px;--ty:${ty.toFixed(1)}px;animation-delay:${i*35}ms" onclick="doReport('${target}','${e}','${l}')"><span>${e}</span>${l}</button>`}).join('')}</div>`;
+  document.querySelector('.tab.report')?.classList.add('open');
+}
+function closeRadial(){$('#overlay').innerHTML='';document.querySelector('.tab.report')?.classList.remove('open')}
+const nearest=()=>[...SPOTS].sort((a,b)=>miles(a)-miles(b))[0];
+function doReport(id,e,l){
+  closeRadial();const s=getS(id);
+  if(l==='New spot'){go('add');return}
+  if(l==='Photo'){toast('The camera opens here in the real app');award(5);return}
+  s.mood=e+' '+l;(REPORTS[id]=REPORTS[id]||[]).unshift([e,l,'you','just now',0]);
+  S.aiPicks=null;S.filter='all';
+  if(S.screen!=='spot'){S.screen='map';stack=[];S.sel=id;S.sheetH='peek';render();centerOn(s.x,s.y+40)}else render();
+  const m=$('#m-'+id);if(m)m.classList.add('pop');floatFrom(id,e);
+  burstEmoji=e;award(5,'Reported! Nearby foodies can see it');
+}
+
+/* Add a spot */
+function a_back(){if(S.add.step>1){S.add.step--;render()}else back()}
+function a_next(){
+  if(S.add.step===1){S.add.x=-addPan.x+addW()/2;S.add.y=-addPan.y+150}
+  if(S.add.step===2&&!S.add.name.trim()){toast('Give the spot a name');$('#aname').focus();return}
+  S.add.step++;render();
+}
+function a_photo(inp){const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{S.add.photo=r.result;render()};r.readAsDataURL(f)}
+function a_publish(){
+  const a=S.add;const id='new'+Date.now();const kmap={'Food truck':'truck','Cart':'cart','Small restaurant':'restaurant','Pop-up':'popup','Market stall':'popup'};
+  SPOTS.push({id,n:a.name.trim(),k:kmap[a.kind],e:cuisineEmoji(a.cuisine),side:['✨','📍','🍽️'],c:a.cuisine.toLowerCase(),x:a.x,y:a.y,p:a.price,r:5.0,rv:1,hood:'Near you',open:true,until:'late',mood:'🆕 Just added',hot:1,
+    col:['#ffe0cc','#ff9f80'],badges:['New on Lokal'],own:'the owner (not claimed yet)',vibe:['Brand new'],ai:'Just added by you. Reviews will show up here as people visit.',dishes:[['Ask what’s good',0,100]],busy:Array(16).fill(0)});
+  S.add={step:1,x:820,y:760,name:'',kind:'Food truck',cuisine:'Tacos',price:'$',chain:false,photo:null};
+  stack=[];S.screen='map';S.sel=id;S.filter='all';S.aiPicks=null;S.sheetH='half';render();const s=getS(id);centerOn(s.x,s.y+120);
+  S.points+=50;S.earned.add('First to Find');setTimeout(()=>celebrate('🕵️','First to find it!','Your spot is live on the map. People will see you found it first. +50 rep.',[cuisineEmoji(a.cuisine),'🎉','✨']),300);
+}
+
+
+/* ======================= Business mode (owner side of the same app) ======================= */
+const B={
+  claimed:false,claimSel:'smash',claimStep:1,live:false,liveSince:null,liveLoc:0,until:'11pm',status:null,soldOut:new Set(),
+  pushesLeft:2,replied:{},heatSlot:0,punch:true,scan:null,
+  menu:[['Classic smash',9,'🍔'],['Double smash',11,'🍔'],['Onion rings',5,'🧅'],['Fries',4,'🍟'],['Shake',6,'🥤']],
+  locs:[['Congress Ave & 2nd St','Downtown',780,690],['E 6th St & Waller','East Austin',1150,600],['Rainey St lot','Rainey',900,760],['S Congress & Elizabeth','South Congress',800,1240]],
+  sched:[['Mon',0,'5–11pm',true],['Tue',0,'5–11pm',true],['Wed',1,'5–11pm',true],['Thu',0,'5–11pm',true],['Fri',2,'6pm–1am',true],['Sat',3,'12–11pm',true],['Sun',0,'—',false]],
+  reviews:[
+    {id:'r1',who:0,stars:5,t:'Best smash burger on Congress. Crispy edges, fast service.',ago:'1 hr'},
+    {id:'r2',who:4,stars:3,t:'Burger was great but waited 25 minutes at 11pm.',ago:'3 hr'},
+    {id:'r3',who:2,stars:5,t:'Onion rings are elite. Please never change them.',ago:'Yesterday'},
+  ],
+};
+const HEAT=[ // [x,y,radius,intensity,label] for Now / 9pm / Late night
+  [[1180,600,170,1,'🔥 120 hungry · E 6th'],[900,760,140,.8,'84 looking · Rainey'],[780,690,110,.55,'52 · Downtown'],[800,1250,120,.45,'38 · SoCo']],
+  [[900,760,190,1,'🔥 160 hungry · Rainey'],[1180,600,150,.75,'96 · E 6th'],[780,690,100,.4,'31 · Downtown'],[640,1290,90,.3,'18 · S 1st']],
+  [[1180,600,200,1,'🔥 140 hungry · E 6th'],[900,760,130,.6,'60 · Rainey'],[780,690,80,.3,'22 · Downtown'],[800,1250,70,.25,'15 · SoCo']],
+];
+const HEATTIPS=['Burger searches near E 6th are up 40% right now. Parking there could bring about 2× your usual views.','Rainey St peaks around 9pm on Fridays. The Food truck rally is there tonight, so expect a crowd.','After 11pm most hungry people are on E 6th. Late-night spots get the most check-ins there.'];
+const WEEK=[['Mon',212],['Tue',248],['Wed',230],['Thu',301],['Fri',388],['Sat',412],['Sun',190]];
+
+function enterBiz(){closeRadial();if(!B.claimed){B.claimStep=1;stack=[['you',null]];S.screen='claim';render();return}S.biz=true;stack=[];S.screen='biz';render()}
+function leaveBiz(){sheet();S.biz=false;stack=[];S.screen='you';render();toast('Back to your personal account')}
+function acctSheet(){sheet(`<h2>Switch account</h2>
+  <button class="claimrow ${S.biz?'':'on'}" onclick="leaveBiz()"><span class="av" style="background:${AVBG[S.avatar]}">${AVATARS[S.avatar]}</span><span class="grow"><b>@you</b><br><span class="muted">Personal</span></span>${S.biz?'':'✓'}</button>
+  <button class="claimrow ${S.biz?'on':''}" onclick="sheet();enterBiz()">${art(getS('smash'),'40px','40px',22)}<span class="grow"><b>Smash Bros. Burgers<span class="verified">✓</span></b><br><span class="muted">Business · 2 trucks</span></span>${S.biz?'✓':''}</button>
+  <button class="claimrow" onclick="sheet();toast('Add another business (next version)')"><span class="av" style="background:var(--card2)">＋</span><span class="grow"><b>Add a business</b><br><span class="muted">Truck, cart, pop-up or small restaurant</span></span></button>`)}
+const bizHeader=title=>{const s=getS('smash');return `<div class="bizhdr"><button class="acct" onclick="acctSheet()">${art(s,'42px','42px',22)}<span class="grow"><b>Smash Bros. Burgers<span class="verified">✓</span></b><span class="bizpill">BUSINESS</span> <span class="muted">${title}</span></span><span class="muted">▾</span></button><button class="iconbtn" onclick="bizSettings()" aria-label="Business settings">⚙️</button></div>`};
+const liveFor=()=>{const m=Math.max(1,Math.round((Date.now()-B.liveSince)/60000));return m<60?m+' min':Math.floor(m/60)+'h '+(m%60)+'m'};
+const STATUSES=[['⏳','~15 min wait','⏳ ~15 min wait'],['⏰','Closing in 30 min','⏰ Closing in 30 min'],['🍟','Sold out of fries','🛑 Fries sold out'],['🌧️','Closed today','🌧️ Closed today']];
+
+Object.assign(SCR,{
+claim:()=>{const st=B.claimStep;
+ return `<div class="page"><div class="hdr"><button class="iconbtn" onclick="${st>1?'B.claimStep--;render()':'back()'}" aria-label="Back">‹</button><h2>Add your business</h2><span class="muted">${st}/2</span></div><div class="pad">
+  <div class="steps"><i class="on"></i><i class="${st>1?'on':''}"></i></div>
+  ${st===1?`<h1>Find your spot</h1><p class="muted" style="margin:-6px 0 0;font-size:14px">Your fans may have added it already. Claim it to take control.</p>
+   <input class="inp" placeholder="Search your business name" value="Smash" aria-label="Search business">
+   ${['smash','guera','jerk'].map(id=>{const s=getS(id);return `<button class="claimrow ${B.claimSel===id?'on':''}" onclick="B.claimSel='${id}';render()">${art(s,'52px','52px',28)}<span class="grow"><b>${esc(s.n)}</b><br><span class="muted">${kindLabel(s.k)} · ${s.hood} · ${s.rv} reviews</span></span>${B.claimSel===id?'✓':''}</button>`}).join('')}
+   <button class="claimrow" onclick="toast('Starts a new listing (next version)')"><span class="av" style="background:var(--card2)">＋</span><span class="grow"><b>Not listed?</b><br><span class="muted">Create your business from scratch</span></span></button>
+   <button class="btn tomato" onclick="B.claimStep=2;render()">This is mine</button>`
+  :`<h1>Quick check that it’s you</h1><p class="muted" style="margin:-6px 0 0;font-size:14px">We texted a code to (512) •••-••42, the number customers see on your truck.</p>
+   <div class="code">${[4,8,2,7,1,5].map((n,i)=>`<input inputmode="numeric" maxlength="1" value="${n}" aria-label="Digit ${i+1}">`).join('')}</div>
+   <label class="photo" for="vphoto" style="height:140px">${B.vphoto?`<img src="${B.vphoto}" alt="Your photo">`:'<span>📸<br>Add a photo of your truck or counter<br><span class="muted">Helps us verify faster</span></span>'}</label>
+   <input type="file" id="vphoto" accept="image/*" class="sr" onchange="readImg(this,d=>{B.vphoto=d;render()})">
+   <button class="btn tomato" onclick="verifyBiz()">Verify my business</button>
+   <p class="muted" style="text-align:center;margin:0">Free forever for the basics. No chains allowed.</p>`}
+ </div></div>`},
+
+biz:()=>{const s=getS('smash');const live=B.live;
+ return `<div class="page">${bizHeader('Today')}<div class="pad" style="padding-top:6px">
+  <div class="livecard ${live?'on':''}"><div class="row"><span class="bigdot"></span><div class="grow"><h2>${live?'You’re live':'You’re offline'}</h2>
+    <div class="muted" style="font-weight:800">${live?`${esc(B.locs[B.liveLoc][0])} · live for <span id="livefor">${liveFor()}</span> · until ${B.until}`:'Customers see your next stop: '+esc(B.locs[B.sched[3][1]][0])+', 5pm'}</div></div></div>
+   ${live?`<div class="qs">${STATUSES.map(([e,l],i)=>`<button class="${B.status===i?'on':''}" onclick="setStatus(${i})"><span style="font-size:18px">${e}</span>${l}</button>`).join('')}</div>
+    <button class="btn ghost sm" onclick="goOffline()">End service</button>`
+   :`<button class="golive-big" onclick="goLiveSheet()">📍 Go live now</button>`}</div>
+  <div class="hungry"><span style="font-size:30px">🍔</span><div class="grow"><b>48 people nearby searched for burgers in the last hour</b><div class="muted" style="font-weight:700">Most are around E 6th. <button class="link" style="color:var(--neon);font-weight:900" onclick="tab('where')">See the heatmap ›</button></div></div></div>
+  <div class="stat4">${[['412','views','+18%'],['86','check-ins','+9%'],['128','followers','+23'],['4.5','rating','★']].map(([n,l,d])=>`<div class="card"><b>${n}</b><small>${l}</small><br><em>${d}</em></div>`).join('')}</div>
+  <button class="btn ghost sm" onclick="go('insights')">📈 See all insights</button>
+  <div class="card"><div class="row"><h3 class="grow">💬 Needs a reply</h3><span class="muted">${B.reviews.filter(r=>!B.replied[r.id]).length} new</span></div>
+   ${B.reviews.map(r=>{const p=PEOPLE[r.who];return `<div class="rep"><span class="av" style="background:${p[2]}">${p[0]}</span><div class="grow"><div class="row" style="gap:6px"><b style="font-size:14px">${p[1]}</b><span class="stars" style="font-size:12px">${'★'.repeat(r.stars)}</span><span class="muted" style="margin-left:auto">${r.ago}</span></div>
+     <div style="font-size:14px;margin-top:2px">${esc(r.t)}</div>
+     ${B.replied[r.id]?`<div class="ownerreply">↳ You: ${esc(B.replied[r.id])}</div>`:`<div class="reply"><input id="rp-${r.id}" placeholder="Reply publicly…" aria-label="Reply"><button class="btn sm" style="width:auto;padding:0 12px" onclick="replyTo('${r.id}')">Reply</button></div>
+     <div class="row" style="margin-top:6px;gap:12px"><button class="link muted" style="font-weight:800" onclick="aiReply('${r.id}')">✨ Suggest a reply</button><button class="link muted" style="font-weight:800" onclick="toast('Sent to our team to review. Thanks!')">🚩 Report as fake</button></div>`}</div></div>`}).join('')}</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="row"><h3 class="grow">📣 Message your followers</h3><span class="badge mustard">${B.pushesLeft} of 3 left this week</span></div>
+   <input class="inp" id="push" value="Double smash is back on the menu tonight 🍔" aria-label="Message">
+   <button class="btn tomato" onclick="sendPush()" ${B.pushesLeft?'':'disabled'}>Send to 128 followers</button>
+   <p class="muted" style="margin:0">Followers within 2 miles get it as a notification. Others see it in their inbox.</p></div>
+ </div></div>`},
+
+where:()=>{const slots=['Now','9pm','Late night'];
+ return `<div class="page">${bizHeader('Where to park')}<div class="pad" style="padding-top:6px">
+  <div class="row"><h2 class="grow">Where people are hungry</h2></div>
+  <div class="seg">${slots.map((l,i)=>`<button class="chip ${B.heatSlot===i?'on':''}" onclick="B.heatSlot=${i};render()">${l}</button>`).join('')}</div>
+  <div class="heatwrap"><div class="mapwrap" id="mapwrap"><div class="world" id="world" style="--inv:${1/S.zoom}">${buildMap()}
+   ${HEAT[B.heatSlot].map(([x,y,r,v])=>`<span class="heat" style="left:${x}px;top:${y}px;width:${r*2}px;height:${r*2}px;background:radial-gradient(circle,rgba(255,45,111,${.75*v}) 0%,rgba(255,90,60,${.55*v}) 35%,rgba(255,204,51,${.3*v}) 60%,transparent 72%)"></span>`).join('')}
+   ${HEAT[B.heatSlot].map(([x,y,,,l])=>`<div class="anchor" style="left:${x}px;top:${y}px;z-index:9"><span class="heatlbl">${esc(l)}</span></div>`).join('')}
+   <div class="anchor" style="left:${getS('smash').x}px;top:${getS('smash').y}px;z-index:10"><span style="position:absolute;left:-18px;top:-18px;font-size:30px;filter:drop-shadow(0 0 10px #ffcc33)">🍔</span></div>
+  </div></div></div>
+  <div class="legend"><span>Fewer</span><i></i><span>More hungry people</span></div>
+  <div class="ai"><b>✨ Tip</b><br>${HEATTIPS[B.heatSlot]}
+   <button class="btn sm mint" style="margin-top:10px" onclick="goLiveSheet(${[1,2,1][B.heatSlot]})">Go live ${['near E 6th','at Rainey St','near E 6th'][B.heatSlot]}</button></div>
+  <div class="card"><div class="row"><h3 class="grow">🗓️ Your weekly stops</h3><span class="muted">Customers see this</span></div>
+   ${B.sched.map((d,i)=>`<div class="schedrow"><b>${d[0]}</b><select aria-label="${d[0]} location" onchange="B.sched[${i}][1]=+this.value" ${d[3]?'':'disabled'}>${B.locs.map((l,k)=>`<option value="${k}" ${k===d[1]?'selected':''}>${esc(l[0])}</option>`).join('')}</select><button class="tog ${d[3]?'on':''}" onclick="B.sched[${i}][3]=!B.sched[${i}][3];render()" aria-label="Open on ${d[0]}"><i></i></button></div>`).join('')}
+   <button class="btn sm ghost" style="margin-top:8px" onclick="toast('Schedule saved. Followers see your week.')">Save schedule</button></div>
+ </div></div>`},
+
+bmenu:()=>`<div class="page">${bizHeader('Menu')}<div class="pad" style="padding-top:6px">
+  <button class="card row" style="text-align:left;width:100%;background:linear-gradient(135deg,rgba(52,224,161,.18),rgba(74,168,255,.1))" onclick="go('scan')"><span style="font-size:32px">📸</span><span class="grow"><h3>Snap your menu board</h3><span class="muted">AI reads it and builds your menu in seconds</span></span><span>›</span></button>
+  <div class="card"><div class="row"><h3 class="grow">Today’s menu</h3><span class="muted">Sold out?</span></div>
+   ${B.menu.map((m,i)=>{const out=B.soldOut.has(m[0]);return `<div class="mitem ${out?'out':''}"><span class="av" style="background:var(--card2)">${m[2]}</span><span class="grow"><b>${esc(m[0])}</b><br><span class="muted">$${m[1]}${out?' · sold out today':''}</span></span><button class="tog red ${out?'on':''}" onclick="toggleOut(${i})" aria-label="${esc(m[0])} sold out"><i></i></button></div>`}).join('')}
+   <button class="btn sm ghost" style="margin-top:8px" onclick="addItem()">＋ Add an item</button></div>
+  <p class="muted" style="margin:0;text-align:center">Sold-out items show instantly on your spot page, so nobody comes for nothing.</p>
+ </div></div>`,
+
+scan:()=>{const sc=B.scan;
+ return `<div class="page"><div class="hdr"><button class="iconbtn" onclick="B.scan=null;back()" aria-label="Back">‹</button><h2>Snap your menu</h2></div><div class="pad">
+  ${!sc?`<p class="muted" style="margin:-6px 0 0;font-size:14px">Take a photo of your menu board. Try any photo, or use our sample board.</p>
+   <label class="photo" for="mphoto"><span>📸<br>Take or choose a photo</span></label><input type="file" id="mphoto" accept="image/*" class="sr" onchange="readImg(this,startScan)">
+   <button class="btn ghost" onclick="startScan(null)">Use the sample menu board</button>`
+  :`<div class="scanbox">${sc.img?`<img src="${sc.img}" alt="Your menu photo">`:`<div class="board"><span>CLASSIC SMASH <b>$9</b></span><span>DOUBLE SMASH <b>$11</b></span><span>BACON JAM SMASH <b>$12</b></span><span>ONION RINGS <b>$5</b></span><span>SHAKE (VAN/CHOC) <b>$6</b></span></div>`}${sc.done?'':'<div class="scanline"></div>'}</div>
+   ${sc.done?`<h3>✨ Found ${SCANNED.length} items</h3><div class="card">${SCANNED.map((f,i)=>`<label class="found" style="animation-delay:${i*80}ms"><input type="checkbox" checked data-f="${i}"><span style="font-size:20px">${f[2]}</span><span class="grow">${esc(f[0])}</span><span>$${f[1]}</span></label>`).join('')}</div>
+    <button class="btn tomato" onclick="importScan()">Add to my menu</button>`:'<p class="muted" style="text-align:center;margin:0;font-weight:800">Reading your menu…</p>'}`}
+ </div></div>`},
+
+promote:()=>{const s=getS('smash');
+ return `<div class="page">${bizHeader('Promote')}<div class="pad" style="padding-top:6px">
+  <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>⏳ Create a drop</h3><p class="muted" style="margin:-4px 0 0">Limited food, a start time and a countdown. Your followers see it first.</p>
+   <input class="inp" id="dname" value="Bacon jam smash, tonight only" aria-label="Drop name">
+   <div class="row"><select class="inp" id="dqty" aria-label="How many"><option>20</option><option selected>30</option><option>50</option></select><select class="inp" id="dtime" aria-label="Starts"><option value="20">In 20 min</option><option value="60" selected>In 1 hour</option><option value="180">In 3 hours</option></select></div>
+   <label class="row" style="font-weight:800;font-size:14px"><span class="grow">Followers only for the first 10 minutes</span><button type="button" class="tog on" onclick="this.classList.toggle('on')" aria-label="Followers only"><i></i></button></label>
+   <button class="btn tomato" onclick="createDrop()">Launch drop</button></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="row"><h3 class="grow">🎟️ Punch card</h3><button class="tog ${B.punch?'on':''}" onclick="B.punch=!B.punch;render()" aria-label="Punch card on"><i></i></button></div>
+   <p style="margin:0;font-size:14px">Buy 9 burgers, get the 10th free. Stamps come from check-ins.</p>
+   <div class="row" style="gap:6px">${Array.from({length:10},(_,i)=>`<span style="flex:1;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:14px;background:${i<6?'var(--neon)':'var(--card2)'};${i===9?'border:2px dashed var(--neon)':''}">${i<6?'🍔':i===9?'🎁':''}</span>`).join('')}</div>
+   <p class="muted" style="margin:0">41 customers are collecting stamps · 7 free burgers earned this month</p></div>
+  <div class="poster"><div class="qr" aria-label="Sample QR code">${qrCells()}</div><div class="grow"><h2 style="color:#fff">Follow us on Lokal</h2><p style="margin:6px 0 10px;opacity:.85;font-size:13px">Print it for your window. Scans turn into followers.</p><button class="btn sm" style="background:#fff;color:#16172b" onclick="toast('Poster saved to your photos')">Save poster</button></div></div>
+  <div class="card row"><span style="font-size:28px">🔗</span><div class="grow"><h3>Link-in-bio page</h3><div class="muted">lokal.example/smashbros · menu, today’s stop, drops</div></div><button class="btn sm ghost" style="width:auto;padding:0 12px" onclick="copyLink('smash')">Copy</button></div>
+  <div class="pro"><div class="row"><span style="font-size:26px">⚡</span><h2 class="grow">Lokal Pro</h2><span class="badge">$19/mo</span></div>
+   <ul><li>Live hungry-people heatmap</li><li>Unlimited drops and 10 messages a week</li><li>Punch cards and deeper insights</li><li>Featured on the map during your hours</li></ul>
+   <button class="btn" onclick="toast('Free trial starts in the real app')">Try free for 30 days</button><p class="muted" style="margin:0;font-size:12px">Price shown is an example for this mockup.</p></div>
+ </div></div>`},
+
+insights:()=>{const s=getS('smash');
+ return `<div class="page"><div class="hdr"><button class="iconbtn" onclick="back()" aria-label="Back">‹</button><h2>Insights</h2><span class="muted">Last 7 days</span></div><div class="pad">
+  <div class="card chart"><div class="row"><h3 class="grow">Map views per day</h3><span class="badge mint">+18% vs last week</span></div>
+   <div class="bars7" id="bars7" style="margin-top:10px">${WEEK.map((d,i)=>`<button class="${i===5?'now':''}" style="height:${d[1]/412*100}%" aria-label="${d[0]}: ${d[1]} views" onpointerenter="weekTip(${i})" onclick="weekTip(${i})"></button>`).join('')}</div>
+   <div class="axis">${WEEK.map(d=>`<span>${d[0]}</span>`).join('')}</div><div id="tip7"></div></div>
+  <div class="ai"><b>✨ What customers say</b><br>People love the crispy edges and the onion rings. The main complaint is the wait after 10pm on weekends; a second grill or a "~15 min wait" status would help.</div>
+  <div class="card"><h3 style="margin-bottom:6px">Where your viewers are</h3>${[['Downtown',41],['E 6th',27],['Rainey',18],['South Congress',14]].map(h=>`<div class="hbar hood"><span>${h[0]}</span><span class="tr"><i style="width:${h[1]*2}%"></i></span><span class="muted">${h[1]}%</span></div>`).join('')}</div>
+  <div class="card"><h3 style="margin-bottom:6px">Most mentioned dishes</h3>${[['🧅 Onion rings',64],['🍔 Double smash',58],['🥤 Shake',22],['🍟 Fries',12]].map(h=>`<div class="hbar"><span>${h[0]}</span><span class="tr"><i style="width:${h[1]}%"></i></span><span class="muted">${h[1]}</span></div>`).join('')}</div>
+  <div class="card chart"><h3>Busy hours</h3><div class="bars" style="margin-top:8px">${s.busy.map((v,i)=>`<button class="${i===13?'now':''}" style="height:${Math.max(4,v*9)}px" aria-label="${hourLbl(i)}"></button>`).join('')}</div><div class="axis"><span>8a</span><span>12p</span><span>4p</span><span>8p</span><span>11p</span></div></div>
+ </div></div>`},
+});
+
+const SCANNED=[['Classic smash',9,'🍔'],['Double smash',11,'🍔'],['Bacon jam smash',12,'🥓'],['Onion rings',5,'🧅'],['Shake (vanilla or chocolate)',6,'🥤']];
+function readImg(inp,cb){const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(f)}
+function verifyBiz(){B.claimed=true;S.biz=true;stack=[];S.screen='biz';render();celebrate('✅','You’re verified!','Smash Bros. Burgers now shows a blue check. Go live whenever you’re ready.',['🍔','✅','✨'])}
+function goLiveSheet(pre){if(pre!=null)B.liveLoc=pre;
+  sheet(`<h2>Where are you serving?</h2>
+   ${B.locs.map((l,i)=>`<button class="locopt ${B.liveLoc===i?'on':''}" onclick="B.liveLoc=${i};goLiveSheet()"><span style="font-size:22px">${i===0?'📍':'🅿️'}</span><span class="grow"><b>${esc(l[0])}</b><br><span class="muted">${i===0?'Your current location':'Saved stop · '+l[1]}</span></span>${B.liveLoc===i?'✓':''}</button>`).join('')}
+   <div><p class="muted" style="margin:0 0 8px;font-weight:900">Serving until</p><div class="seg">${['9pm','10pm','11pm','1am','Sold out'].map(u=>`<button class="chip ${B.until===u?'on':''}" onclick="B.until='${u}';goLiveSheet()">${u}</button>`).join('')}</div></div>
+   <button class="golive-big" onclick="goLive()">📍 Go live here</button>
+   <p class="muted" style="text-align:center;margin:0">128 followers get a ping. You appear on the map right away.</p>`)}
+function goLive(){sheet();const l=B.locs[B.liveLoc];const s=getS('smash');B.live=true;B.liveSince=Date.now();B.status=null;S.ownerHere=true;
+  s.x=l[2];s.y=l[3];s.hood=l[1];s.open=true;s.until=B.until;s.mood='🚚 Just parked';s.hot=1;
+  S.notes.unshift({e:'🍔',bg:'#ffe7b0',t:`Smash Bros. Burgers just went live at ${l[0]}`,d:'Just now',go:'smash',u:1});
+  S.screen='biz';stack=[];render();celebrate('🚚','You’re live!',`You're on the map at ${l[0]}. 128 followers were notified.`,['🍔','🚚','✨'])}
+function goOffline(){B.live=false;const s=getS('smash');s.open=false;s.until='tomorrow 5pm';s.mood='';s.hot=0;render();toast('Service ended. See you tomorrow!')}
+function setStatus(i){B.status=B.status===i?null:i;const s=getS('smash');s.mood=B.status==null?'🚚 Just parked':STATUSES[i][2];
+  if(i===2){B.soldOut.add('Fries')}if(i===3&&B.status===3){s.open=false}else s.open=true;render();toast(B.status==null?'Status cleared':'Customers see: '+STATUSES[i][2])}
+function toggleOut(i){const n=B.menu[i][0];B.soldOut.has(n)?B.soldOut.delete(n):B.soldOut.add(n);render();toast(B.soldOut.has(n)?`${n} marked sold out`:`${n} is back`)}
+function addItem(){B.menu.push(['Chili cheese fries',7,'🌶️']);render();toast('Item added. Edit details in the real app.')}
+function startScan(img){B.scan={img,done:false};if(S.screen!=='scan')go('scan');else render();setTimeout(()=>{if(B.scan){B.scan.done=true;render()}},2200)}
+function importScan(){const picked=[...document.querySelectorAll('[data-f]')].filter(c=>c.checked).map(c=>SCANNED[+c.dataset.f]);
+  picked.forEach(p=>{if(!B.menu.some(m=>m[0]===p[0]))B.menu.push(p)});B.scan=null;stack=[];S.screen='bmenu';render();burstEmoji='📸';award(0,`${picked.length} items added to your menu`)}
+function replyTo(id,txt){const v=(txt||$('#rp-'+id).value).trim();if(!v){toast('Write a reply first');return}B.replied[id]=v;render();toast('Reply posted publicly')}
+function aiReply(id){const r=B.reviews.find(x=>x.id===id);const sug=r.stars>=5?'Thank you! The onion rings aren’t going anywhere. See you soon 🍔':'Thanks for the honest feedback. We’re adding a second grill on weekends to cut the late-night wait.';const i=$('#rp-'+id);if(i){i.value=sug;i.focus()}}
+function sendPush(){const v=$('#push').value.trim();if(!v||!B.pushesLeft)return;B.pushesLeft--;S.notes.unshift({e:'🍔',bg:'#ffe7b0',t:'Smash Bros.: '+v,d:'Just now',go:'smash',u:1});render();burstEmoji='📣';award(0,'Sent to 128 followers')}
+function createDrop(){const name=$('#dname').value.trim()||'Special drop';const qty=+$('#dqty').value;const mins=+$('#dtime').value;
+  DROPS.unshift({id:'smash',t:name,d:'From Smash Bros. Burgers. Followers get first dibs.',at:Date.now()+mins*60e3,left:qty,of:qty});
+  S.notes.unshift({e:'⏳',bg:'#ffe3d1',t:`New drop: ${name}`,d:'Just now',go:'drops',u:1});
+  burstEmoji='⏳';award(0,'Drop launched. It’s live in the Drops tab.');}
+function bizSettings(){sheet(`<h2>Business settings</h2>
+  <div class="card"><h3 style="margin-bottom:6px">🚚 Trucks</h3>${[['Smash Bros. #1','Live today'],['Smash Bros. #2','Offline']].map(t=>`<div class="mitem"><span class="av" style="background:var(--card2)">🚚</span><span class="grow"><b>${t[0]}</b><br><span class="muted">${t[1]}</span></span></div>`).join('')}<button class="btn sm ghost" style="margin-top:8px" onclick="toast('Add a truck (next version)')">＋ Add a truck</button></div>
+  <div class="card"><h3 style="margin-bottom:6px">👥 Team</h3>${[['🧑‍🍳','Leo','Owner'],['👨‍🍳','Sam','Manager · can go live and edit the menu']].map(t=>`<div class="mitem"><span class="av" style="background:var(--card2)">${t[0]}</span><span class="grow"><b>${t[1]}</b><br><span class="muted">${t[2]}</span></span></div>`).join('')}<button class="btn sm ghost" style="margin-top:8px" onclick="toast('Invite sent')">＋ Invite a teammate</button></div>
+  <button class="btn ghost" onclick="leaveBiz()">Switch to personal account</button>`)}
+function weekTip(i){const b=$('#bars7').children[i];$('#bars7').querySelectorAll('.peek').forEach(x=>x.classList.remove('peek'));b.classList.add('peek');
+  $('#tip7').innerHTML=`<div class="tip" style="left:${b.offsetLeft+b.offsetWidth/2+14}px;top:${b.offsetTop+44}px">${WEEK[i][0]}: ${WEEK[i][1]} views</div>`}
+function qrCells(){const r=rng(7);let h='';for(let y=0;y<21;y++)for(let x=0;x<21;x++){const f=(a,b)=>x>=a&&x<a+7&&y>=b&&y<b+7;const inF=f(0,0)||f(14,0)||f(0,14);
+  let k;if(inF){const lx=x%14%7,ly=y%14%7;k=(lx===0||lx===6||ly===0||ly===6||(lx>=2&&lx<=4&&ly>=2&&ly<=4))}else k=r()>.52;h+=`<i class="${k?'k':''}"></i>`}return h}
+setInterval(()=>{const e=$('#livefor');if(e&&B.live)e.textContent=liveFor()},15000);
+
+/* ======================= Navigation and rendering ======================= */
+const TABS=[['map','🗺️','Map'],['drops','⏳','Drops'],['report','',''],['ai','✨','Ask'],['you','😋','You']];
+const BTABS=[['biz','🏠','Today'],['where','📍','Where'],['golive','',''],['bmenu','🍽️','Menu'],['promote','📣','Promote']];
+function go(screen,param,replace){if(!replace)stack.push([S.screen,S.param]);S.screen=screen;S.param=param??null;render()}
+function back(){const p=stack.pop()||['map',null];S.screen=p[0];S.param=p[1];render()}
+function tab(t){if(t==='report'){openRadial();return}if(t==='golive'){if(B.live){stack=[];S.screen='biz';render()}else goLiveSheet();return}closeRadial();stack=[];S.screen=t;S.param=null;render();if(t==='ai')scrollChat()}
+function render(){
+  const v=$('#view');v.innerHTML=SCR[S.screen](S.param);
+  $('#phone').classList.toggle('day',!S.night);
+  const noTabs=['splash','onboard'].includes(S.screen);const tb=$('#tabbar');tb.hidden=noTabs;
+  const cur={map:'map',spot:'map',share:'map',inbox:'map',add:'map',drops:'drops',ai:'ai',you:'you',owner:'you',wrapped:'you',claim:'you',biz:'biz',insights:'biz',where:'where',bmenu:'bmenu',scan:'bmenu',promote:'promote'}[S.screen];
+  if(!noTabs&&S.biz)tb.innerHTML=BTABS.map(([k,e,l])=>k==='golive'?`<button class="tab golive ${B.live?'is-live':''}" onclick="tab('golive')" aria-label="${B.live?'You are live':'Go live'}"><span class="big">${B.live?'●':'📍'}</span>${B.live?'Live':'Go live'}</button>`
+    :`<button class="tab ${k===cur?'on':''}" onclick="tab('${k}')"><span class="e">${e}</span>${l}</button>`).join('');
+  else if(!noTabs)tb.innerHTML=TABS.map(([k,e,l])=>k==='report'?`<button class="tab report" onclick="tab('report')" aria-label="Report"><span class="big">⚡</span></button>`
+    :`<button class="tab ${k===cur?'on':''}" onclick="tab('${k}')"><span class="e">${k==='you'?AVATARS[S.avatar]:e}</span>${l}</button>`).join('');
+  document.querySelectorAll('#jump button').forEach(b=>b.classList.toggle('on',b.dataset.k===S.screen));
+  if(S.screen==='map'){if(S.zoom<.9)S.zoom=1;bindMap();bindSheet();runTicker()}
+  if(S.screen==='where'){S.zoom=.62;bindMap();requestAnimationFrame(()=>centerOn(...[[1040,700],[960,740],[1040,680]][B.heatSlot]))}
+  if(S.screen==='add'&&S.add.step===1)bindAddMap();
+  if(S.screen==='splash')setTimeout(()=>{if(S.screen==='splash')go('onboard',null,true)},2200);
+}
+
+/* ======================= Map: pan, zoom, foodies ======================= */
+let dragMoved=false;
+function applyView(){const w=$('#world');if(!w)return;clamp();w.style.transform=`translate(${S.pan.x}px,${S.pan.y}px) scale(${S.zoom})`;w.style.setProperty('--inv',1/S.zoom);w.classList.toggle('labels',S.zoom>1.15)}
+function clamp(){const m=$('#mapwrap');if(!m)return;const W=m.clientWidth,H=m.clientHeight;S.pan.x=Math.min(0,Math.max(W-1400*S.zoom,S.pan.x));S.pan.y=Math.min(0,Math.max(H-1800*S.zoom,S.pan.y))}
+function centerOn(x,y){const m=$('#mapwrap');if(!m)return;const w=$('#world');w.style.transition='transform .45s cubic-bezier(.2,.8,.2,1)';
+  S.pan.x=m.clientWidth/2-x*S.zoom;S.pan.y=m.clientHeight/2-y*S.zoom;applyView();setTimeout(()=>{if(w)w.style.transition=''},460)}
+function zoomAt(f,cx,cy){const nz=Math.min(2,Math.max(.55,S.zoom*f));const k=nz/S.zoom;S.pan.x=cx-(cx-S.pan.x)*k;S.pan.y=cy-(cy-S.pan.y)*k;S.zoom=nz;applyView()}
+function zoomBy(f){const m=$('#mapwrap');const w=$('#world');w.style.transition='transform .3s';zoomAt(f,m.clientWidth/2,m.clientHeight/2);setTimeout(()=>w.style.transition='',310)}
+function recenter(){S.zoom=1.2;centerOn(ME.x,ME.y+60);toast('📍 You’re in Downtown Austin')}
+function fitTo(list){S.zoom=1;setTimeout(()=>{const xs=list.map(s=>s.x),ys=list.map(s=>s.y);centerOn((Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2+80)},30)}
+function bindMap(){
+  applyView();const wrap=$('#mapwrap');const pts=new Map();let start=null,pinch=null;
+  wrap.onpointerdown=e=>{pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===1){start={x:e.clientX,y:e.clientY,px:S.pan.x,py:S.pan.y};dragMoved=false}
+    else if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),z:S.zoom};dragMoved=true}};
+  wrap.onpointermove=e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&pts.size===2){const [a,b]=[...pts.values()];const r=wrap.getBoundingClientRect();const d=Math.hypot(a.x-b.x,a.y-b.y);zoomAt(pinch.z*d/pinch.d/S.zoom,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top);return}
+    if(!start)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;
+    if(!dragMoved&&Math.hypot(dx,dy)>6){dragMoved=true;$('#world').classList.add('drag')}
+    if(dragMoved){S.pan.x=start.px+dx;S.pan.y=start.py+dy;applyView()}};
+  const end=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size){start=null;$('#world')?.classList.remove('drag');setTimeout(()=>dragMoved=false,0)}};
+  wrap.onpointerup=end;wrap.onpointercancel=end;wrap.onpointerleave=end;
+  wrap.onwheel=e=>{e.preventDefault();const r=wrap.getBoundingClientRect();zoomAt(e.deltaY<0?1.1:.9,e.clientX-r.left,e.clientY-r.top)};
+}
+/* Draggable bottom sheet with three heights */
+function sheetPx(k){const v=$('#view').clientHeight;return{peek:Math.round(v*.3),half:Math.round(v*.55),full:v-70}[k]}
+function bindSheet(){
+  const sh=$('#bsheet'),g=$('#bgrab');sh.style.height=sheetPx(S.sheetH)+'px';$('#rail').style.bottom=(sheetPx(S.sheetH)+12)+'px';
+  let y0=null,h0=0;
+  g.onpointerdown=e=>{y0=e.clientY;h0=sh.clientHeight;sh.classList.add('dragging');g.setPointerCapture(e.pointerId)};
+  g.onpointermove=e=>{if(y0==null)return;const h=Math.max(90,Math.min(sheetPx('full'),h0-(e.clientY-y0)));sh.style.height=h+'px';$('#rail').style.bottom=(h+12)+'px'};
+  g.onpointerup=e=>{if(y0==null)return;const moved=Math.abs(e.clientY-y0)>5;const h=sh.clientHeight;sh.classList.remove('dragging');y0=null;
+    if(!moved){S.sheetH=S.sheetH==='peek'?'half':S.sheetH==='half'?'full':'peek'}
+    else{S.sheetH=['peek','half','full'].reduce((b,k)=>Math.abs(sheetPx(k)-h)<Math.abs(sheetPx(b)-h)?k:b,'peek')}
+    sh.style.height=sheetPx(S.sheetH)+'px';$('#rail').style.bottom=(sheetPx(S.sheetH)+12)+'px'};
+}
+/* Live activity ticker */
+let tickI=0,tickTimer;
+function runTicker(){clearInterval(tickTimer);const show=()=>{const t=$('#ticker');if(!t)return;const [p,txt]=TICKS[tickI%TICKS.length];
+  t.classList.remove('slide');void t.offsetWidth;t.classList.add('slide');t.innerHTML=`<span class="av" style="background:${PEOPLE[p][2]}">${PEOPLE[p][0]}</span><span class="txt"><b>${PEOPLE[p][1]}</b> ${esc(txt)}</span>`;tickI++};
+  show();tickTimer=setInterval(show,3600)}
+/* Foodies wander and the burger truck drives between stops */
+setInterval(()=>{if(S.screen!=='map')return;FOODIES.forEach((f,i)=>{f.x+=(Math.random()-.5)*36;f.y+=(Math.random()-.5)*36;const a=$('#f-'+i);if(a){a.style.transition='left 2.4s ease-in-out, top 2.4s ease-in-out';a.style.left=f.x+'px';a.style.top=f.y+'px'}})},2500);
+const ROUTE=[[780,690],[880,640],[990,600],[1150,600]];let leg=0,dir=1;
+setInterval(()=>{if(S.ownerHere)return;const s=getS('smash');leg+=dir;if(leg===ROUTE.length-1||leg===0)dir*=-1;[s.x,s.y]=ROUTE[leg];
+  s.mood=(leg===0||leg===ROUTE.length-1)?'🚚 Just parked':'🚚 On the move';const a=$('#a-smash');
+  if(a&&S.screen==='map'){a.style.transition='left 1.8s ease-in-out, top 1.8s ease-in-out';a.style.left=s.x+'px';a.style.top=s.y+'px';const m=$('#m-smash');if(m)m.textContent=s.mood}},4500);
+/* Add-a-spot mini map */
+let addPan={x:-500,y:-600};const addW=()=>$('#addwrap')?.clientWidth||340;
+function bindAddMap(){const wrap=$('#addwrap'),w=$('#aworld');const set=()=>{addPan.x=Math.min(0,Math.max(wrap.clientWidth-1400,addPan.x));addPan.y=Math.min(0,Math.max(wrap.clientHeight-1800,addPan.y));w.style.transform=`translate(${addPan.x}px,${addPan.y}px)`};
+  addPan={x:wrap.clientWidth/2-ME.x,y:150-ME.y-40};set();let st=null;
+  wrap.onpointerdown=e=>{st={x:e.clientX,y:e.clientY,px:addPan.x,py:addPan.y};wrap.setPointerCapture(e.pointerId)};
+  wrap.onpointermove=e=>{if(!st)return;addPan.x=st.px+e.clientX-st.x;addPan.y=st.py+e.clientY-st.y;set()};
+  wrap.onpointerup=()=>st=null;}
+
+/* ======================= Screen jumper (desktop) ======================= */
+const JUMP=[['splash','🚀 Splash'],['onboard','🍽️ Cravings'],['map','🗺️ Live map'],['spot','🌮 Spot page'],['report','⚡ Report'],['add','➕ Add a spot'],['ai','✨ Ask AI'],['inbox','🔔 Inbox'],['drops','⏳ Drops'],['you','😋 You'],['wrapped','🎁 Week in food'],['share','📤 Share card'],['claim','🏪 Claim business'],['biz','🏠 Biz: Today'],['where','📍 Biz: Heatmap'],['bmenu','🍽️ Biz: Menu'],['scan','📸 Biz: Snap menu'],['promote','📣 Biz: Promote'],['insights','📈 Biz: Insights']];
+$('#jump').innerHTML=JUMP.map(([k,l])=>`<button data-k="${k}" onclick="jumpTo('${k}')">${l}</button>`).join('');
+function jumpTo(k){sheet();modal();closeRadial();
+  const BIZ=['biz','where','bmenu','scan','promote','insights'];
+  if(k==='claim'){S.biz=false;B.claimed=false;B.claimStep=1;stack=[['you',null]];S.screen='claim';render();return}
+  if(BIZ.includes(k)){B.claimed=true;S.biz=true;B.scan=null;stack=k==='insights'||k==='scan'?[[k==='scan'?'bmenu':'biz',null]]:[];S.screen=k;S.param=null;render();return}
+  S.biz=false;
+  if(k==='report'){if(S.screen!=='map')startMap();setTimeout(()=>openRadial('guera'),80);return}
+  if(k==='map'){S.sel=null;startMap();return}
+  if(k==='spot'||k==='share'){stack=[['map',null]];S.screen=k;S.param='guera';render();return}
+  if(k==='add'){stack=[['map',null]];S.add.step=1;S.screen='add';S.param=null;render();return}
+  if(['owner','inbox','wrapped'].includes(k)){stack=[[k==='inbox'?'map':'you',null]];S.screen=k;S.param=null;render();return}
+  if(['splash','onboard'].includes(k)){stack=[];S.screen=k;render();return}
+  tab(k);
+}
+window.addEventListener('resize',()=>{if(S.screen==='map'){applyView();bindSheet()}});
+render();
+</script>
