@@ -12,8 +12,7 @@ export default function Home() {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.title}>qave-app</Text>
-      <Text style={styles.body}>{'Live updates are on. The real screens come next.'}</Text>
+      <Text style={styles.title}>Hello world</Text>
       <Text style={styles.version}>{version}</Text>
     </View>
   );
@@ -32,11 +31,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 28,
     fontWeight: '700',
-  },
-  body: {
-    color: '#a7b0cf',
-    fontSize: 15,
-    textAlign: 'center',
   },
   version: {
     color: '#5d6690',
