@@ -13,29 +13,32 @@
 <style>
 body{margin:0}
 a{color:#ffcc33}a:hover{color:#ffe08a}
-@keyframes s2Pop{0%{transform:scale(0) rotate(-18deg)}8%{transform:scale(1.14) rotate(4deg)}12%,100%{transform:scale(1) rotate(0)}}
-@keyframes s2T1{0%,17%{transform:scale(0)}19%,100%{transform:scale(1)}}
-@keyframes s2T2{0%,19%{transform:scale(0)}21%,100%{transform:scale(1)}}
-@keyframes s2T3{0%,21%{transform:scale(0)}23%,100%{transform:scale(1)}}
-@keyframes s2Shake{0%,18%{transform:translateX(0)}19%{transform:translateX(-5px)}21%{transform:translateX(5px)}23%{transform:translateX(-4px)}25%,100%{transform:translateX(0)}}
-@keyframes s2Crumb{0%,19%{opacity:0;transform:translate(0,0) scale(1)}21%{opacity:1}36%,100%{opacity:0;transform:translate(var(--cx),var(--cy)) scale(.5)}}
-@keyframes s2Glow{0%,22%{opacity:0}30%{opacity:1}100%{opacity:.75}}
-@keyframes s2Word{0%,26%{opacity:0;transform:translateY(22px)}38%,100%{opacity:1;transform:translateY(0)}}
-@keyframes s2Tag{0%,36%{opacity:0}47%,100%{opacity:1}}
-.s2-pop{animation:s2Pop 3.4s cubic-bezier(.3,1.4,.5,1) infinite}
-.s2-shake{animation:s2Shake 3.4s ease-out infinite}
+@keyframes s2Scene{0%{opacity:0}4%,90%{opacity:1}100%{opacity:0}}
+@keyframes s2Pop{0%{transform:scale(.2) translateY(30px);opacity:0;animation-timing-function:cubic-bezier(.2,.9,.3,1.15)}12%{transform:scale(1) translateY(0);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+@keyframes s2T1{0%,16%{transform:scale(0);animation-timing-function:cubic-bezier(.25,.8,.25,1)}22%,100%{transform:scale(1)}}
+@keyframes s2T2{0%,17.5%{transform:scale(0);animation-timing-function:cubic-bezier(.25,.8,.25,1)}23.5%,100%{transform:scale(1)}}
+@keyframes s2T3{0%,19%{transform:scale(0);animation-timing-function:cubic-bezier(.25,.8,.25,1)}25%,100%{transform:scale(1)}}
+@keyframes s2Recoil{0%,16%{transform:rotate(0) translate(0,0);animation-timing-function:cubic-bezier(.3,.7,.4,1)}22%{transform:rotate(-5deg) translate(-4px,2px);animation-timing-function:cubic-bezier(.4,0,.2,1)}32%,100%{transform:rotate(0) translate(0,0)}}
+@keyframes s2Crumb{0%,20%{opacity:0;transform:translate(0,0) scale(1);animation-timing-function:cubic-bezier(.2,.7,.3,1)}23%{opacity:1}30%{transform:translate(var(--cx),var(--cy)) scale(.9);animation-timing-function:cubic-bezier(.5,0,.8,.4)}42%,100%{opacity:0;transform:translate(calc(var(--cx) * 1.25),calc(var(--cy) + 70px)) scale(.6)}}
+@keyframes s2Glow{0%,18%{opacity:0;animation-timing-function:ease-out}34%,100%{opacity:.85}}
+@keyframes s2Word{0%,27%{opacity:0;transform:translateY(18px);animation-timing-function:cubic-bezier(.2,.8,.2,1)}40%,100%{opacity:1;transform:translateY(0)}}
+@keyframes s2Tag{0%,37%{opacity:0;transform:translateY(8px);animation-timing-function:cubic-bezier(.2,.8,.2,1)}49%,100%{opacity:1;transform:translateY(0)}}
+.s2-scene{animation:s2Scene 3.6s linear infinite}
+.s2-pop{animation:s2Pop 3.6s infinite}
+.s2-shake{transform-origin:50% 85%;animation:s2Recoil 3.6s infinite}
 .s2-t1,.s2-t2,.s2-t3{transform-box:fill-box;transform-origin:center}
-.s2-t1{animation:s2T1 3.4s cubic-bezier(.3,1.6,.5,1) infinite}
-.s2-t2{animation:s2T2 3.4s cubic-bezier(.3,1.6,.5,1) infinite}
-.s2-t3{animation:s2T3 3.4s cubic-bezier(.3,1.6,.5,1) infinite}
-.s2-crumb{animation:s2Crumb 3.4s ease-out infinite}
-.s2-glow{animation:s2Glow 3.4s ease-out infinite}
-.s2-word{animation:s2Word 3.4s ease-out infinite}
-.s2-tag{animation:s2Tag 3.4s ease-out infinite}
-@media (prefers-reduced-motion:reduce){.s2-pop,.s2-shake,.s2-t1,.s2-t2,.s2-t3,.s2-crumb,.s2-glow,.s2-word,.s2-tag{animation:none}.s2-crumb{opacity:0}}
+.s2-t1{animation:s2T1 3.6s infinite}
+.s2-t2{animation:s2T2 3.6s infinite}
+.s2-t3{animation:s2T3 3.6s infinite}
+.s2-crumb{animation:s2Crumb 3.6s infinite}
+.s2-glow{animation:s2Glow 3.6s infinite}
+.s2-word{animation:s2Word 3.6s infinite}
+.s2-tag{animation:s2Tag 3.6s infinite}
+@media (prefers-reduced-motion:reduce){.s2-scene,.s2-pop,.s2-shake,.s2-t1,.s2-t2,.s2-t3,.s2-crumb,.s2-glow,.s2-word,.s2-tag{animation:none}.s2-crumb{opacity:0}}
 </style>
 </helmet>
 <div style="width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; background: #0b0c18; color: #f5f2ff; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;">
+  <div class="s2-scene" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;">
   <div class="s2-glow" aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(60% 34% at 50% 42%, rgba(255,120,50,0.32), transparent 70%);"></div>
   <div class="s2-shake" style="position: relative;">
     <div class="s2-pop" style="transform-origin: 50% 92%;">
@@ -54,13 +57,14 @@ a{color:#ffcc33}a:hover{color:#ffe08a}
         <circle cx="46" cy="56" r="12" fill="#0b0c18"></circle>
       </svg>
     </div>
-    <span class="s2-crumb" style="--cx: 44px; --cy: -46px; position: absolute; right: 16px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: #ffcc33;"></span>
-    <span class="s2-crumb" style="--cx: 62px; --cy: -6px; position: absolute; right: 4px; top: 34px; width: 7px; height: 7px; border-radius: 50%; background: #ff7a45;"></span>
-    <span class="s2-crumb" style="--cx: 26px; --cy: -68px; position: absolute; right: 30px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #ffd65c;"></span>
-    <span class="s2-crumb" style="--cx: 58px; --cy: 26px; position: absolute; right: 2px; top: 50px; width: 6px; height: 6px; border-radius: 50%; background: #ff2d6f;"></span>
+    <span class="s2-crumb" style="--cx: 40px; --cy: -38px; position: absolute; right: 16px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: #ffcc33;"></span>
+    <span class="s2-crumb" style="--cx: 56px; --cy: -16px; position: absolute; right: 4px; top: 34px; width: 7px; height: 7px; border-radius: 50%; background: #ff7a45;"></span>
+    <span class="s2-crumb" style="--cx: 22px; --cy: -52px; position: absolute; right: 30px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #ffd65c;"></span>
+    <span class="s2-crumb" style="--cx: 50px; --cy: 4px; position: absolute; right: 2px; top: 50px; width: 6px; height: 6px; border-radius: 50%; background: #ff2d6f;"></span>
   </div>
   <span class="s2-word" style="position: relative; font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 54px; letter-spacing: -0.04em; line-height: 1;">Lokal</span>
   <p class="s2-tag" style="position: relative; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: #ffcc33;">Only local. No chains.</p>
+  </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
