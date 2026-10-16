@@ -22,7 +22,9 @@ npx expo export --platform web --output-dir "$OUT" >/dev/null
 mkdir -p "$OUT/app"
 SCRIPTS=""
 for f in $(grep -o '/_expo/static/js/web/[^"]*\.js' "$OUT/index.html"); do
-  cp "$OUT$f" "$OUT/app/"; SCRIPTS="$SCRIPTS app/$(basename "$f")"
+  # Asset URLs in the bundle are absolute ("/assets/..."); make them relative to the preview page.
+  sed 's#"/assets/#(window.__LK_BASE||"/")+"assets/#g' "$OUT$f" > "$OUT/app/$(basename "$f")"
+  SCRIPTS="$SCRIPTS app/$(basename "$f")"
 done
 {
   echo '<title>App Preview</title>'
@@ -31,6 +33,6 @@ done
   # Resolve script URLs first, then reset the path so the router opens on the home screen.
   printf '<script>(function(){var base=location.href;var srcs=%s;' "$(printf '%s
 ' $SCRIPTS | python3 -I -c 'import json,sys;print(json.dumps(sys.stdin.read().split()))')"
-  echo 'var urls=srcs.map(function(s){return new URL(s,base).href});try{if(location.pathname!=="/")history.replaceState(null,"","/")}catch(e){}urls.forEach(function(u){var el=document.createElement("script");el.src=u;el.async=false;document.body.appendChild(el)})})()</script>'
+  echo 'window.__LK_BASE=new URL(".",base).href;var urls=srcs.map(function(s){return new URL(s,base).href});try{if(location.pathname!=="/")history.replaceState(null,"","/")}catch(e){}urls.forEach(function(u){var el=document.createElement("script");el.src=u;el.async=false;document.body.appendChild(el)})})()</script>'
 } > "$OUT/preview.html"
 echo "$SCRIPTS"

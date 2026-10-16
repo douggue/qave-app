@@ -28,7 +28,15 @@
       "expo-router",
       "expo-status-bar",
       "expo-font",
-      "expo-splash-screen"
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0b0c18",
+          "image": "./assets/splash-pin.png",
+          "imageWidth": 150,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "scheme": "qaveapp",
     "experiments": {

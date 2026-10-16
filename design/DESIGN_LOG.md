@@ -52,7 +52,7 @@ A · Pin-o (the "o" is a map pin), B · Bite pin (pin with a bite), C · Neon si
 - [ ] Refine the bite so it reads as a **food bite, not Apple's logo**: keep three clear rounded "teeth" scallops at the top right, keep the pin's pointed tail and the hole as the main silhouette, no leaf, never on a round fruit-like shape.
 - [ ] Test the app icon at 16, 24, 40 and 60 px; make a simplified small-size version if the bite disappears.
 - [ ] Define the logo palette (yellow → orange → pink gradient) and a one-color version (white on the gradient, dark on light).
-- [ ] Use B's pop + bite + crumbs animation as the real splash (Lottie), under 2 seconds.
+- [x] Splash built in the app: native splash shows the unbitten gradient pin on Night (`assets/splash-pin.png`, imageWidth 150), then `src/components/animated-splash.tsx` takes over seamlessly: three-tooth bite, soft recoil, crumbs, radial glow, wordmark and tagline, fade into the app (~2 s; reduce-motion skips to a short fade). Built with React Native Animated + react-native-svg, no Lottie needed.
 - [ ] Trademark search for the final name and mark, then have a designer redraw the final vector.
 - Rejected for now: A · Pin-o, C · Neon sign (neon may return as a splash effect), D · Sticker slap (emoji pop-ins may return elsewhere).
 
