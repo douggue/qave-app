@@ -36,7 +36,7 @@ type Props = {
 /**
  * The Lokal splash: the pin from the native splash gets bitten (three teeth),
  * recoils softly while crumbs fall, then the wordmark and tagline glide in
- * and the whole screen slowly cross-fades into the app. About 4 seconds.
+ * and the whole screen slowly cross-fades into the app. 3.5 seconds in total.
  */
 export function AnimatedSplash({ onDone, onReady }: Props) {
   // Animated values are created once and kept for the life of the splash.
@@ -76,7 +76,7 @@ export function AnimatedSplash({ onDone, onReady }: Props) {
 
       Animated.sequence([
         // Let the pin from the native splash sit for a beat before the bite.
-        Animated.delay(400),
+        Animated.delay(300),
         Animated.parallel([
           bite,
           Animated.sequence([
@@ -98,8 +98,8 @@ export function AnimatedSplash({ onDone, onReady }: Props) {
           ]),
         ]),
         // Hold the full logo, then cross-fade slowly into the app.
-        Animated.delay(900),
-        Animated.timing(screen, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }),
+        Animated.delay(650),
+        Animated.timing(screen, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }),
       ]).start(({ finished }) => {
         if (finished) onDone();
       });
