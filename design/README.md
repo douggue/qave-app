@@ -24,6 +24,10 @@ All spots, people and numbers in the mockups are fictional sample data (Austin, 
 - **Owners:** same app, with a Business mode (see v4).
 - **Name:** not chosen yet. Candidates: Dibs, Foodar, Curbie, Nearbite, Tastemap, Glow, Morsel.
 
+## Assets
+
+Custom fun emoji plan, specs and folder layout: [`ASSETS.md`](ASSETS.md).
+
 ## Planned tech stack
 
 - App: Expo + React Native + TypeScript + Expo Router (this repo)
