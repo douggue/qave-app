@@ -30,11 +30,27 @@ All spots, people and numbers in the mockups are fictional sample data (Austin, 
 - Map: Mapbox (`@rnmapbox/maps`) with a custom night style
 - Animations: Reanimated + Skia
 - Backend: Supabase (Postgres + PostGIS, Auth, Storage, Realtime, Edge Functions)
-- AI: Claude API called from Supabase Edge Functions (fast model for summaries, stronger model for chat)
+- AI: Claude API called from Supabase Edge Functions (see "AI plan" below)
 - Notifications: Expo Notifications
 - Starter place data: Foursquare Open Source Places or Overture, chains filtered
 - Monitoring: Sentry + PostHog
 - Builds and releases: GitHub Actions + EAS Build and EAS Update (`.github/workflows/eas-build.yml`)
+
+## AI plan
+
+| Job | Model | Notes |
+|---|---|---|
+| Ask Lokal chat | Claude Opus 5.5 (`claude-opus-5-5`) | Low effort for fast replies. Answers only from tool calls to our database (`search_spots`, `get_spot`), never from memory. |
+| Menu photo scanning (Business mode) | Claude Opus 5.5 (`claude-opus-5-5`) | Reads menu board photos; runs rarely. |
+| Review summaries ("What people say") | Claude Haiku 5.5 (`claude-haiku-5-5`) | High volume, cached per spot. |
+| Moderation (spam, fake reviews, photos) | Claude Haiku 5.5 (`claude-haiku-5-5`) | High volume, simple decisions. |
+
+- The API key lives only in Supabase Edge Functions, never in the app.
+- Turn on Anthropic's server-side refusal fallback for Opus requests.
+- Use prompt caching for the fixed system prompt and tool definitions.
+- Limit free users to about 20 questions a day.
+- Rough cost: about 1–2 cents per Ask Lokal question on Opus 5.5 (estimate). Revisit Claude Sonnet 5.5 (`claude-sonnet-5-5`) once real usage data exists.
+- Needs: an Anthropic API account (phase 4).
 
 ## Instant browser preview of the app
 
