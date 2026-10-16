@@ -158,6 +158,8 @@ After the first approved image (the taco), keep working in the same chat and sta
 
 Notes: purely AI-generated images generally can't be copyrighted in the US, so a designer should refine the app icon or logo if it will be trademarked. Avoid anything resembling real brands or characters.
 
+Ready-to-paste prompts for every sheet: [`EMOJI_PROMPTS.md`](EMOJI_PROMPTS.md).
+
 ## Where the art can come from
 
 1. **Hire an illustrator** (for example through Dribbble, Behance or Upwork). Best result and fully ours. Ask for source files and full commercial rights in writing.
