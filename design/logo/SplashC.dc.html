@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Splash C: Neon sign</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Neonderthaw&amp;family=Figtree:wght@800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ffcc33}a:hover{color:#ffe08a}
+@keyframes cWord{0%,8%{opacity:.08;text-shadow:none}10%{opacity:1;text-shadow:0 0 4px #fff,0 0 12px #ff2d6f,0 0 28px #ff2d6f,0 0 56px #ff2d6f}12%{opacity:.15;text-shadow:none}16%{opacity:1;text-shadow:0 0 4px #fff,0 0 12px #ff2d6f,0 0 28px #ff2d6f,0 0 56px #ff2d6f}18%{opacity:.3;text-shadow:none}22%,86%{opacity:1;text-shadow:0 0 4px #fff,0 0 12px #ff2d6f,0 0 28px #ff2d6f,0 0 56px #ff2d6f}88%{opacity:.6}90%,100%{opacity:1;text-shadow:0 0 4px #fff,0 0 12px #ff2d6f,0 0 28px #ff2d6f,0 0 56px #ff2d6f}}
+@keyframes cPin{0%,26%{opacity:.08;filter:none}28%{opacity:1;filter:drop-shadow(0 0 6px #ffcc33) drop-shadow(0 0 16px #ffcc33)}30%{opacity:.2;filter:none}34%,100%{opacity:1;filter:drop-shadow(0 0 6px #ffcc33) drop-shadow(0 0 16px #ffcc33)}}
+@keyframes cBar{0%,32%{opacity:.08;box-shadow:none}36%,100%{opacity:1;box-shadow:0 0 8px #ffcc33,0 0 22px #ffcc33}}
+@keyframes cTag{0%,42%{opacity:0}50%,100%{opacity:1}}
+@keyframes cWall{0%,8%{opacity:0}22%,100%{opacity:1}}
+.c-word{animation:cWord 5s linear infinite}
+.c-pin{animation:cPin 5s linear infinite}
+.c-bar{animation:cBar 5s linear infinite}
+.c-tag{animation:cTag 5s linear infinite}
+.c-wall{animation:cWall 5s linear infinite}
+@media (prefers-reduced-motion:reduce){.c-word,.c-pin,.c-bar,.c-tag,.c-wall{animation:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: repeating-linear-gradient(0deg, #10122a 0 30px, #0d0f24 30px 32px), #10122a; color: #f5f2ff; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;">
+  <div class="c-wall" aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(55% 32% at 50% 46%, rgba(255,45,111,0.28), transparent 70%);"></div>
+  <div style="position: relative; display: flex; align-items: center; gap: 2px;">
+    <span class="c-word" style="font-family: 'Neonderthaw', 'Brush Script MT', cursive; font-size: 132px; line-height: 1; color: #fff4f8;">Lokal</span>
+    <svg class="c-pin" role="img" aria-label="Glowing map pin" width="34" height="44" viewBox="0 0 100 130" style="transform: translateY(-26px);">
+      <path d="M50 8C27 8 8 27 8 50c0 31 42 70 42 70s42-39 42-70C92 27 73 8 50 8z" fill="none" stroke="#fff3c4" stroke-width="9"></path>
+      <circle cx="50" cy="50" r="13" fill="#fff3c4"></circle>
+    </svg>
+  </div>
+  <div class="c-bar" style="position: relative; width: 230px; height: 5px; border-radius: 3px; background: #fff3c4;"></div>
+  <p class="c-tag" style="position: relative; margin: 22px 0 0; font-size: 13px; font-weight: 800; letter-spacing: 0.32em; color: #9fe9ff; text-shadow: 0 0 8px #4aa8ff;">ONLY LOCAL · NO CHAINS</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Splash B: Bite pin</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@800&amp;family=Figtree:wght@700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ffcc33}a:hover{color:#ffe08a}
+@keyframes bPop{0%{transform:scale(0) rotate(-20deg)}18%{transform:scale(1.15) rotate(4deg)}26%,100%{transform:scale(1) rotate(0)}}
+@keyframes bBite{0%,34%{transform:scale(0)}40%,100%{transform:scale(1)}}
+@keyframes bShake{0%,38%{transform:translateX(0)}41%{transform:translateX(-6px)}44%{transform:translateX(5px)}47%,100%{transform:translateX(0)}}
+@keyframes bCrumb{0%,38%{opacity:0;transform:translate(0,0)}42%{opacity:1}70%,100%{opacity:0;transform:translate(var(--cx),var(--cy))}}
+@keyframes bWord{0%,46%{opacity:0;transform:translateY(24px)}60%,100%{opacity:1;transform:translateY(0)}}
+@keyframes bTag{0%,58%{opacity:0}72%,100%{opacity:1}}
+.b-pop{animation:bPop 4.4s cubic-bezier(.3,1.4,.5,1) infinite}
+.b-shake{animation:bShake 4.4s ease-out infinite}
+.b-bite{transform-box:fill-box;transform-origin:center;animation:bBite 4.4s cubic-bezier(.3,1.6,.5,1) infinite}
+.b-crumb{animation:bCrumb 4.4s ease-out infinite}
+.b-word{animation:bWord 4.4s ease-out infinite}
+.b-tag{animation:bTag 4.4s ease-out infinite}
+@media (prefers-reduced-motion:reduce){.b-pop,.b-shake,.b-bite,.b-crumb,.b-word,.b-tag{animation:none}.b-crumb{opacity:0}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; background: radial-gradient(70% 45% at 50% 42%, rgba(255,140,40,0.26), transparent 70%), #0b0c18; color: #f5f2ff; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;">
+  <div class="b-shake" style="position: relative;">
+    <div class="b-pop" style="transform-origin: 50% 90%;">
+      <svg role="img" aria-label="Map pin with a bite taken out of it" width="150" height="195" viewBox="0 0 100 130" style="display: block; filter: drop-shadow(0 0 26px rgba(255,90,60,0.55));">
+        <defs>
+          <linearGradient id="sb-pin" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#ffcc33"></stop><stop offset="0.55" stop-color="#ff7a45"></stop><stop offset="1" stop-color="#ff2d6f"></stop></linearGradient>
+          <mask id="sb-bite">
+            <rect x="0" y="0" width="100" height="130" fill="#fff"></rect>
+            <circle class="b-bite" cx="93" cy="17" r="15" fill="#000"></circle>
+            <circle class="b-bite" cx="100" cy="37" r="13" fill="#000"></circle>
+            <circle class="b-bite" cx="78" cy="3" r="12" fill="#000"></circle>
+          </mask>
+        </defs>
+        <path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#sb-pin)" mask="url(#sb-bite)"></path>
+        <ellipse cx="34" cy="34" rx="11" ry="7" fill="#fff" opacity="0.45" transform="rotate(-35 34 34)"></ellipse>
+        <circle cx="46" cy="56" r="12" fill="#0b0c18"></circle>
+      </svg>
+    </div>
+    <span class="b-crumb" style="--cx: 46px; --cy: -40px; position: absolute; right: 18px; top: 22px; width: 10px; height: 10px; border-radius: 50%; background: #ffcc33;"></span>
+    <span class="b-crumb" style="--cx: 60px; --cy: 4px; position: absolute; right: 10px; top: 40px; width: 7px; height: 7px; border-radius: 50%; background: #ff7a45;"></span>
+    <span class="b-crumb" style="--cx: 30px; --cy: -62px; position: absolute; right: 30px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: #ffd65c;"></span>
+  </div>
+  <span class="b-word" style="font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 56px; letter-spacing: -0.04em; line-height: 1;">Lokal</span>
+  <p class="b-tag" style="margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; color: #ffcc33;">Only local. No chains.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

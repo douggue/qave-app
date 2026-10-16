@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Concept B: Bite pin</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&amp;family=Figtree:wght@600;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ffcc33}a:hover{color:#ffe08a}
+</style>
+</helmet>
+<div style="width: 640px; height: 800px; box-sizing: border-box; padding: 48px; display: flex; flex-direction: column; gap: 36px; background: #0d0e19; color: #f5f2ff; font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;">
+  <div style="display: flex; justify-content: space-between; align-items: baseline;">
+    <span style="font-size: 13px; font-weight: 800; letter-spacing: 0.14em; color: #ffcc33;">CONCEPT B</span>
+    <span style="font-size: 13px; font-weight: 600; color: #9d9abb;">Bite pin</span>
+  </div>
+
+  <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; gap: 26px; border-radius: 28px; background: radial-gradient(60% 70% at 40% 45%, rgba(255,140,40,0.22), transparent 70%), #12142a;">
+    <svg role="img" aria-label="Map pin with a bite taken out of it" width="132" height="172" viewBox="0 0 100 130">
+      <defs>
+        <linearGradient id="b-pin" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#ffcc33"></stop><stop offset="0.55" stop-color="#ff7a45"></stop><stop offset="1" stop-color="#ff2d6f"></stop></linearGradient>
+        <mask id="b-bite">
+          <rect x="0" y="0" width="100" height="130" fill="#fff"></rect>
+          <circle cx="93" cy="17" r="15" fill="#000"></circle>
+          <circle cx="100" cy="37" r="13" fill="#000"></circle>
+          <circle cx="78" cy="3" r="12" fill="#000"></circle>
+        </mask>
+      </defs>
+      <path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#b-pin)" mask="url(#b-bite)"></path>
+      <ellipse cx="34" cy="34" rx="11" ry="7" fill="#fff" opacity="0.45" transform="rotate(-35 34 34)"></ellipse>
+      <circle cx="46" cy="56" r="12" fill="#12142a"></circle>
+    </svg>
+    <span style="font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 84px; letter-spacing: -0.04em; line-height: 1;">Lokal</span>
+  </div>
+
+  <div style="display: flex; gap: 28px; align-items: flex-end;">
+    <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+      <div style="width: 150px; height: 150px; border-radius: 34px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ff7a45, #ff2d6f); box-shadow: 0 0 0 1px rgba(255,255,255,0.08);">
+        <svg aria-hidden="true" width="78" height="101" viewBox="0 0 100 130">
+          <path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#b-bite)"></path>
+          <circle cx="46" cy="56" r="12" fill="#ff4a55"></circle>
+        </svg>
+      </div>
+      <span style="font-size: 12px; font-weight: 600; color: #9d9abb;">App icon</span>
+    </div>
+    <div style="display: flex; gap: 16px; align-items: flex-end; padding-bottom: 26px;">
+      <div style="width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ff7a45, #ff2d6f);">
+        <svg aria-hidden="true" width="31" height="40" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#b-bite)"></path><circle cx="46" cy="56" r="13" fill="#ff4a55"></circle></svg>
+      </div>
+      <div style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #ff7a45, #ff2d6f);">
+        <svg aria-hidden="true" width="21" height="27" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="#fff" mask="url(#b-bite)"></path></svg>
+      </div>
+    </div>
+    <div style="flex-grow: 1; height: 150px; border-radius: 22px; background: #f3f4f8; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Unbounded', ui-sans-serif, system-ui, sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -0.04em; color: #16172b;">
+      <svg aria-hidden="true" width="36" height="47" viewBox="0 0 100 130"><path d="M50 4C24 4 4 24 4 50c0 34 46 76 46 76s46-42 46-76C96 24 76 4 50 4z" fill="url(#b-pin)" mask="url(#b-bite)"></path><circle cx="46" cy="56" r="12" fill="#f3f4f8"></circle></svg>
+      <span>Lokal</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":640,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

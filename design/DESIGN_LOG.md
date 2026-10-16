@@ -37,6 +37,16 @@ Check this file before any design or emoji work. Tick items off as they're done.
 - [ ] Business tools
 - [ ] App icon and splash mark (to be refined by a designer if it will be trademarked)
 
+### Logo and splash
+
+Concepts (canvas): https://claude.ai/artifact/BpSfoPp9LvWgkv5tmJujG7 · source copies in `logo/`.
+A · Pin-o (the "o" is a map pin), B · Bite pin (pin with a bite), C · Neon sign (script neon), D · Sticker slap (sticker wordmark + emoji).
+
+- [ ] Choose a concept. Lead designer recommendation: **A · Pin-o** for the logo and app icon (simple, readable at 16 px, says "local + map"), with D's emoji stickers popping in around it on the splash.
+- [ ] B: check it doesn't read as a reference to Apple's bitten apple before using it.
+- [ ] C: script is hard to read at small sizes; keep neon as a splash effect only.
+- [ ] Final logo: have a designer refine the vector before any trademark filing.
+
 ### App and mockup changes
 
 - [ ] Replace circle pins with sticker pins (glow by night, shadow by day, anchor dot).
