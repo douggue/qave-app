@@ -56,6 +56,10 @@ Custom fun emoji plan, specs and folder layout: [`ASSETS.md`](ASSETS.md).
 - Rough cost: about 1–2 cents per Ask Lokal question on Opus 5.5 (estimate). Revisit Claude Sonnet 5.5 (`claude-sonnet-5-5`) once real usage data exists.
 - Needs: an Anthropic API account (phase 4).
 
+## Emoji sheet splitter
+
+`tools/split-sheet.py <sheet.png> <out-dir> name1 … name9` splits a 3×3 ChatGPT emoji sheet into clean, solid, square PNGs (needs `pip install pillow numpy scipy`). Approved emoji live in `emoji/approved/`.
+
 ## Instant browser preview of the app
 
 `tools/web-preview.sh <project-dir> <out-dir>` exports the Expo app for web as a single
