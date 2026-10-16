@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     gap: 8,
-    backgroundColor: '#0b1020',
+    backgroundColor: '#0b0c18',
   },
   emoji: {
     fontSize: 64,

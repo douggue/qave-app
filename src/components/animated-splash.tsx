@@ -36,7 +36,7 @@ type Props = {
 /**
  * The Lokal splash: the pin from the native splash gets bitten (three teeth),
  * recoils softly while crumbs fall, then the wordmark and tagline glide in
- * and the whole screen fades into the app. About 2 seconds.
+ * and the whole screen slowly cross-fades into the app. About 4 seconds.
  */
 export function AnimatedSplash({ onDone, onReady }: Props) {
   // Animated values are created once and kept for the life of the splash.
@@ -61,46 +61,45 @@ export function AnimatedSplash({ onDone, onReady }: Props) {
         teeth.forEach((t) => t.setValue(1));
         word.setValue(1);
         tagline.setValue(1);
-        Animated.timing(screen, { toValue: 0, duration: 300, delay: 900, useNativeDriver: true }).start(
+        Animated.timing(screen, { toValue: 0, duration: 700, delay: 900, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }).start(
           () => onDone(),
         );
         return;
       }
 
+      // Slow, soft motion throughout: nothing snaps.
+      const soft = Easing.bezier(0.45, 0, 0.25, 1);
       const bite = Animated.stagger(
-        60,
-        teeth.map((t) => Animated.timing(t, { toValue: 1, duration: 220, easing: ease, useNativeDriver: false })),
+        140,
+        teeth.map((t) => Animated.timing(t, { toValue: 1, duration: 420, easing: soft, useNativeDriver: false })),
       );
 
       Animated.sequence([
-        Animated.delay(150),
+        // Let the pin from the native splash sit for a beat before the bite.
+        Animated.delay(400),
         Animated.parallel([
           bite,
           Animated.sequence([
-            Animated.timing(recoil, { toValue: 1, duration: 200, easing: ease, useNativeDriver: true }),
-            Animated.timing(recoil, {
-              toValue: 0,
-              duration: 360,
-              easing: Easing.bezier(0.4, 0, 0.2, 1),
-              useNativeDriver: true,
-            }),
+            Animated.timing(recoil, { toValue: 1, duration: 380, easing: soft, useNativeDriver: true }),
+            Animated.timing(recoil, { toValue: 0, duration: 700, easing: soft, useNativeDriver: true }),
           ]),
           Animated.sequence([
-            Animated.delay(60),
-            Animated.timing(crumbs, { toValue: 1, duration: 650, easing: Easing.linear, useNativeDriver: true }),
+            Animated.delay(150),
+            Animated.timing(crumbs, { toValue: 1, duration: 1100, easing: Easing.linear, useNativeDriver: true }),
           ]),
-          Animated.timing(glow, { toValue: 1, duration: 500, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+          Animated.timing(glow, { toValue: 1, duration: 900, easing: Easing.out(Easing.quad), useNativeDriver: true }),
           Animated.sequence([
-            Animated.delay(320),
-            Animated.timing(word, { toValue: 1, duration: 450, easing: ease, useNativeDriver: true }),
+            Animated.delay(650),
+            Animated.timing(word, { toValue: 1, duration: 750, easing: ease, useNativeDriver: true }),
           ]),
           Animated.sequence([
-            Animated.delay(560),
-            Animated.timing(tagline, { toValue: 1, duration: 420, easing: ease, useNativeDriver: true }),
+            Animated.delay(1050),
+            Animated.timing(tagline, { toValue: 1, duration: 700, easing: ease, useNativeDriver: true }),
           ]),
         ]),
-        Animated.delay(450),
-        Animated.timing(screen, { toValue: 0, duration: 350, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        // Hold the full logo, then cross-fade slowly into the app.
+        Animated.delay(900),
+        Animated.timing(screen, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }),
       ]).start(({ finished }) => {
         if (finished) onDone();
       });
@@ -116,7 +115,10 @@ export function AnimatedSplash({ onDone, onReady }: Props) {
 
   return (
     <Animated.View
-      style={[styles.screen, { opacity: screen }]}
+      style={[
+        styles.screen,
+        { opacity: screen, transform: [{ scale: screen.interpolate({ inputRange: [0, 1], outputRange: [1.06, 1] }) }] },
+      ]}
       onLayout={onReady}
       accessible
       accessibilityLabel="Lokal. Only local. No chains."
