@@ -12,7 +12,9 @@ export default function Home() {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.title}>Hello world</Text>
+      <Text style={styles.emoji}>🌮</Text>
+      <Text style={styles.title}>Live update works!</Text>
+      <Text style={styles.body}>Update test #1</Text>
       <Text style={styles.version}>{version}</Text>
     </View>
   );
@@ -27,10 +29,17 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: '#0b1020',
   },
+  emoji: {
+    fontSize: 64,
+  },
   title: {
-    color: '#ffffff',
+    color: '#ffcc33',
     fontSize: 28,
     fontWeight: '700',
+  },
+  body: {
+    color: '#a7b0cf',
+    fontSize: 15,
   },
   version: {
     color: '#5d6690',
