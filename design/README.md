@@ -3,6 +3,10 @@
 "Lokal" is a placeholder name. The app is a live, Waze-style map of small, independent
 food in the US: food trucks, carts, pop-ups, market stalls and small restaurants. No chains.
 
+## Design log
+
+Decisions and the list of changes still to make: [`DESIGN_LOG.md`](DESIGN_LOG.md). Read it first.
+
 ## Mockups
 
 Each file is a self-contained clickable page. Open it in a browser, or use the published links.

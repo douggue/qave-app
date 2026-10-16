@@ -18,7 +18,7 @@ Order (left to right, top to bottom):
 8. a hot dog with a wavy line of mustard
 9. a crispy fried chicken drumstick
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -43,7 +43,7 @@ Order (left to right, top to bottom):
 8. a waffle cone with two scoops of ice cream
 9. a mango-chili paleta (Mexican ice pop) on a stick
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -68,7 +68,7 @@ Order (left to right, top to bottom):
 8. a folded crepe with strawberries and chocolate drizzle
 9. two pieces of salmon nigiri sushi
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -93,7 +93,7 @@ Order (left to right, top to bottom):
 8. an elote (grilled corn on the cob) with cheese and chili
 9. a golden waffle with butter and syrup
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -114,11 +114,11 @@ Order (left to right, top to bottom):
 4. a pop-up tent with a striped canopy
 5. a farmers market stall with a wooden counter and an awning
 6. a tiny cozy neighborhood restaurant building with a striped awning and a warm lit window
-7. a bike cart with a small coffee box on the front
+7. a simple bike cart: a bicycle with big wheels and one box with a coffee cup on the front
 8. an alarm clock meaning 'closing soon'
 9. a rain cloud with drops meaning 'closed today because of weather'
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -143,7 +143,7 @@ Order (left to right, top to bottom):
 8. a small food truck with speed lines behind it meaning 'on the move'
 9. a glowing green dot with radio waves meaning 'live now'
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -168,7 +168,7 @@ Order (left to right, top to bottom):
 8. a soft white wisp of steam
 9. a burst of colorful confetti pieces
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -193,7 +193,7 @@ Order (left to right, top to bottom):
 8. a friendly robot
 9. a cat
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -218,7 +218,7 @@ Order (left to right, top to bottom):
 8. a golden crown meaning 'local legend'
 9. a golden key meaning 'insider'
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -243,7 +243,7 @@ Order (left to right, top to bottom):
 8. a string of colorful festival lights meaning 'food truck rally'
 9. a bell meaning 'reminder'
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
@@ -268,11 +268,28 @@ Order (left to right, top to bottom):
 8. a small sign with a QR code meaning 'follow us poster'
 9. a speech bubble with a star meaning 'reply to reviews'
 
-Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it.
+Style (the same for all 9): match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim, smooth shading instead of hard lines.
 
 Layout: a 3×3 grid of 9 separate icons on one square image, at the largest size you can make. Each icon is centered in its own cell, about the same size, filling about 75% of its cell, with clear empty space between all icons. Icons must not touch or overlap.
 
 Background: fully transparent. Nothing else: no text, no numbers, no labels, no grid lines, no borders, no scenery.
 
 All 9 must look like one consistent set with the taco and burger: same glossiness, same color intensity, same outline thickness, same level of detail.
+```
+
+## Redo: food fixes (from the design log)
+
+```
+Create an emoji sprite sheet for a food app's custom emoji set. It contains only 3 icons in one row, on a wide image.
+
+Order (left to right):
+1. a plate of Japanese curry and white rice on a white oval plate
+2. sliced BBQ brisket on a small wooden board, smooth and glossy, with a simple dark bark and only a few char spots
+3. a rack of glazed BBQ pork ribs, smooth and glossy, simple shapes, only a few char spots
+
+Style: match the exact style of the taco and burger images I uploaded. Stylized 3D emoji illustration, like a premium emoji set, NOT photorealistic. Smooth, glossy surfaces with soft gradients and one clear highlight per main shape. Simple, chunky, rounded shapes with only a few details, no rough meat texture. Each icon must clearly read as what it is at 40 pixels wide. Soft light from the top left, a small soft shadow on the bottom right of each object. Every icon has a thin, even white outline around its whole shape, like a die-cut sticker, the same thickness as the taco's. Every icon is fully solid, not see-through, with no glow or haze around it. Rendered like soft glossy 3D, not a flat cartoon or game icon: no dark or black outline lines inside the white rim.
+
+Layout: icons spaced evenly with clear empty space between them; they must not touch or overlap.
+
+Background: fully transparent. Nothing else: no text, no labels, no borders, no scenery.
 ```
