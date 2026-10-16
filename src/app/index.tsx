@@ -1,11 +1,14 @@
 import * as Updates from 'expo-updates';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 // Placeholder home screen. The real app screens replace this.
 export default function Home() {
-  const version = Updates.isEmbeddedLaunch
-    ? 'Installed build'
-    : `Live update ${Updates.updateId?.slice(0, 8)}`;
+  const version =
+    Platform.OS === 'web'
+      ? 'Web preview'
+      : Updates.isEmbeddedLaunch
+        ? 'Installed build'
+        : `Live update ${Updates.updateId?.slice(0, 8)}`;
 
   return (
     <View style={styles.screen}>
