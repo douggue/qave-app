@@ -136,6 +136,28 @@ One entry per emoji. The app reads this file, so swapping artwork never needs co
 
 `keywords` let the AI guide and the add-a-spot form match a spot or a question to the right emoji.
 
+## Chosen approach
+
+**AI-generated with ChatGPT**, then cleaned up and exported here (background removal, trim, rim check, sizes, manifest).
+
+Base prompt (change only `[ITEM]`):
+
+```
+A single [ITEM] emoji icon in a glossy 3D sticker style.
+Soft, rounded, chunky shapes, saturated appetizing colors, soft lighting
+from the top left, a small soft shadow on the bottom right of the object,
+and a thin white outline around the whole shape like a die-cut sticker.
+Centered on a fully transparent background. Nothing else in the image:
+no text, no letters, no logos, no border, no scenery.
+Square 1:1 image, the object fills about 80% of the frame.
+Part of a consistent, playful emoji set.
+```
+
+After the first approved image (the taco), keep working in the same chat and start each request with:
+"Use the exact same style, lighting, outline and level of detail as the taco above. Now make: [ITEM]."
+
+Notes: purely AI-generated images generally can't be copyrighted in the US, so a designer should refine the app icon or logo if it will be trademarked. Avoid anything resembling real brands or characters.
+
 ## Where the art can come from
 
 1. **Hire an illustrator** (for example through Dribbble, Behance or Upwork). Best result and fully ours. Ask for source files and full commercial rights in writing.
