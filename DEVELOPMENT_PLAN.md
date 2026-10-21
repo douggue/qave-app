@@ -133,6 +133,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 ### Phase 0 · Setup (1–3 days)
 - Founder creates accounts: **Supabase**, **Mapbox**, **Anthropic API**, **Apple Developer** ($99/year), **Google Play** ($25 once), **Sentry**, **PostHog**.
 - Keys stored as EAS environment variables and GitHub secrets (never in the code).
+- **iPhone testing:** App Store Expo Go stops at SDK 54 and the app is on SDK 58, so until the Apple Developer account is ready the iPhone preview runs in Safari from the computer's dev server (`npx expo start`, then `http://<computer-ip>:8081` on the same Wi-Fi). After enrollment: an iOS development build through EAS (also needed for Mapbox).
 - Translation setup (English, Canadian French), locale-aware units and currency, UTC time handling.
 - Supabase project, database schema v1, security rules, seed script skeleton.
 - Done when: the app on the phone reads one test spot from Supabase.
