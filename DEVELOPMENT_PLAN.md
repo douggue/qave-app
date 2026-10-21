@@ -185,6 +185,7 @@ and `expo-doctor`, is checked in the browser preview, then reaches the phone as 
 
 ### Phase 7 · Store launch (2–3 weeks, overlaps phase 6)
 - Final name, trademark search, designer-refined logo.
+- **Before the first Play upload:** choose the permanent package ID (it can never change after upload; the current `com.douggue.qaveapp` is a QAVE leftover), set the app's display name, add a production build option to the GitHub workflow, and build a signed **AAB** with EAS. Until then, testing stays on the **APK** preview builds.
 - Store listings and screenshots in English and French, short video, privacy policy and terms in both languages (US state laws, PIPEDA, Quebec Law 25), content policy, data safety forms.
 - Store availability set to the US and Canada only.
 - **Google Play:** new personal developer accounts must run a closed test with at least 12 testers for 14 days before going public (check the current rule at that time).
