@@ -3,6 +3,7 @@ import { AccessibilityInfo, Animated, Easing, StyleSheet, View } from 'react-nat
 import Svg, { Circle, Defs, Ellipse, LinearGradient, Mask, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { brand } from '@/constants/brand';
+import { t } from '@/i18n';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -121,7 +122,7 @@ export function AnimatedSplash({ onDone, onReady }: Props) {
       ]}
       onLayout={onReady}
       accessible
-      accessibilityLabel="Lokal. Only local. No chains."
+      accessibilityLabel={t('splash.a11y')}
     >
       <Animated.View pointerEvents="none" style={[styles.center, { opacity: glow }]}>
         <Svg width={GLOW_SIZE} height={GLOW_SIZE}>
@@ -195,7 +196,7 @@ export function AnimatedSplash({ onDone, onReady }: Props) {
             },
           ]}
         >
-          Lokal
+          {t('splash.wordmark')}
         </Animated.Text>
         <Animated.Text
           style={[
@@ -206,7 +207,7 @@ export function AnimatedSplash({ onDone, onReady }: Props) {
             },
           ]}
         >
-          Only local. No chains.
+          {t('splash.tagline')}
         </Animated.Text>
       </View>
     </Animated.View>

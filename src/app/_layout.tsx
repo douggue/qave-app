@@ -8,8 +8,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { AnimatedSplash } from '@/components/animated-splash';
+import { ToastProvider } from '@/components/ui';
 import { brand } from '@/constants/brand';
 import { useLiveUpdates } from '@/hooks/use-live-updates';
+import { StoreProvider } from '@/state/store';
 
 // Keep the native splash up until the animated splash is ready to take over.
 SplashScreen.preventAutoHideAsync();
@@ -35,10 +37,16 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: brand.night }}>
-      <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: brand.night } }} />
-      {!splashDone && <AnimatedSplash onReady={hideNativeSplash} onDone={finishSplash} />}
-    </View>
+    <StoreProvider>
+      <View style={{ flex: 1, backgroundColor: brand.night }}>
+        <StatusBar style="light" />
+        <ToastProvider>
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: brand.night } }}>
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+        </ToastProvider>
+        {!splashDone && <AnimatedSplash onReady={hideNativeSplash} onDone={finishSplash} />}
+      </View>
+    </StoreProvider>
   );
 }

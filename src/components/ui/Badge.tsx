@@ -1,0 +1,63 @@
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+
+import { radius } from '@/theme/tokens';
+import { useTheme } from '@/theme/use-theme';
+
+import { Emoji, Text, type TextTone } from './Text';
+
+export type BadgeTone = 'grape' | 'mint' | 'neon' | 'amber' | 'hot' | 'neutral';
+
+type Props = {
+  label: string;
+  tone?: BadgeTone;
+  icon?: string;
+  accessibilityLabel?: string;
+  style?: StyleProp<ViewStyle>;
+};
+
+/** A small status pill. Text wraps if it must; meaning is always in the text, not only the color. */
+export function Badge({ label, tone = 'neutral', icon, accessibilityLabel, style }: Props) {
+  const { c } = useTheme();
+  const bg: Record<BadgeTone, string> = {
+    grape: c.tintGrape,
+    mint: c.tintMint,
+    neon: c.tintNeon,
+    amber: c.tintAmber,
+    hot: c.hotFill,
+    neutral: c.card2,
+  };
+  const ink: Record<BadgeTone, TextTone> = {
+    grape: 'grape',
+    mint: 'mint',
+    neon: 'neon',
+    amber: 'amber',
+    hot: 'onHot',
+    neutral: 'ink2',
+  };
+  return (
+    <View
+      accessible
+      accessibilityLabel={accessibilityLabel ?? label}
+      style={[styles.badge, { backgroundColor: bg[tone] }, style]}
+    >
+      {icon ? <Emoji size={12}>{icon}</Emoji> : null}
+      <Text variant="caption" tone={ink[tone]} style={styles.label}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    maxWidth: '100%',
+  },
+  label: { flexShrink: 1 },
+});
