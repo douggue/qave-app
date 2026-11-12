@@ -7,28 +7,62 @@ import { Emoji, Text } from '@/components/ui';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t, type StringKey } from '@/i18n';
 import { useStore } from '@/state/store';
-import { tab as tabEmoji, type TabEmojiKey } from '@/theme/emoji';
+import { status as statusEmoji, tab as tabEmoji, type TabEmojiKey } from '@/theme/emoji';
 import { dur, ease, native } from '@/theme/motion';
 import { glow, gradients } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 type TabSpec = { route: string; label: StringKey; icon: TabEmojiKey };
 
-// Eater tabs: Map, Drops, (Report action), Ask, You. Business tabs arrive in C5.
-const EATER_LEFT: TabSpec[] = [
-  { route: 'index', label: 'tab.map', icon: 'map' },
-  { route: 'drops', label: 'tab.drops', icon: 'drops' },
-];
-const EATER_RIGHT: TabSpec[] = [
-  { route: 'ask', label: 'tab.ask', icon: 'ask' },
-  { route: 'you', label: 'tab.you', icon: 'you' },
-];
+type TabSet = { left: TabSpec[]; right: TabSpec[]; a11y: StringKey };
 
-/** The custom tab bar: four tabs and a raised center Report action (not a screen). */
+// Eater tabs: Map, Drops, (Report action), Ask, You.
+const EATER: TabSet = {
+  left: [
+    { route: 'index', label: 'tab.map', icon: 'map' },
+    { route: 'drops', label: 'tab.drops', icon: 'drops' },
+  ],
+  right: [
+    { route: 'ask', label: 'tab.ask', icon: 'ask' },
+    { route: 'you', label: 'tab.you', icon: 'you' },
+  ],
+  a11y: 'tab.eaterA11y',
+};
+
+// Business tabs: Today, Where, (Go live action), Menu, Promote.
+const BUSINESS: TabSet = {
+  left: [
+    { route: 'today', label: 'tab.today', icon: 'today' },
+    { route: 'where', label: 'tab.where', icon: 'where' },
+  ],
+  right: [
+    { route: 'menu', label: 'tab.menu', icon: 'menu' },
+    { route: 'promote', label: 'tab.promote', icon: 'promote' },
+  ],
+  a11y: 'tab.bizA11y',
+};
+
+/** Route names of a tab set, so the layout can hide the other set (href: null). */
+export const tabRoutes = (biz: boolean) => {
+  const set = biz ? BUSINESS : EATER;
+  return [...set.left, ...set.right].map((s) => s.route);
+};
+
+/** The custom tab bar: four tabs and a raised center action (Report or Go live, not screens). */
 export function TabBar({ state, emitter, navigateToTab, insets }: BottomTabBarProps) {
   const { c } = useTheme();
   const { state: store, actions } = useStore();
   const focusedName = state.routes[state.index]?.name;
+  const biz = store.bizMode;
+  const set = biz ? BUSINESS : EATER;
+  const firstRoute = set.left[0].route;
+  const inSet = focusedName ? tabRoutes(biz).includes(focusedName) : true;
+
+  // Switching modes (or a cold start in Business mode) lands on the first tab of the new set.
+  const firstKey = state.routes.find((r) => r.name === firstRoute)?.key;
+  useEffect(() => {
+    if (store.hydrated && !inSet && firstKey) navigateToTab(firstKey);
+  }, [store.hydrated, inSet, firstKey, navigateToTab]);
 
   const go = (name: string) => {
     const route = state.routes.find((r) => r.name === name);
@@ -49,15 +83,19 @@ export function TabBar({ state, emitter, navigateToTab, insets }: BottomTabBarPr
   return (
     <View
       accessibilityRole="tablist"
-      accessibilityLabel={t('tab.eaterA11y')}
+      accessibilityLabel={t(set.a11y)}
       style={[
         styles.bar,
         { backgroundColor: c.card, borderTopColor: c.line, paddingBottom: Math.max(insets.bottom, 8) },
       ]}
     >
-      {EATER_LEFT.map(renderTab)}
-      <CenterAction open={store.reportOpen} onPress={store.reportOpen ? actions.closeReport : actions.openReport} />
-      {EATER_RIGHT.map(renderTab)}
+      {set.left.map(renderTab)}
+      {biz ? (
+        <GoLiveAction live={!!store.liveSession} onPress={store.liveSession ? () => go('today') : actions.openGoLive} />
+      ) : (
+        <CenterAction open={store.reportOpen} onPress={store.reportOpen ? actions.closeReport : actions.openReport} />
+      )}
+      {set.right.map(renderTab)}
     </View>
   );
 }
@@ -157,6 +195,36 @@ function CenterAction({ open, onPress }: { open: boolean; onPress: () => void })
       </View>
       <Text variant="micro" tone="ink2" center style={styles.label}>
         {t('tab.report')}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** Business center action: Go live while offline; while live it shows LIVE and opens Today. */
+function GoLiveAction({ live, onPress }: { live: boolean; onPress: () => void }) {
+  const { c, isNight } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={live ? t('biz.live') : t('tab.goLiveA11y')}
+      accessibilityHint={live ? t('tab.today') : t('tab.goLiveHint')}
+      style={({ pressed }) => [styles.item, styles.center, pressed && { opacity: 0.9 }]}
+    >
+      <View style={[styles.ring, { backgroundColor: c.paper }]}>
+        {Platform.OS !== 'ios' && isNight ? <View style={[styles.halo, { backgroundColor: c.mint }]} /> : null}
+        <View
+          style={[
+            styles.circle,
+            { backgroundColor: live ? c.mintFill : c.card2, borderWidth: 2, borderColor: c.mint },
+            isNight && glow(c.mint, 18, 0.8),
+          ]}
+        >
+          <Emoji size={26}>{live ? statusEmoji.live : tabEmoji.golive}</Emoji>
+        </View>
+      </View>
+      <Text variant="micro" tone={live ? 'mint' : 'ink2'} center style={styles.label}>
+        {live ? t('biz.live') : t('tab.goLive')}
       </Text>
     </Pressable>
   );

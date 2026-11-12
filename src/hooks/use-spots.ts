@@ -18,6 +18,7 @@ export function useSpots(): Spot[] {
           y: o.y ?? spot.y,
           open: o.open ?? spot.open,
           hot: o.hot ?? spot.hot,
+          until: o.until ?? spot.until,
           mood: o.mood !== undefined ? o.mood : spot.mood,
         };
       }),

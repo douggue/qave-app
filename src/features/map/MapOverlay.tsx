@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Chip, Emoji, Text, useToast } from '@/components/ui';
-import { getNotes, getPeople, getTicks } from '@/data/repo';
+import { Chip, Emoji, Text } from '@/components/ui';
+import { getPeople, getTicks } from '@/data/repo';
 import { useClock } from '@/hooks/use-clock';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useScreenReader } from '@/hooks/use-screen-reader';
 import { matchesFilter, useSpots } from '@/hooks/use-spots';
 import { t, type StringKey } from '@/i18n';
-import { useStore, type FilterKey } from '@/state/store';
+import { useNotes, useStore, type FilterKey } from '@/state/store';
 import { avatar, avatarBg, filterIcon, ui } from '@/theme/emoji';
 import { dur, ease, native } from '@/theme/motion';
 import { elevation, minTap, radius } from '@/theme/tokens';
@@ -32,8 +32,7 @@ const FILTERS: { key: FilterKey; label: StringKey }[] = [
 export function MapTopBar() {
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
-  const toast = useToast();
-  const unread = getNotes().filter((n) => n.unread).length;
+  const unread = useNotes().filter((n) => n.unread).length;
 
   return (
     <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 8 }]}>
@@ -53,7 +52,8 @@ export function MapTopBar() {
         <IconButton
           icon={ui.bell}
           label={t('map.bell', { n: unread })}
-          onPress={() => toast.show(t('common.comingNext'), { emoji: ui.bell })}
+          hint={t('map.bellHint')}
+          onPress={() => router.push('/inbox')}
           badge={unread}
         />
       </View>
@@ -147,11 +147,13 @@ export function IconButton({
   label,
   onPress,
   badge,
+  hint,
 }: {
   icon: string;
   label: string;
   onPress: () => void;
   badge?: number;
+  hint?: string;
 }) {
   const { c } = useTheme();
   return (
@@ -159,6 +161,7 @@ export function IconButton({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={hint}
       style={({ pressed }) => [
         styles.icon,
         { backgroundColor: c.glass, borderColor: c.line },

@@ -24,6 +24,15 @@ export function FxHost() {
   const spot = getSpot(fx.spotId);
   const isCheckIn = fx.kind === 'checkIn';
 
+  // Go live (C5): a small rain of the truck's food, no rep (owners do not earn eater rep).
+  if (fx.kind === 'goLive') {
+    return (
+      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        {spot ? <EmojiRain key={`live-${fx.id}`} food={spot.food} seed={fx.id} count={12} onDone={done} /> : null}
+      </View>
+    );
+  }
+
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {isCheckIn && spot ? <EmojiRain key={`rain-${fx.id}`} food={spot.food} seed={fx.id} onDone={done} /> : null}

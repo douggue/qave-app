@@ -1,7 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
 
-import type { LiveSession, Mood, Report, ReportType } from '@/data/types';
+import { getBusiness, getNotes } from '@/data/repo';
+import type { ClockTime, LiveSession, LiveStatusId, Mood, Note, Report, ReportType, Stop, Until } from '@/data/types';
+import { t } from '@/i18n';
+import type { MoodEmojiKey } from '@/theme/emoji';
 
 export type ThemeMode = 'auto' | 'night' | 'day';
 export type FilterKey = 'all' | 'open' | 'mobile' | 'tacos' | 'bbq' | 'sweets' | 'asian' | 'popup' | 'cheap';
@@ -13,6 +16,8 @@ export type SpotOverride = {
   open?: boolean;
   hot?: boolean;
   mood?: Mood | null;
+  /** Serving-until time set when a business goes live. */
+  until?: Until;
 };
 
 export type LokalState = {
@@ -44,12 +49,18 @@ export type LokalState = {
   fx: Fx | null;
   /** Claimed drop codes per drop id (this session only). */
   claims: Record<string, { code: string; at: number }>;
+  /** Inbox notes added this session (go-live), newest first. Sample notes come from repo. */
+  notes: Note[];
+  /** Note ids read this session (sample or added). */
+  readNotes: Record<string, true>;
+  /** The business Go live sheet is open. */
+  goLiveOpen: boolean;
 };
 
 /** A one-off celebration. `id` changes each time so hosts can restart. */
 export type Fx = {
   id: number;
-  kind: 'checkIn' | 'report';
+  kind: 'checkIn' | 'report' | 'goLive';
   spotId: string;
   /** Report type for the float and burst emoji. */
   report?: ReportType;
@@ -76,6 +87,9 @@ const initialState: LokalState = {
   voted: {},
   fx: null,
   claims: {},
+  notes: [],
+  readNotes: {},
+  goLiveOpen: false,
 };
 
 type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode'>;
@@ -98,7 +112,25 @@ type Action =
   | { type: 'overrideSpot'; spotId: string; patch: SpotOverride }
   | { type: 'selectSpot'; spotId: string | null }
   | { type: 'focusSpot'; spotId: string }
-  | { type: 'setReportOpen'; open: boolean };
+  | { type: 'setReportOpen'; open: boolean }
+  | { type: 'setGoLiveOpen'; open: boolean }
+  | { type: 'goLive'; session: LiveSession; stop: Stop; note: Note }
+  | { type: 'setLiveStatus'; status: LiveStatusId | null }
+  | { type: 'endService' }
+  | { type: 'readNotes'; ids: string[] };
+
+/** What customers see on the pin for each owner quick status (04 spec 2.4). */
+const STATUS_MOOD: Record<LiveStatusId, { emoji: MoodEmojiKey; key: Mood['key'] }> = {
+  wait15: { emoji: 'wait', key: 'mood.wait15' },
+  closing30: { emoji: 'closing', key: 'mood.closing30' },
+  soldOut: { emoji: 'soldOut', key: 'mood.soldOut' },
+  closed: { emoji: 'closed', key: 'mood.closed' },
+};
+const JUST_PARKED: Mood = { emoji: 'parked', key: 'mood.justParked' };
+
+function patchSpot(state: LokalState, spotId: string, patch: SpotOverride): LokalState['overrides'] {
+  return { ...state.overrides, [spotId]: { ...state.overrides[spotId], ...patch } };
+}
 
 function reducer(state: LokalState, action: Action): LokalState {
   switch (action.type) {
@@ -162,7 +194,7 @@ function reducer(state: LokalState, action: Action): LokalState {
     case 'setThemeMode':
       return { ...state, themeMode: action.mode };
     case 'setBizMode':
-      return { ...state, bizMode: action.on, reportOpen: false };
+      return { ...state, bizMode: action.on, reportOpen: false, goLiveOpen: false };
     case 'setLiveSession':
       return { ...state, liveSession: action.session };
     case 'overrideSpot':
@@ -176,6 +208,52 @@ function reducer(state: LokalState, action: Action): LokalState {
       return { ...state, selectedSpot: action.spotId, focusSeq: state.focusSeq + 1, filter: 'all' };
     case 'setReportOpen':
       return { ...state, reportOpen: action.open };
+    case 'setGoLiveOpen':
+      return { ...state, goLiveOpen: action.open };
+    case 'goLive': {
+      const { session, stop, note } = action;
+      return {
+        ...state,
+        goLiveOpen: false,
+        liveSession: session,
+        overrides: patchSpot(state, session.spotId, {
+          x: stop.x,
+          y: stop.y,
+          open: true,
+          hot: true,
+          mood: JUST_PARKED,
+          until: session.until === 'soldOut' ? { key: 'until.soldOut' } : session.until,
+        }),
+        notes: [note, ...state.notes],
+      };
+    }
+    case 'setLiveStatus': {
+      const live = state.liveSession;
+      if (!live) return state;
+      // Tapping the selected status again clears it (back to "Just parked").
+      const status = live.status === action.status ? null : action.status;
+      const mood = status ? { emoji: STATUS_MOOD[status].emoji, key: STATUS_MOOD[status].key } : JUST_PARKED;
+      return {
+        ...state,
+        liveSession: { ...live, status },
+        overrides: patchSpot(state, live.spotId, { mood, open: status !== 'closed', hot: status === null }),
+      };
+    }
+    case 'endService': {
+      const live = state.liveSession;
+      if (!live) return state;
+      // The truck stays where it parked; it is just closed now.
+      return {
+        ...state,
+        liveSession: null,
+        overrides: patchSpot(state, live.spotId, { open: false, hot: false, mood: null }),
+      };
+    }
+    case 'readNotes': {
+      const readNotes = { ...state.readNotes };
+      action.ids.forEach((id) => (readNotes[id] = true));
+      return { ...state, readNotes };
+    }
     default:
       return state;
   }
@@ -206,6 +284,31 @@ function makeActions(dispatch: (action: Action) => void) {
     focusSpot: (spotId: string) => dispatch({ type: 'focusSpot', spotId }),
     openReport: () => dispatch({ type: 'setReportOpen', open: true }),
     closeReport: () => dispatch({ type: 'setReportOpen', open: false }),
+    openGoLive: () => dispatch({ type: 'setGoLiveOpen', open: true }),
+    closeGoLive: () => dispatch({ type: 'setGoLiveOpen', open: false }),
+    /** Owner goes live at a saved stop: moves the pin, opens it, says "Just parked" and adds an inbox note. */
+    goLive: (stop: Stop, until: ClockTime | 'soldOut') => {
+      const biz = getBusiness();
+      const at = Date.now();
+      dispatch({
+        type: 'goLive',
+        stop,
+        session: { spotId: biz.spotId, stopId: stop.id, until, startedAt: at, status: null },
+        note: {
+          id: `n-live-${at}`,
+          emoji: 'live',
+          tint: '#d8f6ea',
+          text: t('note.wentLive', { name: biz.name, place: stop.name }),
+          ago: t('note.justNow'),
+          go: biz.spotId,
+          unread: true,
+          createdAt: at,
+        },
+      });
+    },
+    setLiveStatus: (status: LiveStatusId | null) => dispatch({ type: 'setLiveStatus', status }),
+    endService: () => dispatch({ type: 'endService' }),
+    readNotes: (ids: string[]) => dispatch({ type: 'readNotes', ids }),
   };
 }
 
@@ -258,3 +361,12 @@ export function useStore(): StoreValue {
 /** Total check-ins across all spots. */
 export const totalCheckIns = (state: LokalState) =>
   Object.values(state.checkIns).reduce((sum, n) => sum + n, 0);
+
+/** Sample notes plus the ones added this session, newest first, with this session's read state. */
+export const useNotes = (): Note[] => {
+  const { notes, readNotes } = useStore().state;
+  return useMemo(
+    () => [...notes, ...getNotes()].map((n) => (readNotes[n.id] ? { ...n, unread: false } : n)),
+    [notes, readNotes],
+  );
+};

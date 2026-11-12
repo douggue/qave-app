@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Badge, Card, Chip, Emoji, Screen, Text, useToast } from '@/components/ui';
+import { getBusiness } from '@/data/repo';
 import { t, type StringKey } from '@/i18n';
 import { levelFor } from '@/state/rep';
 import { totalCheckIns, useStore, type ThemeMode } from '@/state/store';
@@ -14,7 +15,7 @@ const MODES: { mode: ThemeMode; label: StringKey }[] = [
   { mode: 'day', label: 'theme.day' },
 ];
 
-// You tab: quiet rep and level, a few stats, the map look and the Business switch (wired in C5).
+// You tab: quiet rep and level, a few stats, the map look and the Business switch.
 export default function YouScreen() {
   const { c } = useTheme();
   const toast = useToast();
@@ -122,10 +123,14 @@ export default function YouScreen() {
       </Card>
 
       <Pressable
-        onPress={() => toast.show(t('toast.bizSoon'), { emoji: ui.store })}
+        onPress={() => {
+          // The tab bar sees bizMode and lands on Today.
+          actions.setBizMode(true);
+          toast.show(t('biz.switchedIn'), { emoji: ui.store });
+        }}
         accessibilityRole="button"
-        accessibilityLabel={t('you.toBiz')}
-        accessibilityHint={t('you.toBizSub')}
+        accessibilityLabel={t('you.toBizA11y', { name: getBusiness().name })}
+        accessibilityHint={t('you.toBizHint')}
         style={({ pressed }) => [
           styles.row,
           { backgroundColor: c.card, borderColor: c.line },
@@ -136,7 +141,7 @@ export default function YouScreen() {
         <View style={styles.rowText}>
           <Text variant="ui">{t('you.toBiz')}</Text>
           <Text variant="caption" tone="ink2">
-            {t('you.toBizSub')}
+            {getBusiness().name}
           </Text>
         </View>
         <Text variant="heading" tone="ink2" accessibilityElementsHidden importantForAccessibility="no">
