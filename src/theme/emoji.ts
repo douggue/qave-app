@@ -166,6 +166,12 @@ export const ui = {
   thumbDown: '👎',
   noChain: '🚫',
   owner: '🧑‍🍳',
+  send: '↑',
+  bellOn: '🔔',
+  copy: '📋',
+  timer: '⏳',
+  gift: '🎁',
+  sparkle: '✦',
 } as const;
 export type UiEmojiKey = keyof typeof ui;
 

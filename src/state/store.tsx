@@ -33,6 +33,8 @@ export type LokalState = {
   liveSession: LiveSession | null;
   overrides: Record<string, SpotOverride>;
   selectedSpot: string | null;
+  /** Bumped by focusSpot so the map re-centers even when the spot is already selected. */
+  focusSeq: number;
   reportOpen: boolean;
   /** When you checked in at each spot this session (not persisted). */
   hereAt: Record<string, number>;
@@ -40,6 +42,8 @@ export type LokalState = {
   voted: Record<string, true>;
   /** The celebration playing now (rain, rep burst, emoji float). */
   fx: Fx | null;
+  /** Claimed drop codes per drop id (this session only). */
+  claims: Record<string, { code: string; at: number }>;
 };
 
 /** A one-off celebration. `id` changes each time so hosts can restart. */
@@ -66,10 +70,12 @@ const initialState: LokalState = {
   liveSession: null,
   overrides: {},
   selectedSpot: null,
+  focusSeq: 0,
   reportOpen: false,
   hereAt: {},
   voted: {},
   fx: null,
+  claims: {},
 };
 
 type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode'>;
@@ -83,6 +89,7 @@ type Action =
   | { type: 'addReport'; report: Report; mood?: Mood; rep: number }
   | { type: 'vote'; reportId: string; value: 1 | -1; rep: number }
   | { type: 'toggleReminder'; dropId: string }
+  | { type: 'claimDrop'; dropId: string; code: string; at: number; rep: number }
   | { type: 'stillHere'; spotId: string; at: number; rep: number }
   | { type: 'setFilter'; filter: FilterKey }
   | { type: 'setThemeMode'; mode: ThemeMode }
@@ -90,6 +97,7 @@ type Action =
   | { type: 'setLiveSession'; session: LiveSession | null }
   | { type: 'overrideSpot'; spotId: string; patch: SpotOverride }
   | { type: 'selectSpot'; spotId: string | null }
+  | { type: 'focusSpot'; spotId: string }
   | { type: 'setReportOpen'; open: boolean };
 
 function reducer(state: LokalState, action: Action): LokalState {
@@ -135,6 +143,14 @@ function reducer(state: LokalState, action: Action): LokalState {
       else reminders[action.dropId] = true;
       return { ...state, reminders };
     }
+    case 'claimDrop':
+      // Once per drop: a second claim keeps the first code.
+      if (state.claims[action.dropId]) return state;
+      return {
+        ...state,
+        rep: state.rep + action.rep,
+        claims: { ...state.claims, [action.dropId]: { code: action.code, at: action.at } },
+      };
     case 'stillHere':
       return {
         ...state,
@@ -156,6 +172,8 @@ function reducer(state: LokalState, action: Action): LokalState {
       };
     case 'selectSpot':
       return { ...state, selectedSpot: action.spotId };
+    case 'focusSpot':
+      return { ...state, selectedSpot: action.spotId, focusSeq: state.focusSeq + 1, filter: 'all' };
     case 'setReportOpen':
       return { ...state, reportOpen: action.open };
     default:
@@ -174,6 +192,8 @@ function makeActions(dispatch: (action: Action) => void) {
     addReport: (report: Report, rep: number, mood?: Mood) => dispatch({ type: 'addReport', report, rep, mood }),
     vote: (reportId: string, value: 1 | -1, rep = 0) => dispatch({ type: 'vote', reportId, value, rep }),
     toggleReminder: (dropId: string) => dispatch({ type: 'toggleReminder', dropId }),
+    claimDrop: (dropId: string, code: string, rep = 0) =>
+      dispatch({ type: 'claimDrop', dropId, code, rep, at: Date.now() }),
     confirmStillHere: (spotId: string, rep: number) =>
       dispatch({ type: 'stillHere', spotId, at: Date.now(), rep }),
     setFilter: (filter: FilterKey) => dispatch({ type: 'setFilter', filter }),
@@ -182,6 +202,8 @@ function makeActions(dispatch: (action: Action) => void) {
     setLiveSession: (session: LiveSession | null) => dispatch({ type: 'setLiveSession', session }),
     overrideSpot: (spotId: string, patch: SpotOverride) => dispatch({ type: 'overrideSpot', spotId, patch }),
     selectSpot: (spotId: string | null) => dispatch({ type: 'selectSpot', spotId }),
+    /** Select a spot and ask the map to center it (Ask, Drops, inbox). Clears the filter. */
+    focusSpot: (spotId: string) => dispatch({ type: 'focusSpot', spotId }),
     openReport: () => dispatch({ type: 'setReportOpen', open: true }),
     closeReport: () => dispatch({ type: 'setReportOpen', open: false }),
   };

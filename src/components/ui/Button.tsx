@@ -19,6 +19,9 @@ type Props = {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   fullWidth?: boolean;
+  /** 'switch' for on/off buttons such as Remind me; pass `checked` with it. */
+  role?: 'button' | 'switch';
+  checked?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -35,6 +38,8 @@ export function Button({
   accessibilityLabel,
   accessibilityHint,
   fullWidth = true,
+  role = 'button',
+  checked,
   style,
 }: Props) {
   const { c, isNight } = useTheme();
@@ -60,10 +65,10 @@ export function Button({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      accessibilityRole="button"
+      accessibilityRole={role}
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: !!disabled }}
+      accessibilityState={role === 'switch' ? { disabled: !!disabled, checked: !!checked } : { disabled: !!disabled }}
       style={({ pressed }) => [
         fullWidth ? styles.full : styles.auto,
         variant === 'primary' && isNight && { ...glow('#ff3c50', 14, 0.6), shadowOffset: { width: 0, height: 8 } },

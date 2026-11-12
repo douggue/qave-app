@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { AccessibilityInfo, Animated, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
 import { EmojiFloat } from '@/components/celebrate/EmojiFloat';
 import { LokalMap, type LokalMapHandle } from '@/components/map/LokalMap';
@@ -78,12 +78,18 @@ export default function MapScreen() {
 
   // Focus requests from elsewhere (Ask "Show on map", inbox) arrive through selectedSpot.
   const lastFocused = useRef<string | null>(null);
+  const lastSeq = useRef(state.focusSeq);
+  const focusSeq = state.focusSeq;
   useEffect(() => {
+    if (focusSeq !== lastSeq.current) {
+      lastSeq.current = focusSeq;
+      lastFocused.current = null;
+    }
     if (!height || !selected || lastFocused.current === selected.id) return;
     lastFocused.current = selected.id;
     mapRef.current?.animateTo(selected.x, selected.y, undefined, focusOffset);
     setSnap((s) => (s === 'peek' ? 'half' : s));
-  }, [selected, height, focusOffset]);
+  }, [selected, height, focusOffset, focusSeq]);
 
   const close = () => {
     lastFocused.current = null;
@@ -98,6 +104,18 @@ export default function MapScreen() {
     },
     [focus],
   );
+
+  // Stretch: Surprise me picks an open, highly rated spot you have not checked in at yet.
+  const surprise = () => {
+    const pool = spots.filter((s) => s.open && s.rating >= 4.6 && !state.checkIns[s.id] && s.id !== state.selectedSpot);
+    if (pool.length === 0) {
+      toast.show(t('toast.surpriseNone'), { emoji: ui.dice });
+      return;
+    }
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    onPin(pick);
+    AccessibilityInfo.announceForAccessibility(t('toast.surprise', { name: pick.name }));
+  };
 
   const toggleTheme = () => {
     actions.setThemeMode(isNight ? 'day' : 'night');
@@ -137,6 +155,7 @@ export default function MapScreen() {
           label={t(isNight ? 'map.toDay' : 'map.toNight')}
           onPress={toggleTheme}
         />
+        <IconButton icon={ui.dice} label={t('map.surprise')} onPress={surprise} />
         <IconButton icon={ui.plus} label={t('map.zoomIn')} onPress={() => mapRef.current?.zoomIn()} />
         <IconButton icon={ui.minus} label={t('map.zoomOut')} onPress={() => mapRef.current?.zoomOut()} />
         <IconButton icon={ui.recenter} label={t('map.recenter')} onPress={() => mapRef.current?.recenter(focusOffset)} />

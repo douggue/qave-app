@@ -14,19 +14,30 @@ type Props = {
   tone?: 'glass' | 'solid';
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  /** 'radio' inside a radiogroup (theme picker); selected then reads as checked. */
+  role?: 'button' | 'radio';
 };
 
 /** A pill that grows with its label. No fixed width, no truncation. */
-export function Chip({ label, icon, selected, onPress, tone = 'solid', accessibilityLabel, accessibilityHint }: Props) {
+export function Chip({
+  label,
+  icon,
+  selected,
+  onPress,
+  tone = 'solid',
+  accessibilityLabel,
+  accessibilityHint,
+  role = 'button',
+}: Props) {
   const { c, isNight } = useTheme();
   return (
     <Pressable
       onPress={onPress}
       hitSlop={{ top: 4, bottom: 4 }}
-      accessibilityRole="button"
+      accessibilityRole={role}
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ selected: !!selected }}
+      accessibilityState={role === 'radio' ? { checked: !!selected } : { selected: !!selected }}
       style={({ pressed }) => [
         styles.chip,
         { backgroundColor: tone === 'glass' ? c.glass : c.card, borderColor: c.line },

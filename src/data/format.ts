@@ -147,3 +147,31 @@ export function formatPrice(price: number): string {
     return `$${price}`;
   }
 }
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** Ticking countdown text: "m:ss" under an hour, "h:mm:ss" under a day, else "1d 3h". */
+export function formatCountdown(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(total / 86_400);
+  const h = Math.floor((total % 86_400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (d > 0) return t('time.countDH', { d, h });
+  if (h > 0) return `${h}:${pad2(m)}:${pad2(s)}`;
+  return `${m}:${pad2(s)}`;
+}
+
+/** The same countdown in words, by the minute, for screen readers (never read every tick). */
+export function countdownWords(ms: number): string {
+  const totalMin = Math.max(0, Math.ceil(ms / 60_000));
+  const d = Math.floor(totalMin / 1440);
+  const h = Math.floor((totalMin % 1440) / 60);
+  const m = totalMin % 60;
+  const days = d === 1 ? t('time.day1') : t('time.days', { n: d });
+  const hours = h === 1 ? t('time.hour1') : t('time.hours', { n: h });
+  const mins = m <= 1 ? t('time.min1') : t('time.mins', { n: m });
+  if (d > 0) return h > 0 ? t('time.words2', { a: days, b: hours }) : days;
+  if (h > 0) return m > 0 ? t('time.words2', { a: hours, b: mins }) : hours;
+  return mins;
+}
