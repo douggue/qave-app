@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { FoodArt } from '@/components/cards/FoodArt';
 import { SpotRow, TrendCard } from '@/components/cards/SpotCards';
 import { StillThere } from '@/components/spot/Freshness';
-import { Badge, Button, Emoji, Text, useToast } from '@/components/ui';
+import { Badge, Button, Emoji, Text } from '@/components/ui';
 import {
   closingLeft,
   closingText,
@@ -17,9 +17,9 @@ import {
 } from '@/data/format';
 import type { Spot } from '@/data/types';
 import { APP_START, useClock } from '@/hooks/use-clock';
+import { useCheckIn } from '@/hooks/use-check-in';
 import { matchesFilter } from '@/hooks/use-spots';
 import { t } from '@/i18n';
-import { REP } from '@/state/rep';
 import { useStore } from '@/state/store';
 import { mood as moodEmoji, report as reportEmoji, status as statusEmoji, ui } from '@/theme/emoji';
 import { minTap } from '@/theme/tokens';
@@ -97,18 +97,12 @@ export function SheetExplore({ spots, onFocus }: ExploreProps) {
 /** Preview state for the selected spot. */
 export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => void }) {
   const { c } = useTheme();
-  const { state, actions } = useStore();
-  const toast = useToast();
+  const { actions } = useStore();
   const now = useClock(60_000);
   const left = closingLeft(spot, now, APP_START);
   const mood = moodText(spot);
-  const checkedIn = (state.checkIns[spot.id] ?? 0) > 0;
+  const { here: checkedIn, checkIn } = useCheckIn(spot);
   const friends = spot.friends ?? [];
-
-  const checkIn = () => {
-    actions.checkIn(spot.id, REP.checkIn);
-    toast.show(t('checkin.done', { spot: spot.name }), { emoji: ui.check });
-  };
 
   return (
     <View style={styles.preview}>
@@ -173,8 +167,8 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
             variant={checkedIn ? 'soft' : 'primary'}
             icon={checkedIn ? ui.check : undefined}
             label={checkedIn ? t('act.here') : t('act.checkIn')}
-            accessibilityLabel={t('act.checkInA11y', { name: spot.name })}
-            disabled={!spot.open}
+            accessibilityLabel={t(checkedIn ? 'act.hereA11y' : 'act.checkInA11y', { name: spot.name })}
+            disabled={checkedIn}
             onPress={checkIn}
           />
         </View>

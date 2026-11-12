@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
 
-import type { LiveSession, Mood, Report } from '@/data/types';
+import type { LiveSession, Mood, Report, ReportType } from '@/data/types';
 
 export type ThemeMode = 'auto' | 'night' | 'day';
 export type FilterKey = 'all' | 'open' | 'mobile' | 'tacos' | 'bbq' | 'sweets' | 'asian' | 'popup' | 'cheap';
@@ -34,6 +34,22 @@ export type LokalState = {
   overrides: Record<string, SpotOverride>;
   selectedSpot: string | null;
   reportOpen: boolean;
+  /** When you checked in at each spot this session (not persisted). */
+  hereAt: Record<string, number>;
+  /** Report ids you have voted on at least once (first vote gives rep). */
+  voted: Record<string, true>;
+  /** The celebration playing now (rain, rep burst, emoji float). */
+  fx: Fx | null;
+};
+
+/** A one-off celebration. `id` changes each time so hosts can restart. */
+export type Fx = {
+  id: number;
+  kind: 'checkIn' | 'report';
+  spotId: string;
+  /** Report type for the float and burst emoji. */
+  report?: ReportType;
+  rep: number;
 };
 
 const initialState: LokalState = {
@@ -51,6 +67,9 @@ const initialState: LokalState = {
   overrides: {},
   selectedSpot: null,
   reportOpen: false,
+  hereAt: {},
+  voted: {},
+  fx: null,
 };
 
 type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode'>;
@@ -58,7 +77,9 @@ type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode'>;
 type Action =
   | { type: 'hydrate'; data: Partial<Persisted> }
   | { type: 'addRep'; amount: number }
-  | { type: 'checkIn'; spotId: string; rep: number }
+  | { type: 'checkIn'; spotId: string; rep: number; at: number }
+  | { type: 'celebrate'; fx: Omit<Fx, 'id'> }
+  | { type: 'clearFx'; id: number }
   | { type: 'addReport'; report: Report; mood?: Mood; rep: number }
   | { type: 'vote'; reportId: string; value: 1 | -1; rep: number }
   | { type: 'toggleReminder'; dropId: string }
@@ -82,7 +103,12 @@ function reducer(state: LokalState, action: Action): LokalState {
         ...state,
         rep: state.rep + action.rep,
         checkIns: { ...state.checkIns, [action.spotId]: (state.checkIns[action.spotId] ?? 0) + 1 },
+        hereAt: { ...state.hereAt, [action.spotId]: action.at },
       };
+    case 'celebrate':
+      return { ...state, fx: { ...action.fx, id: (state.fx?.id ?? 0) + 1 } };
+    case 'clearFx':
+      return state.fx?.id === action.id ? { ...state, fx: null } : state;
     case 'addReport': {
       const spotId = action.report.spotId;
       const overrides = action.mood
@@ -94,7 +120,14 @@ function reducer(state: LokalState, action: Action): LokalState {
       const votes = { ...state.votes };
       if (votes[action.reportId] === action.value) delete votes[action.reportId];
       else votes[action.reportId] = action.value;
-      return { ...state, votes, rep: state.rep + action.rep };
+      // Only the first vote on a report earns rep; changing it later is free.
+      const first = !state.voted[action.reportId];
+      return {
+        ...state,
+        votes,
+        voted: first ? { ...state.voted, [action.reportId]: true } : state.voted,
+        rep: state.rep + (first ? action.rep : 0),
+      };
     }
     case 'toggleReminder': {
       const reminders = { ...state.reminders };
@@ -135,7 +168,9 @@ const STORAGE_KEY = 'lokal.state.v1';
 function makeActions(dispatch: (action: Action) => void) {
   return {
     addRep: (amount: number) => dispatch({ type: 'addRep', amount }),
-    checkIn: (spotId: string, rep: number) => dispatch({ type: 'checkIn', spotId, rep }),
+    checkIn: (spotId: string, rep: number) => dispatch({ type: 'checkIn', spotId, rep, at: Date.now() }),
+    celebrate: (fx: Omit<Fx, 'id'>) => dispatch({ type: 'celebrate', fx }),
+    clearFx: (id: number) => dispatch({ type: 'clearFx', id }),
     addReport: (report: Report, rep: number, mood?: Mood) => dispatch({ type: 'addReport', report, rep, mood }),
     vote: (reportId: string, value: 1 | -1, rep = 0) => dispatch({ type: 'vote', reportId, value, rep }),
     toggleReminder: (dropId: string) => dispatch({ type: 'toggleReminder', dropId }),

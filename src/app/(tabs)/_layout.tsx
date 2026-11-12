@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router/js-tabs';
 import { View } from 'react-native';
 
 import { TabBar } from '@/components/nav/TabBar';
-import { ReportPlaceholder } from '@/components/report/ReportPlaceholder';
 import { useTheme } from '@/theme/use-theme';
 
 export default function TabsLayout() {
@@ -18,7 +17,6 @@ export default function TabsLayout() {
         <Tabs.Screen name="ask" />
         <Tabs.Screen name="you" />
       </Tabs>
-      <ReportPlaceholder />
     </View>
   );
 }

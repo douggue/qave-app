@@ -159,6 +159,13 @@ export const ui = {
   chevron: '›',
   store: '🏪',
   construction: '🚧',
+  go: '🧭',
+  pin: '📍',
+  share: '📤',
+  thumbUp: '👍',
+  thumbDown: '👎',
+  noChain: '🚫',
+  owner: '🧑‍🍳',
 } as const;
 export type UiEmojiKey = keyof typeof ui;
 

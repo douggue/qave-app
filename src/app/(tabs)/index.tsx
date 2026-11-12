@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
+import { EmojiFloat } from '@/components/celebrate/EmojiFloat';
 import { LokalMap, type LokalMapHandle } from '@/components/map/LokalMap';
 import { SpotPin } from '@/components/map/SpotPin';
 import { BottomSheet, type Snap } from '@/components/sheet/BottomSheet';
@@ -11,7 +12,7 @@ import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { matchesFilter, useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { ui } from '@/theme/emoji';
+import { report as reportEmoji, ui } from '@/theme/emoji';
 import { ease, native } from '@/theme/motion';
 import { useTheme } from '@/theme/use-theme';
 import { IconButton, MapTopBar } from '@/features/map/MapOverlay';
@@ -103,6 +104,10 @@ export default function MapScreen() {
     toast.show(t(isNight ? 'map.themeDay' : 'map.themeNight'), { emoji: isNight ? ui.sun : ui.moon });
   };
 
+  // A fresh report rises from its pin as a short emoji float (02 spec 7.8).
+  const fx = state.fx;
+  const floatSpot = fx?.kind === 'report' && fx.report ? spots.find((s) => s.id === fx.spotId) : undefined;
+
   // Selected pin last, so it draws on top.
   const ordered = [...spots].sort((x, y) => Number(x.id === state.selectedSpot) - Number(y.id === state.selectedSpot));
 
@@ -119,6 +124,9 @@ export default function MapScreen() {
             onPress={onPin}
           />
         ))}
+        {fx && floatSpot && fx.report ? (
+          <EmojiFloat key={fx.id} x={floatSpot.x} y={floatSpot.y} emoji={reportEmoji[fx.report]} />
+        ) : null}
       </LokalMap>
 
       <MapTopBar />

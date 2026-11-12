@@ -104,3 +104,46 @@ export function pinLabel(spot: Spot): string {
   const mood = moodText(spot);
   return mood ? t('pin.a11yMood', { label, mood }) : label;
 }
+
+/** Short weekday name, Monday first (0 = Monday). */
+export function weekdayShort(mondayIndex: number): string {
+  const date = new Date(2024, 0, 1 + mondayIndex); // 1 Jan 2024 was a Monday.
+  try {
+    return date.toLocaleDateString(locale, { weekday: 'short' });
+  } catch {
+    return String(mondayIndex + 1);
+  }
+}
+
+/** Today as a Monday-first index. */
+export const todayIndex = (now: number) => (new Date(now).getDay() + 6) % 7;
+
+/** "just now", "4 min ago", "2 hr ago" for a report. */
+export function reportAgo(report: Report, now: number, appStart: number): string {
+  const at = report.createdAt ?? appStart - (report.ageMin ?? 0) * 60_000;
+  const min = Math.max(0, Math.floor((now - at) / 60_000));
+  if (min < 1) return t('spot.justNow');
+  if (min < 60) return t('spot.minAgo', { min });
+  return t('spot.hrAgo', { hr: Math.floor(min / 60) });
+}
+
+const BUSY_WORDS: { min: number; key: StringKey }[] = [
+  { min: 9, key: 'busy.peak' },
+  { min: 6, key: 'busy.busy' },
+  { min: 3, key: 'busy.little' },
+  { min: 1, key: 'busy.quiet' },
+  { min: 0, key: 'busy.closed' },
+];
+export const busyWord = (v: number) => t((BUSY_WORDS.find((w) => v >= w.min) ?? BUSY_WORDS[4]).key);
+
+export function formatPrice(price: number): string {
+  try {
+    return price.toLocaleString(locale, {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: price % 1 ? 2 : 0,
+    });
+  } catch {
+    return `$${price}`;
+  }
+}

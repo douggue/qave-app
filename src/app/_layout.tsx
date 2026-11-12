@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { AnimatedSplash } from '@/components/animated-splash';
+import { FxHost } from '@/components/celebrate/FxHost';
+import { ReportRadial } from '@/components/report/ReportRadial';
 import { ToastProvider } from '@/components/ui';
 import { brand } from '@/constants/brand';
 import { useLiveUpdates } from '@/hooks/use-live-updates';
@@ -43,7 +45,11 @@ export default function RootLayout() {
         <ToastProvider>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: brand.night } }}>
             <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="spot/[id]" />
           </Stack>
+          {/* Overlays above every screen, below the toast: the Report radial and celebrations. */}
+          <ReportRadial />
+          <FxHost />
         </ToastProvider>
         {!splashDone && <AnimatedSplash onReady={hideNativeSplash} onDone={finishSplash} />}
       </View>
