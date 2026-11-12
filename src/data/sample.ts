@@ -3,11 +3,31 @@
 // Screens never import this file: they go through src/data/repo.ts, which will
 // switch to Supabase later.
 
-import type { Business, Drop, LiveStatus, Note, Person, Report, Spot, Tick } from './types';
+import type { Business, Drop, LiveStatus, MapLabel, Note, Person, Report, Spot, Tick } from './types';
 
 /** The world is 1400x1800 units. "You" stand at ME. */
 export const WORLD = { width: 1400, height: 1800 } as const;
 export const ME = { x: 820, y: 700 } as const;
+
+/** Place names drawn on the illustrated map (proper nouns, not UI copy). */
+export const MAP_LABELS: MapLabel[] = [
+  { kind: 'hood', text: 'DOWNTOWN', x: 560, y: 520 },
+  { kind: 'hood', text: 'EAST AUSTIN', x: 1090, y: 470 },
+  { kind: 'hood', text: 'SOUTH CONGRESS', x: 690, y: 1215 },
+  { kind: 'hood', text: 'ZILKER PARK', x: 170, y: 1070 },
+  { kind: 'hood', text: 'HYDE PARK', x: 560, y: 160 },
+  { kind: 'hood', text: 'BOULDIN', x: 420, y: 1240 },
+  { kind: 'hood', text: 'HOLLY', x: 1150, y: 1110 },
+  { kind: 'hood', text: 'PEASE PARK', x: 90, y: 340 },
+  { kind: 'street', text: 'Congress Ave', x: 790, y: 230 },
+  { kind: 'street', text: 'E 6th St', x: 1230, y: 590 },
+  { kind: 'street', text: 'Cesar Chavez St', x: 80, y: 772 },
+  { kind: 'street', text: 'Riverside Dr', x: 1040, y: 1020 },
+  { kind: 'street', text: 'S 1st St', x: 630, y: 1560 },
+  { kind: 'street', text: 'N Lamar Blvd', x: 392, y: 420, rotate: -87 },
+  { kind: 'water', text: 'Lady Bird Lake', x: 200, y: 900 },
+  { kind: 'shield', text: '35', x: 1007, y: 263 },
+];
 
 // Fictional coordinates spread over central Austin, only for the directions link.
 const geo = (x: number, y: number) => ({

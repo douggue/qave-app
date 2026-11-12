@@ -145,3 +145,12 @@ export type Business = {
   };
   nudge: { count: number; food: string; area: string };
 };
+
+/** A place name drawn on the illustrated map. */
+export type MapLabel = {
+  kind: 'hood' | 'street' | 'water' | 'shield';
+  text: string;
+  x: number;
+  y: number;
+  rotate?: number;
+};

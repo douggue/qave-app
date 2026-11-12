@@ -31,11 +31,91 @@ export const en = {
   'common.showOnMap': 'Show on map',
   'common.showOnMapA11y': 'Show {name} on the map',
 
-  // Map (placeholder until C2)
+  // Map home
   'map.title': 'Live near you',
   'map.summary': '{count} local spots near you. {open} open now. 0 chains.',
-  'map.placeholder': 'The live map lands in the next build.',
   'map.you': 'You are here',
+  'map.a11y': 'Map of local food spots. Drag to move around.',
+  'map.askPill': 'Ask Lokal: "tacos open now under $10"',
+  'map.askA11y': 'Ask Lokal',
+  'map.askHint': 'Opens the Ask tab',
+  'map.bell': 'Notifications, {n} unread',
+  'map.toDay': 'Switch to day map',
+  'map.toNight': 'Switch to night map',
+  'map.themeNight': 'Night map on',
+  'map.themeDay': 'Day map on',
+  'map.zoomIn': 'Zoom in',
+  'map.zoomOut': 'Zoom out',
+  'map.recenter': 'Back to you',
+  'map.filters': 'Filters',
+  'map.ticker': '{handle} {text}',
+
+  // Pins
+  'pin.a11y': '{name}, {kind}, {status}, {distance}',
+  'pin.a11yMood': '{label}, reported: {mood}',
+  'pin.hint': 'Shows details',
+
+  // Status lines
+  'status.hereNow': 'Here now · until {until}',
+  'status.open': 'Open · until {until}',
+  'status.next': 'Next: {until}',
+  'status.closesIn': 'Closes in {min} min',
+  'status.closingNow': 'Closing now',
+  'time.dayAt': '{day} {time}',
+
+  // Freshness (idea A)
+  'fresh.you': 'You confirmed it just now',
+  'fresh.min': 'Seen {min} min ago',
+  'fresh.hr': 'Last seen {hr} hr ago. Still there?',
+  'fresh.none': 'No recent reports. Still there?',
+  'fresh.yep': 'Yep, still here',
+  'fresh.thanks': 'Thanks',
+  'fresh.yepA11y': 'Confirm {name} is still here',
+
+  // Distance
+  'dist.walk': '{n} min walk',
+  'dist.mi': '{d} mi',
+  'dist.km': '{d} km',
+
+  // Bottom sheet
+  'sheet.title': 'Live near you',
+  'sheet.sub': '{count} local spots · {open} open now · 0 chains',
+  'sheet.trending': 'Trending right now',
+  'sheet.closest': 'Closest to you',
+  'sheet.a11y': 'Spot list',
+  'sheet.handle': 'Spot list, {state}',
+  'sheet.handleHint': 'Double tap to show more',
+  'sheet.peek': 'collapsed',
+  'sheet.half': 'half open',
+  'sheet.full': 'expanded',
+  'sheet.hint': "Tap a sticker to see what's cooking",
+  'sheet.close': 'Close preview',
+  'sheet.noMatch': 'Nothing matches right now. Try another filter.',
+  'filter.announce': '{n} spots match {filter}',
+
+  // Spot meta
+  'spot.rating': '{r} ({n})',
+  'spot.meta': '{r} · {price} · {kind}',
+  'spot.metaFull': '{r} ({n}) · {price} · {kind}',
+  'spot.ratingA11y': 'Rated {r} out of 5 from {n} reviews',
+  'spot.distHood': '{distance} · {hood}',
+  'spot.friends1': '{name} loves this',
+  'spot.friendsN': '{name} and {n} friends love this',
+  'spot.rowA11y': '{name}, {status}, {distance}',
+  'spot.openPage': 'See menu, busy times & reviews',
+  'spot.loading': 'This spot page lands in the next build.',
+  'spot.notFound': 'We could not find that spot.',
+
+  // Actions
+  'act.checkIn': 'Check in',
+  'act.here': "You're here",
+  'act.report': 'Report',
+  'act.open': 'Open',
+  'act.openA11y': 'Open the page for {name}',
+  'act.reportA11y': 'Report what is happening at {name}',
+  'act.checkInA11y': 'Check in at {name}',
+  'checkin.done': "You're checked in at {spot}",
+  'rep.plus': '+{n} rep',
 
   // Filters
   'filter.all': 'All',

@@ -161,3 +161,13 @@ export const ui = {
   construction: '🚧',
 } as const;
 export type UiEmojiKey = keyof typeof ui;
+
+/** Icons for the map filter chips (keys match FilterKey in the store). */
+export const filterIcon: Partial<Record<string, string>> = {
+  mobile: kind.truck,
+  tacos: food.taco,
+  bbq: food.bbq,
+  sweets: food.croissant,
+  asian: food.pho,
+  popup: kind.popup,
+};
