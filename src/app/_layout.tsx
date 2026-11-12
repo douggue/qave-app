@@ -12,7 +12,9 @@ import { FxHost } from '@/components/celebrate/FxHost';
 import { ReportRadial } from '@/components/report/ReportRadial';
 import { ToastProvider } from '@/components/ui';
 import { brand } from '@/constants/brand';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { useLiveUpdates } from '@/hooks/use-live-updates';
+import { getLocale } from '@/i18n';
 import { StoreProvider } from '@/state/store';
 
 // Keep the native splash up until the animated splash is ready to take over.
@@ -20,6 +22,10 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   useLiveUpdates();
+  // Web renders in RENDER_LOCALE until hydration; then the tree remounts once in the device
+  // locale if it differs (strings are not reactive). Native keeps one key from the start.
+  const hydrated = useHydrated();
+  const localeKey = hydrated ? getLocale() : 'pre';
   const [fontsLoaded, fontError] = useFonts({ Unbounded_800ExtraBold, Figtree_700Bold });
   const [splashDone, setSplashDone] = useState(false);
   // Never hold the app back for fonts: after 1.5 s, start with the fallback font.
@@ -40,7 +46,7 @@ export default function RootLayout() {
 
   return (
     <StoreProvider>
-      <View style={{ flex: 1, backgroundColor: brand.night }}>
+      <View key={localeKey === 'en-US' || localeKey === 'pre' ? 'app' : localeKey} style={{ flex: 1, backgroundColor: brand.night }}>
         <StatusBar style="light" />
         <ToastProvider>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: brand.night } }}>

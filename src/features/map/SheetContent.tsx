@@ -1,13 +1,12 @@
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
 import { SpotRow, TrendCard } from '@/components/cards/SpotCards';
-import { StillThere } from '@/components/spot/Freshness';
-import { Badge, Button, Emoji, Text } from '@/components/ui';
+import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
+import { Badge, Button, Emoji, LiveText, Text, useToast } from '@/components/ui';
 import {
   closingLeft,
-  closingText,
   formatDistance,
   kindLabel,
   milesFromMe,
@@ -15,13 +14,14 @@ import {
   priceText,
   statusText,
 } from '@/data/format';
+import { directionsUrl } from '@/data/links';
 import type { Spot } from '@/data/types';
-import { APP_START, useClock } from '@/hooks/use-clock';
+import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useCheckIn } from '@/hooks/use-check-in';
 import { matchesFilter } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { mood as moodEmoji, report as reportEmoji, status as statusEmoji, ui } from '@/theme/emoji';
+import { mood as moodEmoji, report as reportEmoji, ui } from '@/theme/emoji';
 import { minTap } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -54,7 +54,7 @@ export function SheetExplore({ spots, onFocus }: ExploreProps) {
 
   const matching = spots.filter((s) => matchesFilter(s, filter));
   const rows = matching
-    .map((spot) => ({ spot, left: closingLeft(spot, now, APP_START), miles: milesFromMe(spot) }))
+    .map((spot) => ({ spot, left: closingLeft(spot, now, getAppStart()), miles: milesFromMe(spot) }))
     .sort((a, b) => {
       if (a.left !== null && b.left !== null) return a.left - b.left;
       if (a.left !== null) return -1;
@@ -98,8 +98,7 @@ export function SheetExplore({ spots, onFocus }: ExploreProps) {
 export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => void }) {
   const { c } = useTheme();
   const { actions } = useStore();
-  const now = useClock(60_000);
-  const left = closingLeft(spot, now, APP_START);
+  const toast = useToast();
   const mood = moodText(spot);
   const { here: checkedIn, checkIn } = useCheckIn(spot);
   const friends = spot.friends ?? [];
@@ -125,10 +124,11 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
           </View>
           <View style={styles.inline}>
             <View style={[styles.dot, { backgroundColor: spot.open ? c.mintFill : c.ink3 }]} />
-            <Text variant="ui" tone={spot.open ? 'mint' : 'ink2'} style={styles.shrink}>
+            <LiveText variant="ui" tone={spot.open ? 'mint' : 'ink2'} style={styles.shrink} placeholderWidth="70%">
               {statusText(spot)}
-            </Text>
+            </LiveText>
           </View>
+          <ClosingSoon spot={spot} />
         </View>
         <Pressable
           onPress={onClose}
@@ -136,18 +136,17 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
           accessibilityLabel={t('sheet.close')}
           style={[styles.close, { backgroundColor: c.card2 }]}
         >
-          <Text variant="ui" tone="ink2">
+          <Text variant="ui" tone="ink2" accessible={false} accessibilityElementsHidden importantForAccessibility="no">
             {ui.close}
           </Text>
         </Pressable>
       </View>
 
       <View style={styles.wrapRow}>
-        {left !== null ? <Badge tone="amber" icon={statusEmoji.closingSoon} label={closingText(left)} /> : null}
         {mood && spot.mood ? <Badge tone="neon" icon={moodEmoji[spot.mood.emoji]} label={mood} /> : null}
-        <Text variant="caption" tone="ink2">
+        <LiveText variant="caption" tone="ink2" placeholderWidth={140}>
           {t('spot.distHood', { distance: formatDistance(spot), hood: spot.hood })}
-        </Text>
+        </LiveText>
       </View>
 
       <StillThere spot={spot} />
@@ -185,9 +184,12 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
           <Button
             size="sm"
             variant="ghost"
-            label={t('act.open')}
-            accessibilityLabel={t('act.openA11y', { name: spot.name })}
-            onPress={() => router.push({ pathname: '/spot/[id]', params: { id: spot.id } })}
+            icon={ui.go}
+            label={t('act.go')}
+            accessibilityLabel={t('act.goA11y', { name: spot.name })}
+            onPress={() =>
+              Linking.openURL(directionsUrl(spot)).catch(() => toast.show(t('toast.mapsError'), { emoji: ui.go }))
+            }
           />
         </View>
       </View>

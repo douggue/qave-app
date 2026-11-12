@@ -164,7 +164,6 @@ export const ui = {
   share: '📤',
   thumbUp: '👍',
   thumbDown: '👎',
-  noChain: '🚫',
   owner: '🧑‍🍳',
   send: '↑',
   bellOn: '🔔',

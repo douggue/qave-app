@@ -3,15 +3,17 @@ import { Linking, Pressable, ScrollView, StyleSheet, useWindowDimensions, View }
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { StillThere } from '@/components/spot/Freshness';
-import { Badge, Button, Card, Emoji, Placeholder, Text, useToast } from '@/components/ui';
+import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
+import { Badge, Button, Card, Emoji, LiveText, Placeholder, Text, useToast } from '@/components/ui';
 import { formatDistance, isMobile, kindLabel, priceText, statusText } from '@/data/format';
 import { directionsUrl } from '@/data/links';
 import type { Spot } from '@/data/types';
 import { LiveReports } from '@/features/spot/LiveReports';
 import { AiSummary, BusyBars, ScheduleStrip, TopDishes, VibeChips } from '@/features/spot/SpotSections';
+import { getSpots } from '@/data/repo';
 import { useCheckIn } from '@/hooks/use-check-in';
 import { useClock } from '@/hooks/use-clock';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
@@ -19,7 +21,16 @@ import { avatar, kind as kindEmoji, ui } from '@/theme/emoji';
 import { minTap, screenPad, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-const BADGE_TONES = ['mint', 'neon', 'amber'] as const;
+/** Sentence case for a label that sits first in a row ("food truck" -> "Food truck"). */
+const sentence = (text: string) => text.charAt(0).toLocaleUpperCase() + text.slice(1);
+
+/**
+ * Web static output pre-renders one page per sample spot, so /spot/guera hydrates against
+ * HTML for that spot (not the generic [id] page). Swap for a Supabase query later.
+ */
+export function generateStaticParams(): { id: string }[] {
+  return getSpots().map((s) => ({ id: s.id }));
+}
 
 // The spot page: a stack push over the tabs, so the map keeps its pan, zoom, filter and sheet.
 export default function SpotScreen() {
@@ -47,7 +58,11 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
   const { actions } = useStore();
   const toast = useToast();
   const now = useClock(60_000);
+  const hydrated = useHydrated();
   const { here, checkIn } = useCheckIn(spot);
+  const kind = kindLabel(spot);
+  // The kind already shows in the meta row, so skip a badge that repeats it.
+  const badges = spot.badges.filter((b) => b.toLocaleLowerCase() !== kind.toLocaleLowerCase());
   const friends = spot.friends ?? [];
   const artH = height < 700 ? 220 : 260;
 
@@ -89,12 +104,12 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
             <View style={styles.inline}>
               <Emoji size={14}>{kindEmoji[spot.kind]}</Emoji>
               <Text variant="ui" tone="ink2">
-                {kindLabel(spot)}
+                {sentence(kind)}
               </Text>
             </View>
-            <Text variant="ui" tone="ink2">
+            <LiveText variant="ui" tone="ink2" placeholderWidth={56}>
               {formatDistance(spot)}
-            </Text>
+            </LiveText>
           </View>
 
           {friends.length ? (
@@ -115,10 +130,10 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
           ) : null}
 
           <View style={styles.wrapRow}>
-            {spot.badges.map((b, i) => (
-              <Badge key={b} label={b} tone={BADGE_TONES[i % BADGE_TONES.length]} />
+            <Badge label={t('spot.notChain')} accessibilityLabel={t('spot.notChainA11y')} tone="mint" icon={ui.check} />
+            {badges.map((b) => (
+              <Badge key={b} label={b} tone="neutral" />
             ))}
-            <Badge label={t('spot.notChain')} accessibilityLabel={t('spot.notChainA11y')} tone="grape" icon={ui.noChain} />
           </View>
           {spot.owner ? (
             <Text variant="caption" tone="ink2">
@@ -130,16 +145,17 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
             <View style={styles.wrapRow}>
               <View style={[styles.inline, styles.grow]}>
                 <View style={[styles.dot, { backgroundColor: spot.open ? c.mintFill : c.ink3 }]} />
-                <Text variant="ui" tone={spot.open ? 'mint' : 'ink2'} style={styles.shrink}>
+                <LiveText variant="ui" tone={spot.open ? 'mint' : 'ink2'} style={styles.shrink} placeholderWidth="70%">
                   {statusText(spot)}
-                </Text>
+                </LiveText>
               </View>
               <Text variant="caption" tone="ink2">
                 {spot.hood}
               </Text>
             </View>
+            <ClosingSoon spot={spot} />
             <StillThere spot={spot} />
-            {isMobile(spot) && spot.schedule ? <ScheduleStrip spot={spot} now={now} /> : null}
+            {isMobile(spot) && spot.schedule ? <ScheduleStrip spot={spot} now={now} ready={hydrated} /> : null}
           </Card>
 
           <AiSummary spot={spot} />
@@ -177,7 +193,7 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
             </View>
           </View>
 
-          <BusyBars spot={spot} now={now} />
+          <BusyBars spot={spot} now={now} ready={hydrated} />
           <TopDishes spot={spot} />
           <VibeChips spot={spot} />
           <LiveReports spot={spot} onReport={report} />

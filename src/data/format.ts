@@ -1,4 +1,4 @@
-import { locale, t, type StringKey } from '@/i18n';
+import { getLocale, t, type StringKey } from '@/i18n';
 
 import { ME } from './repo';
 import type { ClockTime, Report, Spot, Until } from './types';
@@ -16,20 +16,36 @@ const KIND_KEY: Record<Spot['kind'], StringKey> = {
 export const kindLabel = (spot: Spot) => t(KIND_KEY[spot.kind]);
 export const isMobile = (spot: Spot) => spot.kind === 'truck' || spot.kind === 'cart' || spot.kind === 'trailer';
 
-const useKm = /-CA$/i.test(locale) || /^fr/i.test(locale);
+const metricLocale = () => {
+  const locale = getLocale();
+  return /-CA$/i.test(locale) || /^fr/i.test(locale);
+};
 
 /** Miles from you on the 1400x1800 world (600 units per mile, as in the mockup). */
 export const milesFromMe = (spot: Pick<Spot, 'x' | 'y'>) => Math.hypot(spot.x - ME.x, spot.y - ME.y) / 600;
 
-export function formatDistance(spot: Pick<Spot, 'x' | 'y'>): string {
+/**
+ * "0.4 mi", "6 min walk", or with `long` the spoken form for screen readers:
+ * "0.4 miles away", "650 meters away", "1.2 kilometers away".
+ */
+export function formatDistance(spot: Pick<Spot, 'x' | 'y'>, opts?: { long?: boolean }): string {
+  const locale = getLocale();
+  const km = metricLocale();
   const miles = milesFromMe(spot);
+  if (opts?.long) {
+    if (km && miles * 1.609 < 1) return t('dist.mLong', { n: Math.max(50, Math.round((miles * 1609) / 50) * 50) });
+    const value = km ? miles * 1.609 : miles;
+    const d = value.toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+    return t(km ? 'dist.kmLong' : 'dist.miLong', { d });
+  }
   if (miles < 0.25) return t('dist.walk', { n: Math.max(1, Math.round(miles * 20)) });
-  const value = useKm ? miles * 1.609 : miles;
+  const value = km ? miles * 1.609 : miles;
   const d = value.toLocaleString(locale, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
-  return t(useKm ? 'dist.km' : 'dist.mi', { d });
+  return t(km ? 'dist.km' : 'dist.mi', { d });
 }
 
 export function formatClock(time: ClockTime): string {
+  const locale = getLocale();
   const date = new Date(2024, 0, 7 + (time.day ?? 0), time.h, time.m);
   let clock: string;
   try {
@@ -99,17 +115,18 @@ export function pinLabel(spot: Spot): string {
     name: spot.name,
     kind: kindLabel(spot),
     status: statusText(spot),
-    distance: formatDistance(spot),
+    distance: formatDistance(spot, { long: true }),
   });
   const mood = moodText(spot);
   return mood ? t('pin.a11yMood', { label, mood }) : label;
 }
 
 /** Short weekday name, Monday first (0 = Monday). */
-export function weekdayShort(mondayIndex: number): string {
+export function weekdayShort(mondayIndex: number, style: 'short' | 'long' = 'short'): string {
+  const locale = getLocale();
   const date = new Date(2024, 0, 1 + mondayIndex); // 1 Jan 2024 was a Monday.
   try {
-    return date.toLocaleDateString(locale, { weekday: 'short' });
+    return date.toLocaleDateString(locale, { weekday: style });
   } catch {
     return String(mondayIndex + 1);
   }
@@ -137,6 +154,7 @@ const BUSY_WORDS: { min: number; key: StringKey }[] = [
 export const busyWord = (v: number) => t((BUSY_WORDS.find((w) => v >= w.min) ?? BUSY_WORDS[4]).key);
 
 export function formatPrice(price: number): string {
+  const locale = getLocale();
   try {
     return price.toLocaleString(locale, {
       style: 'currency',

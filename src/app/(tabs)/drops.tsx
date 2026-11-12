@@ -7,7 +7,7 @@ import { getDrops } from '@/data/repo';
 import type { Drop } from '@/data/types';
 import { ClaimModal } from '@/features/drops/ClaimModal';
 import { DropCard } from '@/features/drops/DropCard';
-import { APP_START, useClock } from '@/hooks/use-clock';
+import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useShowOnMap } from '@/hooks/use-show-on-map';
 import { useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
@@ -69,7 +69,7 @@ export default function DropsScreen() {
               key={drop.id}
               drop={drop}
               spot={spot}
-              state={dropState(drop, now, APP_START, claimed)}
+              state={dropState(drop, now, getAppStart(), claimed)}
               reminded={!!state.reminders[drop.id]}
               claimed={claimed}
               onRemind={remind}

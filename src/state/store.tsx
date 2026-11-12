@@ -92,7 +92,7 @@ const initialState: LokalState = {
   goLiveOpen: false,
 };
 
-type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode'>;
+type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode' | 'readNotes'>;
 
 type Action =
   | { type: 'hydrate'; data: Partial<Persisted> }
@@ -339,14 +339,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const { hydrated, rep, checkIns, themeMode, bizMode } = state;
+  const { hydrated, rep, checkIns, themeMode, bizMode, readNotes } = state;
   useEffect(() => {
     if (!hydrated) return;
-    const data: Persisted = { rep, checkIns, themeMode, bizMode };
+    // Read notes are kept too, so the bell stays at 0 after a visit to the inbox.
+    const data: Persisted = { rep, checkIns, themeMode, bizMode, readNotes };
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {
       // Not saved this time; the next change tries again.
     });
-  }, [hydrated, rep, checkIns, themeMode, bizMode]);
+  }, [hydrated, rep, checkIns, themeMode, bizMode, readNotes]);
 
   const value = useMemo(() => ({ state, actions }), [state, actions]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

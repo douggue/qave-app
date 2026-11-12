@@ -1,12 +1,14 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
 import { EmojiFloat } from '@/components/celebrate/EmojiFloat';
-import { LokalMap, type LokalMapHandle } from '@/components/map/LokalMap';
+import { LokalMap, ZOOMS, type HitTarget, type LokalMapHandle, type Region } from '@/components/map/LokalMap';
 import { SpotPin } from '@/components/map/SpotPin';
-import { BottomSheet, type Snap } from '@/components/sheet/BottomSheet';
+import { BottomSheet, PEEK, type Snap } from '@/components/sheet/BottomSheet';
 import { useToast } from '@/components/ui';
+import { milesFromMe } from '@/data/format';
 import type { Spot } from '@/data/types';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { matchesFilter, useSpots } from '@/hooks/use-spots';
@@ -14,11 +16,12 @@ import { t } from '@/i18n';
 import { useStore } from '@/state/store';
 import { report as reportEmoji, ui } from '@/theme/emoji';
 import { ease, native } from '@/theme/motion';
+import { withAlpha } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconButton, MapTopBar } from '@/features/map/MapOverlay';
 import { SheetExplore, SheetHeader, SheetPreview } from '@/features/map/SheetContent';
 
-const PEEK = 156;
 
 /** Two shared bob loops for all pins (02 spec 7.1), paused off-screen and under reduce motion. */
 function useBobLoops() {
@@ -56,12 +59,19 @@ function useBobLoops() {
 export default function MapScreen() {
   const mapRef = useRef<LokalMapHandle>(null);
   const toast = useToast();
-  const { isNight } = useTheme();
+  const { c, isNight } = useTheme();
+  const insets = useSafeAreaInsets();
   const { state, actions } = useStore();
   const spots = useSpots();
   const bobs = useBobLoops();
   const [snap, setSnap] = useState<Snap>('peek');
   const [height, setHeight] = useState(0);
+  // The top bar's measured height, so the camera centers inside the visible band.
+  const [topInset, setTopInset] = useState(0);
+  const topEstimate = topInset || insets.top + 174;
+  // Positive shifts a target up: half the difference between what covers the bottom (sheet peek;
+  // the tab bar takes its own layout space) and what covers the top.
+  const bandOffset = Math.round((PEEK - topEstimate) / 2);
 
   const selected = state.selectedSpot ? spots.find((s) => s.id === state.selectedSpot) ?? null : null;
   // Keep the pin above the half-open sheet.
@@ -91,11 +101,11 @@ export default function MapScreen() {
     setSnap((s) => (s === 'peek' ? 'half' : s));
   }, [selected, height, focusOffset, focusSeq]);
 
-  const close = () => {
+  const close = useCallback(() => {
     lastFocused.current = null;
     actions.selectSpot(null);
     setSnap('peek');
-  };
+  }, [actions]);
 
   const onPin = useCallback(
     (spot: Spot) => {
@@ -104,6 +114,22 @@ export default function MapScreen() {
     },
     [focus],
   );
+  const onHitPin = useCallback(
+    (pin: HitTarget) => {
+      const spot = spots.find((s) => s.id === pin.id);
+      if (spot) onPin(spot);
+    },
+    [spots, onPin],
+  );
+
+  // Open zoomed out on the middle of the spot cluster, centered in the band between the
+  // top bar and the sheet. Computed once: the map keeps its own camera after that.
+  const [initialRegion] = useState<Region>(() => {
+    const cx = spots.reduce((sum, s) => sum + s.x, 0) / Math.max(1, spots.length);
+    const cy = spots.reduce((sum, s) => sum + s.y, 0) / Math.max(1, spots.length);
+    const zoom = ZOOMS[0];
+    return { x: cx, y: cy + bandOffset / zoom, zoom };
+  });
 
   // Stretch: Surprise me picks an open, highly rated spot you have not checked in at yet.
   const surprise = () => {
@@ -126,12 +152,12 @@ export default function MapScreen() {
   const fx = state.fx;
   const floatSpot = fx?.kind === 'report' && fx.report ? spots.find((s) => s.id === fx.spotId) : undefined;
 
-  // Selected pin last, so it draws on top.
-  const ordered = [...spots].sort((x, y) => Number(x.id === state.selectedSpot) - Number(y.id === state.selectedSpot));
+  // Nearest first. The selected pin has zIndex 2000, so it still draws on top.
+  const ordered = useMemo(() => [...spots].sort((a, b) => milesFromMe(a) - milesFromMe(b)), [spots]);
 
   return (
     <View style={styles.screen} onLayout={(e: LayoutChangeEvent) => setHeight(e.nativeEvent.layout.height)}>
-      <LokalMap ref={mapRef} region={{ x: 820, y: 700 + 140, zoom: 1 }}>
+      <LokalMap ref={mapRef} region={initialRegion} pins={spots} onPin={onHitPin} onMapPress={close}>
         {ordered.map((spot, i) => (
           <SpotPin
             key={spot.id}
@@ -147,7 +173,15 @@ export default function MapScreen() {
         ) : null}
       </LokalMap>
 
-      <MapTopBar />
+      <View style={styles.overlay} pointerEvents="box-none">
+        <LinearGradient
+          pointerEvents="none"
+          colors={[withAlpha(c.paper, 0.92), withAlpha(c.paper, 0.6), 'transparent']}
+          locations={[0, 0.55, 1]}
+          style={[styles.scrim, { height: insets.top + 190 }]}
+        />
+        <MapTopBar onLayout={(e) => setTopInset(Math.round(e.nativeEvent.layout.height))} />
+      </View>
 
       <View style={[styles.rail, { bottom: PEEK + 12 }]} pointerEvents="box-none">
         <IconButton
@@ -158,7 +192,7 @@ export default function MapScreen() {
         <IconButton icon={ui.dice} label={t('map.surprise')} onPress={surprise} />
         <IconButton icon={ui.plus} label={t('map.zoomIn')} onPress={() => mapRef.current?.zoomIn()} />
         <IconButton icon={ui.minus} label={t('map.zoomOut')} onPress={() => mapRef.current?.zoomOut()} />
-        <IconButton icon={ui.recenter} label={t('map.recenter')} onPress={() => mapRef.current?.recenter(focusOffset)} />
+        <IconButton icon={ui.recenter} label={t('map.recenter')} onPress={() => mapRef.current?.recenter(bandOffset)} />
       </View>
 
       <BottomSheet
@@ -175,5 +209,7 @@ export default function MapScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  rail: { position: 'absolute', right: 12, gap: 8 },
+  rail: { position: 'absolute', right: 12, gap: 8, zIndex: 3000 },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 3000 },
+  scrim: { position: 'absolute', top: 0, left: 0, right: 0 },
 });

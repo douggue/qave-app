@@ -3,7 +3,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Emoji, Text } from '@/components/ui';
+import { Emoji, Text, useToast } from '@/components/ui';
+import { getBusiness } from '@/data/repo';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t, type StringKey } from '@/i18n';
 import { useStore } from '@/state/store';
@@ -56,13 +57,26 @@ export function TabBar({ state, emitter, navigateToTab, insets }: BottomTabBarPr
   const biz = store.bizMode;
   const set = biz ? BUSINESS : EATER;
   const firstRoute = set.left[0].route;
+  const toast = useToast();
   const inSet = focusedName ? tabRoutes(biz).includes(focusedName) : true;
+  const focusedIsBiz = !!focusedName && tabRoutes(true).includes(focusedName);
+  // The demo user owns the sample business. Later: the signed-in user's claimed spots.
+  const ownsBusiness = !!getBusiness().spotId;
+  const { setBizMode } = actions;
 
-  // Switching modes (or a cold start in Business mode) lands on the first tab of the new set.
+  // A deep link to a business route (/today, /where, ...) switches into Business mode for an
+  // owner instead of bouncing to the Map. Only eater routes outside the set bounce: switching
+  // modes (or a cold start in Business mode) lands on the first tab of the new set.
   const firstKey = state.routes.find((r) => r.name === firstRoute)?.key;
   useEffect(() => {
-    if (store.hydrated && !inSet && firstKey) navigateToTab(firstKey);
-  }, [store.hydrated, inSet, firstKey, navigateToTab]);
+    if (!store.hydrated || inSet) return;
+    if (focusedIsBiz && !biz && ownsBusiness) {
+      setBizMode(true);
+      toast.show(t('biz.switchedIn'));
+      return;
+    }
+    if (firstKey) navigateToTab(firstKey);
+  }, [store.hydrated, inSet, focusedIsBiz, biz, ownsBusiness, setBizMode, toast, firstKey, navigateToTab]);
 
   const go = (name: string) => {
     const route = state.routes.find((r) => r.name === name);
@@ -70,6 +84,8 @@ export function TabBar({ state, emitter, navigateToTab, insets }: BottomTabBarPr
     const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
     if (name !== focusedName && !event.defaultPrevented) navigateToTab(route.key);
   };
+
+  if (!store.hydrated) return null;
 
   const renderTab = (spec: TabSpec) => (
     <TabItem
@@ -138,7 +154,7 @@ function TabItem({ spec, selected, onPress }: { spec: TabSpec; selected: boolean
       >
         <Emoji size={22}>{tabEmoji[spec.icon]}</Emoji>
       </Animated.View>
-      <Text variant="micro" tone={selected ? 'ink' : 'ink2'} center style={styles.label}>
+      <Text variant="micro" maxFontSizeMultiplier={1.4} tone={selected ? 'ink' : 'ink2'} center style={styles.label}>
         {label}
       </Text>
       <View
@@ -193,7 +209,7 @@ function CenterAction({ open, onPress }: { open: boolean; onPress: () => void })
           </Animated.Text>
         </LinearGradient>
       </View>
-      <Text variant="micro" tone="ink2" center style={styles.label}>
+      <Text variant="micro" maxFontSizeMultiplier={1.4} tone="ink2" center style={styles.label}>
         {t('tab.report')}
       </Text>
     </Pressable>
@@ -223,7 +239,7 @@ function GoLiveAction({ live, onPress }: { live: boolean; onPress: () => void })
           <Emoji size={26}>{live ? statusEmoji.live : tabEmoji.golive}</Emoji>
         </View>
       </View>
-      <Text variant="micro" tone={live ? 'mint' : 'ink2'} center style={styles.label}>
+      <Text variant="micro" maxFontSizeMultiplier={1.4} tone={live ? 'mint' : 'ink2'} center style={styles.label}>
         {live ? t('biz.live') : t('tab.goLive')}
       </Text>
     </Pressable>

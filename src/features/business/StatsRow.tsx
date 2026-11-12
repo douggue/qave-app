@@ -2,11 +2,11 @@ import { StyleSheet, View } from 'react-native';
 
 import { Card, Text } from '@/components/ui';
 import { getBusiness } from '@/data/repo';
-import { locale, t, type StringKey } from '@/i18n';
+import { getLocale, t, type StringKey } from '@/i18n';
 import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-const num = (n: number) => n.toLocaleString(locale);
+const num = (n: number) => n.toLocaleString(getLocale());
 
 /** This week's numbers and the demand nudge. Shown live or offline (owners check numbers before service). */
 export function StatsRow() {
@@ -16,7 +16,7 @@ export function StatsRow() {
     { label: 'biz.stat.views', value: num(stats.views), delta: stats.viewsDelta },
     { label: 'biz.stat.checkIns', value: num(stats.checkIns), delta: stats.checkInsDelta },
     { label: 'biz.stat.followers', value: num(stats.followers), delta: stats.followersDelta },
-    { label: 'biz.stat.rating', value: stats.rating.toLocaleString(locale, { minimumFractionDigits: 1 }) },
+    { label: 'biz.stat.rating', value: stats.rating.toLocaleString(getLocale(), { minimumFractionDigits: 1 }) },
   ];
 
   return (

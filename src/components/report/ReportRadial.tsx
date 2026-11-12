@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Emoji, Text, useToast } from '@/components/ui';
+import { Badge, Button, Emoji, Text, useToast } from '@/components/ui';
 import type { Spot } from '@/data/types';
 import { isDuplicate, newReport, REPORT_OPTIONS, reportTarget, type ReportOption } from '@/features/report/options';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -166,27 +166,16 @@ function RadialOverlay() {
                   ]}
                 >
                   <Emoji size={24}>{reportEmoji[o.type]}</Emoji>
-                  <Text variant="heading" style={styles.shrink}>
+                  <Text variant="ui" style={[styles.rowLabel, styles.grow]}>
                     {t(o.label)}
                   </Text>
-                  {soon(o) ? (
-                    <Text variant="caption" tone="ink2">
-                      {soon(o)}
-                    </Text>
-                  ) : null}
+                  {soon(o) ? <Badge label={soon(o) ?? ''} tone="neutral" style={styles.soon} /> : null}
                 </Pressable>
               ))
             : null}
-          <Pressable
-            onPress={() => dismiss()}
-            accessibilityRole="button"
-            accessibilityLabel={t('report.cancel')}
-            style={[styles.listRow, styles.cancel, { borderColor: c.line }]}
-          >
-            <Text variant="ui" tone="ink2" center style={styles.shrink}>
-              {t('report.cancel')}
-            </Text>
-          </Pressable>
+          <View style={styles.cancel}>
+            <Button size="sm" variant="ghost" fullWidth={false} label={t('report.cancel')} onPress={() => dismiss()} />
+          </View>
         </Animated.View>
       ) : (
         <>
@@ -329,11 +318,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: space.md,
+    gap: space.sm,
     paddingHorizontal: space.lg,
     paddingVertical: space.sm,
-    borderRadius: radius.md,
+    borderRadius: 16,
     borderWidth: 1,
   },
-  cancel: { justifyContent: 'center' },
+  rowLabel: { fontSize: 17, lineHeight: 22 },
+  grow: { flexGrow: 1, flexShrink: 1 },
+  soon: { alignSelf: 'center' },
+  cancel: { alignItems: 'center', paddingTop: space.xs },
 });

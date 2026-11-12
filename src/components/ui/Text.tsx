@@ -21,7 +21,7 @@ export function Text({ variant = 'body', tone = 'ink', center, tabular, style, .
   const { c } = useTheme();
   return (
     <RNText
-      maxFontSizeMultiplier={1.6}
+      maxFontSizeMultiplier={variant === 'display' || variant === 'title' ? 1.6 : 2.0}
       {...rest}
       style={[
         typeScale[variant],
@@ -36,6 +36,7 @@ export function Text({ variant = 'body', tone = 'ink', center, tabular, style, .
 
 /** A decorative emoji: hidden from screen readers, the parent label carries the meaning. */
 export function Emoji({ children, size = 24, style, ...rest }: TextProps & { size?: number }) {
+  const { c } = useTheme();
   return (
     <RNText
       accessible={false}
@@ -44,7 +45,7 @@ export function Emoji({ children, size = 24, style, ...rest }: TextProps & { siz
       aria-hidden
       allowFontScaling={false}
       {...rest}
-      style={[{ fontSize: size, lineHeight: Math.round(size * 1.2), textAlign: 'center' }, style]}
+      style={[{ color: c.ink, fontSize: size, lineHeight: Math.round(size * 1.2), textAlign: 'center' }, style]}
     >
       {children}
     </RNText>

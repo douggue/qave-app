@@ -369,6 +369,7 @@ Pass = no clipped word, no overlap, buttons grow taller, tab bar grows taller, n
 7. Pad flag on: Today, Go live sheet, tab bars (both), sheet preview, You pass section 5.4.
 8. Set the browser locale to `fr-CA` (or temporarily force the locale in `src/i18n/index.ts`): distances show km with a decimal comma; Go live chips show "22 h" style times.
 9. Every new pressable measures at least 48 (check in the web inspector) or has `hitSlop`.
+10. Tap pin opens preview: on web, click 3 different stickers; each shows the sheet preview at half within 250 ms and its pin lifts (scale 1.2, up 5). Clicking empty map closes the preview.
 
 ---
 

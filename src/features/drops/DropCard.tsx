@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { Button, Card, Emoji, Text } from '@/components/ui';
+import { Button, Card, Emoji, LiveText, Text } from '@/components/ui';
 import type { DropState } from '@/data/drops';
 import { countdownWords, formatCountdown, formatDistance } from '@/data/format';
 import type { Drop, Spot } from '@/data/types';
@@ -45,9 +45,9 @@ export function DropCard({ drop, spot, state, reminded, claimed, onRemind, onCla
         <FoodArt food={spot.food} width={64} height={64} radius={16} />
         <View style={styles.topText}>
           <Text variant="heading">{drop.title}</Text>
-          <Text variant="caption" tone="ink2">
+          <LiveText variant="caption" tone="ink2" placeholderWidth="70%">
             {t('drops.where', { spot: spot.name, distance })}
-          </Text>
+          </LiveText>
         </View>
       </View>
       <Text tone="ink2" importantForAccessibility="no" accessibilityElementsHidden>
@@ -60,9 +60,9 @@ export function DropCard({ drop, spot, state, reminded, claimed, onRemind, onCla
             <Text variant="ui" tone="ink2">
               {t('drops.startsIn')}
             </Text>
-            <Text tabular style={styles.timer}>
+            <LiveText tabular style={styles.timer} placeholderWidth={64}>
               {formatCountdown(state.msToStart)}
-            </Text>
+            </LiveText>
           </View>
         ) : phase === 'live' ? (
           <LivePill />

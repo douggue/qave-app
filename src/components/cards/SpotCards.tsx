@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Badge, Emoji, Text } from '@/components/ui';
+import { Badge, Emoji, LiveText, Text } from '@/components/ui';
 import { closingText, formatDistance, kindLabel, moodText, priceText, statusText } from '@/data/format';
 import type { Spot } from '@/data/types';
 import { t } from '@/i18n';
@@ -26,9 +26,9 @@ export function TrendCard({ spot, onPress }: { spot: Spot; onPress: (spot: Spot)
       </Text>
       <View style={styles.inline}>
         {spot.mood ? <Emoji size={12}>{moodEmoji[spot.mood.emoji]}</Emoji> : null}
-        <Text variant="caption" tone="ink2" numberOfLines={2} style={styles.shrink}>
+        <LiveText variant="caption" tone="ink2" numberOfLines={2} style={styles.shrink} placeholderWidth="80%">
           {line}
-        </Text>
+        </LiveText>
       </View>
     </Pressable>
   );
@@ -64,12 +64,12 @@ export function SpotRow({
       <FoodArt food={spot.food} width={56} height={56} radius={16} />
       <View style={styles.middle}>
         <Text variant="ui">{spot.name}</Text>
-        {closing ? <Badge tone="amber" icon={statusEmoji.closingSoon} label={closing} /> : null}
+        {closing ? <Badge live tone="amber" icon={statusEmoji.closingSoon} label={closing} /> : null}
         <View style={styles.inline}>
           <View style={[styles.dot, { backgroundColor: spot.open ? c.mintFill : c.ink3 }]} />
-          <Text variant="label" tone={spot.open ? 'mint' : 'ink2'} style={styles.shrink}>
+          <LiveText variant="label" tone={spot.open ? 'mint' : 'ink2'} style={styles.shrink} placeholderWidth="70%">
             {status}
-          </Text>
+          </LiveText>
         </View>
         <View style={styles.inline}>
           <Emoji size={11}>{ui.star}</Emoji>
@@ -78,9 +78,9 @@ export function SpotRow({
           </Text>
         </View>
       </View>
-      <Text variant="caption" tone="ink2" style={styles.distance}>
+      <LiveText variant="caption" tone="ink2" style={styles.distance} placeholderWidth={40}>
         {distance}
-      </Text>
+      </LiveText>
     </Pressable>
   );
 }

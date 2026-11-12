@@ -294,8 +294,8 @@ export const en = {
   'spot.scheduleNote': 'Usual spots, updated by {own}.',
   'spot.scheduleNoteAnon': 'Usual spots, updated by the owner.',
   'spot.off': 'Off',
-  'spot.dayA11y': '{day}: {place}',
-  'spot.dayTodayA11y': 'Today, {day}: {place}',
+  'spot.dayA11y': '{day}, {place}',
+  'spot.dayTodayA11y': 'Today, {day}, {place}',
   'spot.whatPeopleSay': 'What people say',
   'spot.aiBadge': 'AI summary',
   'spot.busy': 'Busy times',
@@ -427,6 +427,15 @@ export const en = {
   'inbox.openDrops': 'Opens Drops',
   'inbox.empty': 'Nothing new yet. Reports and live spots show up here.',
   'map.bellHint': 'Opens your inbox',
+  'dist.miLong': '{d} miles away',
+  'dist.kmLong': '{d} kilometers away',
+  'dist.mLong': '{n} meters away',
+  'spot.busyPeak': 'Busiest around {peak}',
+  'spot.busyA11yPeak': 'Busy times. Open now. Busiest around {peak}.',
+  'spot.offA11y': 'off',
+  'notFound.title': 'This spot moved on',
+  'notFound.body': "Food trucks do that. Let's get you back to the map.",
+  'notFound.back': 'Back to the map',
 } as const;
 
 export type StringKey = keyof typeof en;

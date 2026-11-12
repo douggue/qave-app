@@ -5,10 +5,20 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
-import { Animated, PanResponder, Platform, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import {
+  Animated,
+  PanResponder,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+  type ViewInstance,
+} from 'react-native';
 
 import { ME, WORLD } from '@/data/repo';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -22,7 +32,7 @@ import { MapWorld } from './MapWorld';
 // (region, onRegionChange, children as markers, ref.animateTo) so Mapbox can replace it.
 
 /** The three zoom levels (buttons only tonight, no pinch). */
-export const ZOOMS = [0.7, 1, 1.4] as const;
+export const ZOOMS = [0.6, 1, 1.4] as const;
 
 export type Region = { x: number; y: number; zoom: number };
 
@@ -39,7 +49,20 @@ type Props = {
   onRegionChange?: (region: Region) => void;
   /** Markers, positioned in world units (absolute left/top). */
   children?: ReactNode;
+  /** Tap targets for the release hit-test (a tap that a short drag started on a pin). */
+  pins?: HitTarget[];
+  onPin?: (pin: HitTarget) => void;
+  /** A tap on the map that hits no pin. */
+  onMapPress?: () => void;
 };
+
+/** Anything with a world position; the map screen passes spots. */
+export type HitTarget = { id: string; x: number; y: number };
+
+/** A tap within this many world units of a pin's sticker or anchor counts as a pin tap. */
+const HIT_RADIUS = 30;
+/** The sticker sits above the anchor point, so hit-test its center too. */
+const STICKER_LIFT = 38;
 
 /** 1 / zoom, so markers can keep their screen size at every zoom level. */
 const MapScaleContext = createContext<Animated.AnimatedDivision | null>(null);
@@ -56,6 +79,11 @@ class MapCamera {
   h = 0;
   reduceMotion = false;
   onChange?: (region: Region) => void;
+  pins: HitTarget[] = [];
+  onPin?: (pin: HitTarget) => void;
+  onMapPress?: () => void;
+  /** The viewport's position in the window, for turning a release point into world units. */
+  origin = { x: 0, y: 0 };
   readonly cx: Animated.Value;
   readonly cy: Animated.Value;
   readonly scale: Animated.Value;
@@ -72,15 +100,20 @@ class MapCamera {
     this.scale = new Animated.Value(region.zoom);
     this.inverse = Animated.divide(1, this.scale);
     this.pan = PanResponder.create({
-      // Capture only real drags, so taps still reach the pins.
-      onMoveShouldSetPanResponderCapture: (_e, g) => Math.abs(g.dx) + Math.abs(g.dy) > 6,
+      // Never take a touch at its start, and capture only real drags, so taps still reach the pins.
+      onStartShouldSetPanResponderCapture: () => false,
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponderCapture: (_e, g) => Math.abs(g.dx) + Math.abs(g.dy) > 10,
       onPanResponderGrant: () => {
         this.cx.stopAnimation();
         this.cy.stopAnimation();
         this.start = { x: this.x, y: this.y };
       },
       onPanResponderMove: (_e, g) => this.jump(this.start.x - g.dx / this.zoom, this.start.y - g.dy / this.zoom),
-      onPanResponderRelease: () => this.emit(),
+      onPanResponderRelease: (_e, g) => {
+        if (Math.abs(g.dx) + Math.abs(g.dy) < 8) this.tap(g.moveX, g.moveY);
+        this.emit();
+      },
       onPanResponderTerminate: () => this.emit(),
       onPanResponderTerminationRequest: () => false,
     });
@@ -92,9 +125,42 @@ class MapCamera {
     return { x: lim(x, this.w / 2 / zoom, WORLD.width), y: lim(y, this.h / 2 / zoom, WORLD.height) };
   }
 
-  configure(onChange: ((region: Region) => void) | undefined, reduceMotion: boolean) {
-    this.onChange = onChange;
-    this.reduceMotion = reduceMotion;
+  configure(cfg: {
+    onChange?: (region: Region) => void;
+    reduceMotion: boolean;
+    pins?: HitTarget[];
+    onPin?: (pin: HitTarget) => void;
+    onMapPress?: () => void;
+  }) {
+    this.onChange = cfg.onChange;
+    this.reduceMotion = cfg.reduceMotion;
+    this.pins = cfg.pins ?? [];
+    this.onPin = cfg.onPin;
+    this.onMapPress = cfg.onMapPress;
+  }
+
+  /** World point under a window point. */
+  toWorld(winX: number, winY: number) {
+    return {
+      x: this.x + (winX - this.origin.x - this.w / 2) / this.zoom,
+      y: this.y + (winY - this.origin.y - this.h / 2) / this.zoom,
+    };
+  }
+
+  /** A tap at a window point: the nearest pin within HIT_RADIUS, else a map press. */
+  tap(winX: number, winY: number) {
+    const p = this.toWorld(winX, winY);
+    let best: HitTarget | null = null;
+    let bestD = HIT_RADIUS;
+    for (const pin of this.pins) {
+      const d = Math.min(Math.hypot(pin.x - p.x, pin.y - p.y), Math.hypot(pin.x - p.x, pin.y - STICKER_LIFT - p.y));
+      if (d <= bestD) {
+        best = pin;
+        bestD = d;
+      }
+    }
+    if (best) this.onPin?.(best);
+    else this.onMapPress?.();
   }
 
   private emit() {
@@ -148,7 +214,7 @@ class MapCamera {
 }
 
 export const LokalMap = forwardRef<LokalMapHandle, Props>(function LokalMap(
-  { region = { x: ME.x, y: ME.y, zoom: 1 }, onRegionChange, children },
+  { region = { x: ME.x, y: ME.y, zoom: 1 }, onRegionChange, children, pins, onPin, onMapPress },
   ref,
 ) {
   const { map, isNight } = useTheme();
@@ -156,9 +222,11 @@ export const LokalMap = forwardRef<LokalMapHandle, Props>(function LokalMap(
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [camera] = useState(() => new MapCamera(region));
 
+  const viewRef = useRef<ViewInstance>(null);
+
   useEffect(() => {
-    camera.configure(onRegionChange, reduceMotion);
-  }, [camera, onRegionChange, reduceMotion]);
+    camera.configure({ onChange: onRegionChange, reduceMotion, pins, onPin, onMapPress });
+  }, [camera, onRegionChange, reduceMotion, pins, onPin, onMapPress]);
 
   useEffect(() => {
     if (size.w) camera.setViewport(size.w, size.h);
@@ -192,17 +260,29 @@ export const LokalMap = forwardRef<LokalMapHandle, Props>(function LokalMap(
   const onLayout = (e: LayoutChangeEvent) => {
     const { width: w, height: h } = e.nativeEvent.layout;
     setSize({ w, h });
+    viewRef.current?.measureInWindow((x, y) => {
+      camera.origin = { x, y };
+    });
   };
 
   return (
     <View
+      ref={viewRef}
       style={[styles.fill, { backgroundColor: map.bg }, Platform.OS === 'web' && webNoTouchScroll]}
       onLayout={onLayout}
       accessibilityLabel={t('map.a11y')}
       {...camera.pan.panHandlers}
     >
       <Animated.View style={[styles.world, { transform: [{ translateX: tx }, { translateY: ty }, { scale: camera.scale }] }]}>
-        <MapWorld palette={map} night={isNight} />
+        {/* A tap on empty map (no pin, no drag) closes the preview. A drag steals this touch. */}
+        <Pressable
+          accessible={false}
+          importantForAccessibility="no"
+          onPress={onMapPress}
+          style={StyleSheet.absoluteFill}
+        >
+          <MapWorld palette={map} night={isNight} />
+        </Pressable>
         <MapScaleContext.Provider value={camera.inverse}>
           <YouDot />
           {children}

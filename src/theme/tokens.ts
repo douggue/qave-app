@@ -148,6 +148,8 @@ export const type = {
   display: { fontFamily: display, fontSize: 28, lineHeight: 34, letterSpacing: -0.3 },
   title: { fontFamily: display, fontSize: 22, lineHeight: 28, letterSpacing: -0.2 },
   heading: { fontFamily: display, fontSize: 18, lineHeight: 24 },
+  /** Card titles (Busy times, Top dishes, Live reports). Unbounded stays for display, title and section headers. */
+  cardTitle: { fontFamily: ui, fontSize: 17, lineHeight: 22 },
   ui: { fontFamily: ui, fontSize: 15, lineHeight: 20 },
   body: { fontFamily: ui, fontSize: 15, lineHeight: 22 },
   label: { fontFamily: ui, fontSize: 13, lineHeight: 18 },
@@ -161,6 +163,8 @@ export const emojiSize = { xs: 14, sm: 18, md: 24, lg: 32, xl: 48, hero: 72 } as
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 export const radius = { sm: 10, md: 16, lg: 22, xl: 28, pill: 999 } as const;
 export const minTap = 44;
+/** Comfortable tap target for chips and small controls. */
+export const tapComfort = 48;
 export const hitSlop = { top: 8, bottom: 8, left: 8, right: 8 } as const;
 export const screenPad = 16;
 
@@ -170,6 +174,12 @@ export const elevation = {
   e2: { shadowColor: '#000', shadowOpacity: 0.45, shadowRadius: 16, shadowOffset: { width: 0, height: 10 }, elevation: 8 },
   e3: { shadowColor: '#000', shadowOpacity: 0.6, shadowRadius: 24, shadowOffset: { width: 0, height: -10 }, elevation: 16 },
 } as const;
+
+/** A #rrggbb color at the given opacity, as rgba(). */
+export const withAlpha = (hex: string, a: number) => {
+  const v = parseInt(hex.replace('#', '').slice(0, 6), 16);
+  return `rgba(${(v >> 16) & 255},${(v >> 8) & 255},${v & 255},${a})`;
+};
 
 /** Soft colored glow (iOS and web). Android needs a halo view behind the element instead. */
 export const glow = (color: string, r = 16, o = 0.8) => ({

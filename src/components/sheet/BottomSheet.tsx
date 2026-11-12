@@ -24,7 +24,8 @@ import { useTheme } from '@/theme/use-theme';
 export type Snap = 'peek' | 'half' | 'full';
 export const SNAPS: Snap[] = ['peek', 'half', 'full'];
 const SNAP_KEY: Record<Snap, StringKey> = { peek: 'sheet.peek', half: 'sheet.half', full: 'sheet.full' };
-const PEEK = 156;
+/** Sheet height at the peek snap; the map uses it to center inside the visible band. */
+export const PEEK = 156;
 
 type SheetConfig = {
   snap: Snap;

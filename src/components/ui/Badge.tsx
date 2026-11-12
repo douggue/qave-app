@@ -1,5 +1,6 @@
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useHydrated } from '@/hooks/use-hydrated';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -13,11 +14,17 @@ type Props = {
   icon?: string;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
+  /** Clock- or locale-dependent label: a same-height placeholder until the web page hydrates. */
+  live?: boolean;
 };
 
 /** A small status pill. Text wraps if it must; meaning is always in the text, not only the color. */
-export function Badge({ label, tone = 'neutral', icon, accessibilityLabel, style }: Props) {
+export function Badge({ label, tone = 'neutral', icon, accessibilityLabel, style, live }: Props) {
   const { c } = useTheme();
+  const hydrated = useHydrated();
+  if (live && !hydrated) {
+    return <View aria-hidden style={[styles.badge, styles.skeleton, { backgroundColor: c.card2 }, style]} />;
+  }
   const bg: Record<BadgeTone, string> = {
     grape: c.tintGrape,
     mint: c.tintMint,
@@ -60,4 +67,5 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
   },
   label: { flexShrink: 1 },
+  skeleton: { width: 96, height: 24 },
 });

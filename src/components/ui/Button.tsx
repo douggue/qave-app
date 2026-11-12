@@ -71,8 +71,6 @@ export function Button({
       accessibilityState={role === 'switch' ? { disabled: !!disabled, checked: !!checked } : { disabled: !!disabled }}
       style={({ pressed }) => [
         fullWidth ? styles.full : styles.auto,
-        variant === 'primary' && isNight && { ...glow('#ff3c50', 14, 0.6), shadowOffset: { width: 0, height: 8 } },
-        variant === 'mint' && isNight && glow(c.mint, 12, 0.6),
         disabled && { opacity: 0.4 },
         pressed && { opacity: 0.9, transform: reduceMotion ? [] : [{ scale: 0.97 }] },
         style,
@@ -83,7 +81,7 @@ export function Button({
           colors={gradients.hotBtn}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={[styles.body, shape]}
+          style={[styles.body, shape, isNight && glow('#ff3c50', 12, 0.45)]}
         >
           {content}
         </LinearGradient>
@@ -93,6 +91,7 @@ export function Button({
             styles.body,
             shape,
             variant === 'mint' && { backgroundColor: c.mintFill },
+            variant === 'mint' && isNight && glow(c.mint, 12, 0.45),
             variant === 'ghost' && { borderWidth: 1.5, borderColor: c.line },
             variant === 'soft' && { backgroundColor: c.card2, borderWidth: 1, borderColor: c.line },
           ]}
@@ -107,7 +106,7 @@ export function Button({
 const styles = StyleSheet.create({
   full: { alignSelf: 'stretch' },
   auto: { alignSelf: 'flex-start' },
-  body: { alignItems: 'center', justifyContent: 'center' },
+  body: { alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexShrink: 1 },
   label: { flexShrink: 1 },
 });

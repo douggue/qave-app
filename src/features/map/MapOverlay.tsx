@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Chip, Emoji, Text } from '@/components/ui';
@@ -29,13 +29,13 @@ const FILTERS: { key: FilterKey; label: StringKey }[] = [
 ];
 
 /** The top of the map: Ask pill, bell, filter chips and the live ticker. */
-export function MapTopBar() {
+export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => void }) {
   const insets = useSafeAreaInsets();
   const { c } = useTheme();
   const unread = useNotes().filter((n) => n.unread).length;
 
   return (
-    <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 8 }]}>
+    <View pointerEvents="box-none" onLayout={onLayout} style={[styles.top, { paddingTop: insets.top + 8 }]}>
       <View style={styles.row} pointerEvents="box-none">
         <Pressable
           onPress={() => router.navigate('/ask')}
@@ -85,6 +85,7 @@ function FilterChips() {
           <Chip
             key={f.key}
             tone="glass"
+            compact
             label={label}
             icon={filterIcon[f.key]}
             selected={state.filter === f.key}
@@ -141,6 +142,9 @@ function Ticker() {
   );
 }
 
+/** Text glyphs (not emoji) that need the ink color to show on the night map. */
+const GLYPHS = new Set<string>([ui.plus, ui.minus]);
+
 /** A 44 pt glass icon button used over the map. */
 export function IconButton({
   icon,
@@ -169,7 +173,19 @@ export function IconButton({
         pressed && styles.pressed,
       ]}
     >
-      <Emoji size={19}>{icon}</Emoji>
+      {GLYPHS.has(icon) ? (
+        <Text
+          variant="heading"
+          accessible={false}
+          importantForAccessibility="no"
+          accessibilityElementsHidden
+          style={{ color: c.ink, fontSize: 22, lineHeight: 24 }}
+        >
+          {icon}
+        </Text>
+      ) : (
+        <Emoji size={19}>{icon}</Emoji>
+      )}
       {badge ? (
         <View style={[styles.badge, { backgroundColor: c.hotFill }]}>
           <Text variant="micro" style={styles.badgeText}>

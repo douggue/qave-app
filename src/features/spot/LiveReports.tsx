@@ -5,7 +5,7 @@ import { Button, Card, Emoji, Text, useToast } from '@/components/ui';
 import { reportAgo } from '@/data/format';
 import { getPeople } from '@/data/repo';
 import type { Report, Spot } from '@/data/types';
-import { APP_START, useClock } from '@/hooks/use-clock';
+import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useAllReports } from '@/hooks/use-spots';
 import { t } from '@/i18n';
@@ -97,7 +97,7 @@ function ReportRow({ report, spot, now }: { report: Report; spot: Spot; now: num
           </Text>
         </View>
         <Text variant="caption" tone="ink2">
-          {t('spot.reportBy', { who: person.name, when: reportAgo(report, now, APP_START) })}
+          {t('spot.reportBy', { who: person.name, when: reportAgo(report, now, getAppStart()) })}
         </Text>
       </View>
       <View style={styles.votes}>
@@ -119,7 +119,7 @@ export function LiveReports({ spot, onReport }: { spot: Spot; onReport: () => vo
   const reports = useAllReports().filter((r) => r.spotId === spot.id);
   return (
     <Card>
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="cardTitle" accessibilityRole="header">
         {t('spot.reports')}
       </Text>
       {reports.length ? (

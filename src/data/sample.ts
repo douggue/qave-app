@@ -3,7 +3,7 @@
 // Screens never import this file: they go through src/data/repo.ts, which will
 // switch to Supabase later.
 
-import type { Business, Drop, LiveStatus, MapLabel, Note, Person, Report, Spot, Tick } from './types';
+import type { Business, Drop, LiveStatus, MapLabel, Note, Person, Report, ScheduleStop, Spot, Tick } from './types';
 
 /** The world is 1400x1800 units. "You" stand at ME. */
 export const WORLD = { width: 1400, height: 1800 } as const;
@@ -11,7 +11,7 @@ export const ME = { x: 820, y: 700 } as const;
 
 /** Place names drawn on the illustrated map (proper nouns, not UI copy). */
 export const MAP_LABELS: MapLabel[] = [
-  { kind: 'hood', text: 'DOWNTOWN', x: 560, y: 520 },
+  { kind: 'hood', text: 'DOWNTOWN', x: 620, y: 520 },
   { kind: 'hood', text: 'EAST AUSTIN', x: 1090, y: 470 },
   { kind: 'hood', text: 'SOUTH CONGRESS', x: 690, y: 1215 },
   { kind: 'hood', text: 'ZILKER PARK', x: 170, y: 1070 },
@@ -35,6 +35,17 @@ const geo = (x: number, y: number) => ({
   lng: +(-97.8 + (x / WORLD.width) * 0.12).toFixed(5),
 });
 
+/** Weekly stops for mobile spots: the full name for screen readers, a short one (9 characters or fewer) for the strip. */
+const E6TH: ScheduleStop = { name: 'East 6th Street', short: 'E 6th' };
+const RAINEY: ScheduleStop = { name: 'Rainey Street', short: 'Rainey' };
+const CESAR: ScheduleStop = { name: 'East Cesar Chavez', short: 'Cesar Ch.' };
+const DOWNTOWN: ScheduleStop = { name: 'Downtown', short: 'Downtown' };
+const SOCO: ScheduleStop = { name: 'South Congress', short: 'SoCo' };
+const MARKET: ScheduleStop = { name: 'Saturday market', short: 'Market' };
+const ZILKER: ScheduleStop = { name: 'Zilker Park', short: 'Zilker' };
+const S1ST: ScheduleStop = { name: 'South 1st Street', short: 'S 1st' };
+const TRAIL: ScheduleStop = { name: 'Lady Bird Lake trail', short: 'Trail' };
+
 export const SPOTS: Spot[] = [
   {
     id: 'guera', name: 'Taquería La Güera', kind: 'truck', food: 'taco', category: 'tacos',
@@ -44,23 +55,23 @@ export const SPOTS: Spot[] = [
     aiSummary: 'Locals rave about the al pastor and the green salsa. A short line after 7pm, but it moves fast.',
     dishes: [{ name: 'Al pastor taco', price: 3.5, liked: 96 }, { name: 'Birria plate', price: 13, liked: 91 }, { name: 'Horchata', price: 4, liked: 88 }],
     busy: [1, 1, 2, 3, 5, 4, 3, 3, 4, 6, 8, 9, 7, 5, 3, 2],
-    schedule: ['E 6th', 'E 6th', null, 'E 6th', 'E 6th', 'Rainey', 'Rainey'],
+    schedule: [E6TH, E6TH, null, E6TH, E6TH, RAINEY, RAINEY],
     friends: [{ name: 'Maya', avatar: 'unicorn' }, { name: 'Ellie', avatar: 'octopus' }, { name: 'Brad', avatar: 'cowboy' }],
   },
   {
     id: 'smoke', name: 'Smoke Signal BBQ', kind: 'trailer', food: 'bbq', category: 'bbq',
-    x: 1185, y: 770, ...geo(1185, 770), price: 2, rating: 4.7, reviewCount: 388, hood: 'East Cesar Chavez',
+    x: 1130, y: 760, ...geo(1130, 760), price: 2, rating: 4.7, reviewCount: 388, hood: 'East Cesar Chavez',
     open: true, until: { key: 'until.soldOut' }, closesInMin: 25, mood: { emoji: 'line', key: 'mood.line25' }, hot: false,
     badges: ['Trailer', 'Pitmaster-owned'], owner: 'Dez', vibe: ['Worth the wait', 'Shaded seating', 'BYOB'],
     aiSummary: 'The brisket is the star: peppery bark, very tender. Lines peak from noon to 1pm, and ribs usually sell out by 2pm.',
     dishes: [{ name: 'Brisket (½ lb)', price: 16, liked: 97 }, { name: 'Pork ribs (3)', price: 14, liked: 90 }, { name: 'Jalapeño mac', price: 5, liked: 85 }],
     busy: [0, 0, 3, 6, 9, 10, 8, 5, 3, 2, 1, 0, 0, 0, 0, 0],
-    schedule: [null, null, 'E Cesar Chavez', 'E Cesar Chavez', 'E Cesar Chavez', 'E Cesar Chavez', 'E Cesar Chavez'],
+    schedule: [null, null, CESAR, CESAR, CESAR, CESAR, CESAR],
     friends: [{ name: 'Brad', avatar: 'cowboy' }],
   },
   {
     id: 'dough', name: 'Little Dough Bakery', kind: 'restaurant', food: 'croissant', category: 'sweets',
-    x: 520, y: 1150, ...geo(520, 1150), price: 1, rating: 4.9, reviewCount: 146, hood: 'Bouldin',
+    x: 590, y: 1120, ...geo(590, 1120), price: 1, rating: 4.9, reviewCount: 146, hood: 'Bouldin',
     open: true, until: { h: 15, m: 0 }, mood: { emoji: 'news', key: 'mood.newPecan' }, hot: false,
     badges: ['Women-owned', 'Tiny bakery'], owner: 'June', vibe: ['Morning favorite', 'Dog friendly', 'Cozy'],
     aiSummary: 'Tiny counter, huge flavor. The new pecan croissant is a hit. Come before 10am to see the full case.',
@@ -85,11 +96,11 @@ export const SPOTS: Spot[] = [
     aiSummary: 'Crispy-edged smash burgers and very fast service. A late-night favorite. Skip the fries; get the onion rings.',
     dishes: [{ name: 'Double smash', price: 11, liked: 94 }, { name: 'Onion rings', price: 5, liked: 92 }, { name: 'Fries', price: 4, liked: 71 }],
     busy: [0, 0, 0, 1, 3, 4, 2, 1, 2, 4, 6, 7, 8, 9, 8, 6],
-    schedule: ['Downtown', 'Downtown', 'E 6th', 'Downtown', 'SoCo', 'SoCo', null],
+    schedule: [DOWNTOWN, DOWNTOWN, E6TH, DOWNTOWN, SOCO, SOCO, null],
   },
   {
     id: 'kolache', name: 'Kolache Corner', kind: 'restaurant', food: 'kolache', category: 'sweets',
-    x: 720, y: 450, ...geo(720, 450), price: 1, rating: 4.4, reviewCount: 80, hood: 'Downtown',
+    x: 740, y: 570, ...geo(740, 570), price: 1, rating: 4.4, reviewCount: 80, hood: 'Downtown',
     open: true, until: { h: 13, m: 0 }, closesInMin: 40, mood: { emoji: 'soldOut', key: 'mood.sausageOut' }, hot: false,
     badges: ['Since 1998'], owner: 'Hana', vibe: ['Grab and go', 'Early bird'],
     aiSummary: 'Classic Czech-Texan kolaches. Fruit ones last all morning; sausage ones sell out by about 10am.',
@@ -104,7 +115,7 @@ export const SPOTS: Spot[] = [
     aiSummary: 'Smoky jerk chicken with real heat. The $10 lunch plate is the best deal on South Congress.',
     dishes: [{ name: 'Jerk chicken plate', price: 14, liked: 96 }, { name: 'Lunch deal', price: 10, liked: 94 }, { name: 'Festival (3)', price: 5, liked: 89 }],
     busy: [0, 0, 2, 5, 8, 7, 4, 2, 2, 3, 5, 6, 4, 2, 0, 0],
-    schedule: ['SoCo', 'SoCo', 'SoCo', null, 'SoCo', 'Market', 'Market'],
+    schedule: [SOCO, SOCO, SOCO, null, SOCO, MARKET, MARKET],
     friends: [{ name: 'Maya', avatar: 'unicorn' }],
   },
   {
@@ -115,7 +126,7 @@ export const SPOTS: Spot[] = [
     aiSummary: 'Fresh fruit paletas; mango-chile is the favorite. Parks by the Zilker entrance on warm days.',
     dishes: [{ name: 'Mango-chile paleta', price: 4, liked: 97 }, { name: 'Strawberry cream', price: 4, liked: 93 }, { name: 'Elote cup', price: 6, liked: 90 }],
     busy: [0, 0, 0, 1, 3, 5, 7, 8, 9, 8, 6, 3, 0, 0, 0, 0],
-    schedule: [null, 'Zilker', 'Zilker', 'Zilker', 'Zilker', 'Zilker', 'Zilker'],
+    schedule: [null, ZILKER, ZILKER, ZILKER, ZILKER, ZILKER, ZILKER],
   },
   {
     id: 'supper', name: 'Sunday Supper Club', kind: 'popup', food: 'supper', category: 'popup',
@@ -134,7 +145,7 @@ export const SPOTS: Spot[] = [
     aiSummary: 'Big bowls of chana masala and butter chicken. Very good value, with lots of vegan choices.',
     dishes: [{ name: 'Butter chicken bowl', price: 11, liked: 95 }, { name: 'Chana masala', price: 9, liked: 93 }, { name: 'Mango lassi', price: 4, liked: 91 }],
     busy: [0, 0, 1, 4, 7, 6, 3, 2, 3, 5, 6, 4, 2, 0, 0, 0],
-    schedule: ['S 1st', 'S 1st', 'S 1st', 'S 1st', 'S 1st', null, null],
+    schedule: [S1ST, S1ST, S1ST, S1ST, S1ST, null, null],
   },
   {
     id: 'dumpling', name: 'Dumpling Dojo', kind: 'popup', food: 'dumpling', category: 'asian',
@@ -154,7 +165,7 @@ export const SPOTS: Spot[] = [
     aiSummary: 'Cold brew and honey lattes from a bike by the lake trail. A quick, friendly stop on a run or walk.',
     dishes: [{ name: 'Honey latte', price: 5, liked: 95 }, { name: 'Cold brew', price: 4, liked: 92 }],
     busy: [7, 9, 8, 6, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    schedule: ['Trail', 'Trail', 'Trail', 'Trail', 'Trail', 'Trail', null],
+    schedule: [TRAIL, TRAIL, TRAIL, TRAIL, TRAIL, TRAIL, null],
   },
 ];
 
@@ -199,10 +210,8 @@ export const DROPS: Drop[] = [
 
 export const NOTES: Note[] = [
   { id: 'n1', emoji: 'burger', tint: '#ffe7b0', text: 'Smash Bros. Burgers just parked 0.3 mi away', ago: '2 min ago', go: 'smash', unread: true },
-  { id: 'n2', emoji: 'party', tint: '#d8f6ea', text: 'Your report at Smoke Signal helped 23 foodies', ago: '1 hr ago', unread: true },
   { id: 'n3', emoji: 'timer', tint: '#ffe3d1', text: 'Birria drop at La Güera starts in about an hour', ago: '3 hr ago', go: 'drops', unread: false },
   { id: 'n4', emoji: 'dumpling', tint: '#ffe3d1', text: 'New pop-up near you: Dumpling Dojo (Sat 9am)', ago: 'Yesterday', go: 'dumpling', unread: false },
-  { id: 'n5', emoji: 'taco', tint: '#ffe0cc', text: 'Taco Tuesday quest starts tomorrow', ago: 'Yesterday', unread: false },
 ];
 
 /** The sample business the demo user owns (mockup `B`). */

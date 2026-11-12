@@ -22,6 +22,9 @@ export type Until = ClockTime | { key: 'until.soldOut' | 'until.sunset' };
 /** Moods are data: an emoji key plus a text key, so screen readers never read emoji. */
 export type Mood = { emoji: MoodEmojiKey; key: StringKey; params?: Record<string, string | number> };
 
+/** A usual weekly stop: `short` (9 characters or fewer) fits the 7-day strip. */
+export type ScheduleStop = { name: string; short: string };
+
 export type Friend = { name: string; avatar: AvatarKey };
 export type Dish = { name: string; price: number; liked: number };
 
@@ -55,7 +58,7 @@ export type Spot = {
   /** Relative busyness for 16 hourly slots from 8am to 11pm, 0 to 10. */
   busy: number[];
   /** Weekly stops for mobile spots, Monday first; null means off. */
-  schedule?: (string | null)[];
+  schedule?: (ScheduleStop | null)[];
   friends?: Friend[];
 };
 

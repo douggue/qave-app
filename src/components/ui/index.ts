@@ -6,3 +6,4 @@ export { Screen } from './Screen';
 export { Emoji, Text, type TextTone } from './Text';
 export { ToastProvider, useToast } from './Toast';
 export { Placeholder } from './Placeholder';
+export { LiveText, Skeleton } from './Skeleton';

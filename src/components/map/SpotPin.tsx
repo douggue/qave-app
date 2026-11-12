@@ -80,7 +80,7 @@ export const SpotPin = memo(function SpotPin({ spot, selected, dimmed, bob, onPr
   const bobY = reduceMotion
     ? 0
     : bob.interpolate({ inputRange: [0, 1], outputRange: [0, spot.hot || selected ? -5 : -2.5] });
-  const liftY = lift.interpolate({ inputRange: [0, 1], outputRange: [0, -6] });
+  const liftY = lift.interpolate({ inputRange: [0, 1], outputRange: [0, -5] });
   const liftScale = lift.interpolate({ inputRange: [0, 1], outputRange: [1, reduceMotion ? 1.15 : 1.2] });
 
   const scaleTransform = inverse ? [{ translateY: PIVOT }, { scale: inverse }, { translateY: -PIVOT }] : [];
