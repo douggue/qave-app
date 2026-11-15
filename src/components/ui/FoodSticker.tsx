@@ -12,6 +12,12 @@ const STICKERS: Partial<Record<FoodKey, ImageSourcePropType>> = {
   dumpling: require('../../../assets/emoji/food-dumpling.png'),
   pho: require('../../../assets/emoji/food-pho.png'),
   jerk: require('../../../assets/emoji/food-jerk.png'),
+  bbq: require('../../../assets/emoji/food-bbq.png'),
+  curry: require('../../../assets/emoji/food-curry.png'),
+  supper: require('../../../assets/emoji/food-supper.png'),
+  rings: require('../../../assets/emoji/food-rings.png'),
+  shake: require('../../../assets/emoji/food-shake.png'),
+  paleta: require('../../../assets/emoji/food-paleta.png'),
 };
 
 type Props = { food: FoodKey; size: number; style?: StyleProp<TextStyle>; dim?: boolean };
