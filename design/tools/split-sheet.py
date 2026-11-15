@@ -1,7 +1,9 @@
-"""Split a 3x3 AI-generated emoji sheet into clean, square, transparent PNGs.
+"""Split an AI-generated emoji sheet (2x2 or 3x3) into clean, square, transparent PNGs.
 
-Usage: python3 split-sheet.py <sheet.png> <out-dir> name1 name2 ... name9
+Usage: python3 split-sheet.py <sheet.png> <out-dir> name1 ... nameN   (N = 4 or 9; the grid follows N)
 
+- Works on a real transparent background, or on a plain or fake-checkerboard background that
+  ChatGPT sometimes draws instead: background connected to the image edge is removed.
 - Removes the faint haze and makes each emoji fully solid (alpha >= 200 becomes opaque).
 - Keeps detached parts (raindrops, steam) with the emoji in the same grid cell.
 - Separates emoji that touch a neighbour by cutting at the thinnest line near the cell border.
@@ -15,13 +17,31 @@ src_path, out_dir, *names = sys.argv[1:]
 src = Image.open(src_path).convert("RGBA")
 arr = np.array(src)
 H, W = arr.shape[:2]
+G = int(round(len(names) ** 0.5))
+assert G * G == len(names), "give 4 or 9 names"
+
+# No real transparency: treat the edge colors (plain, or a fake checkerboard) as background.
+if (arr[:, :, 3] < 200).mean() < 0.05:
+    rgb = arr[:, :, :3].astype(int)
+    border = np.concatenate([rgb[0], rgb[-1], rgb[:, 0], rgb[:, -1]])
+    keys, counts = np.unique((border // 8), axis=0, return_counts=True)
+    bg_colors = keys[np.argsort(-counts)[:2]] * 8 + 4
+    near = np.zeros((H, W), bool)
+    for col in bg_colors:
+        near |= np.abs(rgb - col).sum(axis=2) < 40
+    lab, _ = ndimage.label(near)
+    edge_ids = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))
+    bg = np.isin(lab, edge_ids[edge_ids > 0])
+    arr[:, :, 3] = np.where(bg, 0, 255)
+    src = Image.fromarray(arr)
+    print("background removed from edge colors", [tuple(c) for c in bg_colors])
 solid = ndimage.binary_opening(arr[:, :, 3] >= 200, iterations=2)
 labels, count = ndimage.label(solid)
-cells = [np.zeros_like(solid) for _ in range(9)]
+cells = [np.zeros_like(solid) for _ in range(G * G)]
 
 
 def cell_of(y, x):
-    return min(2, int(y / (H / 3))) * 3 + min(2, int(x / (W / 3)))
+    return min(G - 1, int(y / (H / G))) * G + min(G - 1, int(x / (W / G)))
 
 
 def thinnest(mask, axis, lo, hi):
@@ -35,14 +55,14 @@ for i in range(1, count + 1):
     if part.sum() < 300:  # specks
         continue
     ys, xs = np.where(part)
-    col_lo, col_hi = int(xs.min() / (W / 3)), int(xs.max() / (W / 3))
-    row_lo, row_hi = int(ys.min() / (H / 3)), int(ys.max() / (H / 3))
-    big = part.sum() > 0.04 * H * W / 9
-    if big and (col_hi > col_lo or row_hi > row_lo) and part.sum() > 0.9 * H * W / 9:
+    col_lo, col_hi = int(xs.min() / (W / G)), int(xs.max() / (W / G))
+    row_lo, row_hi = int(ys.min() / (H / G)), int(ys.max() / (H / G))
+    big = part.sum() > 0.04 * H * W / (G * G)
+    if big and (col_hi > col_lo or row_hi > row_lo) and part.sum() > 0.9 * H * W / (G * G):
         # Two emoji touching: cut at the thinnest column or row near each crossed border.
         pieces = [part]
-        for b in range(1, 3):
-            edge = int(b * W / 3)
+        for b in range(1, G):
+            edge = int(b * W / G)
             new = []
             for p in pieces:
                 pys, pxs = np.where(p)
@@ -55,8 +75,8 @@ for i in range(1, count + 1):
                 else:
                     new.append(p)
             pieces = new
-        for b in range(1, 3):
-            edge = int(b * H / 3)
+        for b in range(1, G):
+            edge = int(b * H / G)
             new = []
             for p in pieces:
                 pys, pxs = np.where(p)

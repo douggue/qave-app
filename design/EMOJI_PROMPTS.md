@@ -1,5 +1,118 @@
 # Lokal: emoji sheet prompts
 
+## Round 2 · Better method (use this one)
+
+What changed from round 1, and why:
+- **One reference image with all 8 approved stickers** (`design/emoji/lokal-style-reference.png`) instead of 2. ChatGPT copies a set much better than a pair.
+- **The style rules are sent once, in a setup message.** Each sheet prompt then only describes the food, so ChatGPT focuses on it.
+- **4 per image (2×2), not 9.** Each sticker comes out about twice as big and sharper.
+- **Direction for each food:** angle, shape, main colors, the one detail that makes it read, and what it must NOT look like (the reason curry was redone).
+- **Background:** transparent, or plain light grey if ChatGPT can't. The split tool now removes a plain or fake-checkerboard background itself.
+
+### How to run it (about 15 minutes)
+
+1. Open a **new** ChatGPT chat. Upload `lokal-style-reference.png`, paste **Setup**, send. ChatGPT replies "Ready".
+2. Paste **Sheet 1**. Wait for the image. Do the same for **Sheet 2** and **Sheet 3**, in the same chat.
+3. If one sticker is off, use a **Fix** message, never a whole new sheet.
+4. Send the 3 finished images back to Claude. Claude splits, cleans, checks them at 24, 40 and 56 px on the night and day maps, and puts the approved ones in the app.
+
+### Setup (send once, with the reference image)
+
+```
+I'm making a custom emoji set for a food app. The image I uploaded shows the 8 approved emoji. Every new emoji must look like it belongs in this exact set, as if the same artist made it on the same day.
+
+Study them and match exactly:
+- Stylized glossy 3D emoji illustration, like a premium emoji set. Not photorealistic, not a flat cartoon, not a game icon, not a painting.
+- Seen from a slight 3/4 angle from above, slightly tilted, like the burger, dumplings and taco.
+- Chunky, rounded, simplified shapes. Few details, each one big enough to see at 40 pixels.
+- Rich, warm, saturated colors. Smooth gradients, one clear glossy highlight on each main shape.
+- Soft light from the top left. A small soft shadow under the bottom right of the object only.
+- A thin, even, pure white outline around the whole silhouette, like a die-cut sticker, exactly as thick as on the reference. No dark or black outline lines anywhere.
+- Fully solid and opaque. No glow, haze, sparkles, smoke clouds or background scenery.
+- No text, letters, numbers, logos or brand marks anywhere.
+
+I'll send the items 4 at a time. Reply only "Ready".
+```
+
+### Sheet 1 · Bakery and coffee
+
+```
+Make sheet 1: one square image, as large as you can, with a 2×2 grid of 4 separate emoji. Each emoji is centered in its quarter, fills about 70% of it, and never touches another one. Background: fully transparent if you can; otherwise a plain flat light grey. Never a checkerboard pattern.
+
+Top left: a plump golden butter croissant, a fat curved crescent seen from the side at a slight angle, 5 clear rounded layers, deep golden-amber with a glossy egg-wash shine and lighter cream in the folds. Must not look like a shrimp or a horn.
+Top right: a round Texas fruit kolache, seen from above at an angle: a soft golden bun with a puffy rim and a shiny apricot-orange jam center, a few white streusel crumbs on the rim. Must not look like a bagel, a donut or a fried egg: the center is filled with glossy jam, no hole.
+Bottom left: a to-go paper coffee cup, short and wide, cream white with a brown cardboard sleeve and a dark brown lid, two soft white curls of steam above it. No logo. Must not look like a soda cup.
+Bottom right: a ring donut with glossy pink frosting and a few colorful rod sprinkles, golden dough showing at the edge. Must not look like a bagel.
+
+Match the reference set exactly: same angle, gloss, color strength, white rim thickness and level of detail.
+```
+
+### Sheet 2 · Sides and sweets
+
+```
+Make sheet 2: one square image, as large as you can, with a 2×2 grid of 4 separate emoji. Each emoji is centered in its quarter, fills about 70% of it, and never touches another one. Background: fully transparent if you can; otherwise a plain flat light grey. Never a checkerboard pattern.
+
+Top left: a plain red paper scoop carton of golden french fries, about 9 thick fries standing at different heights, bright golden with lighter tips. The carton has no logo, letters or stripes. Must not resemble any fast-food brand.
+Top right: a stack of 3 thick battered onion rings leaning on each other, light golden brown, the front ring standing up so its big hole shows. Bumpy batter shown with smooth glossy shading. Must not look like donuts or bagels: thinner rings, bigger holes.
+Bottom left: a tall milkshake glass with a pink strawberry shake, a swirl of whipped cream, a red cherry on top and a red-and-white striped straw.
+Bottom right: a rectangular Mexican mango paleta (ice pop) on a wooden stick, bright mango orange with small fruit pieces inside, a red chili-lime dusting on one corner, rounded corners, and a small three-tooth bite taken out of the top right corner. Must not look like a cheese bar or a twin popsicle.
+
+Match the reference set exactly: same angle, gloss, color strength, white rim thickness and level of detail.
+```
+
+### Sheet 3 · Hot dishes (includes the 3 redos)
+
+```
+Make sheet 3: one square image, as large as you can, with a 2×2 grid of 4 separate emoji. Each emoji is centered in its quarter, fills about 70% of it, and never touches another one. Background: fully transparent if you can; otherwise a plain flat light grey. Never a checkerboard pattern.
+
+Top left: three thick slices of smoked BBQ brisket fanned out on a small light wooden board, each slice with a dark bark edge and a thin pink smoke ring, juicy and glossy, smooth simple shapes with almost no texture. Must not look like bread or cake.
+Top right: Japanese curry and rice on a white oval plate, seen from above at an angle: a neat dome of white rice on the left, glossy golden-brown curry with a few big carrot and potato chunks on the right. Must not look like ramen or soup: a flat plate, no bowl, no noodles.
+Bottom left: a small round black cast-iron pot of hearty red-brown stew with big vegetable chunks, a wooden spoon resting in it and its lid tilted open on the side. Must not look like ramen or pho: a heavy dark pot, not a ceramic bowl, no noodles.
+Bottom right: a short rack of 4 glazed pork ribs in glossy dark-red BBQ sauce, white bone tips showing along the top, smooth surfaces. Must not look like a chocolate bar.
+
+Match the reference set exactly: same angle, gloss, color strength, white rim thickness and level of detail.
+```
+
+### Fix messages (when one sticker is off)
+
+```
+Redo only the [top left / top right / bottom left / bottom right] emoji: [the note, e.g. "simpler, fewer crumbs, bigger jam center"]. Keep the other 3 exactly the same, same layout and size.
+```
+```
+The style drifted from the reference. Redo the whole sheet closer to the reference image: glossier, chunkier, fewer details, and the same thin white sticker rim.
+```
+
+### Review checklist (Claude runs it, founder decides)
+
+- Reads as what it is at 24 px, without a label, on the night and the day map.
+- Doesn't look like another sticker in the set.
+- Same gloss, color strength, angle and rim as the reference.
+- Solid after cleaning, no halo, no text, no brand look.
+
+### Where they go in the app
+
+| Sheet | Sticker | App food key |
+|---|---|---|
+| 1 | croissant | `croissant` |
+| 1 | kolache | `kolache` |
+| 1 | coffee | `coffee` |
+| 1 | donut | (new, for future spots) |
+| 2 | fries | `fries` |
+| 2 | onion rings | `rings` |
+| 2 | milkshake | `shake` |
+| 2 | paleta | `paleta` |
+| 3 | brisket | `bbq` |
+| 3 | curry plate | `curry` |
+| 3 | stew pot | `supper` |
+| 3 | ribs | (BBQ alternate) |
+
+Split command: `python3 design/tools/split-sheet.py <sheet.png> <out-dir> name1 name2 name3 name4` (top left, top right, bottom left, bottom right).
+
+---
+
+## Round 1 (archive)
+
+
 How to use: in ChatGPT, upload `design/emoji/approved/food-taco.png` and `design/emoji/approved/food-burger.png` first (or work in the same chat as the taco), then paste one prompt per sheet. Send each finished sheet back to Claude to split, clean and export.
 
 ## 1. Food sheet 1
