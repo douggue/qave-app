@@ -48,7 +48,7 @@ A · Pin-o (the "o" is a map pin), B · Bite pin (pin with a bite), C · Neon si
 - [x] Choose a concept: **B · Bite pin**.
 - [x] Refinement round on the canvas (row 3): bite shapes, icon at real sizes, colors and versions, refined splash.
 - [ ] Approve the refined bite: **three equal teeth** at the top right (main logo), **two big teeth + bigger hole** for 24 px and smaller.
-- [ ] Approve the app icon: white bite pin on the Sun → Grill → Chili gradient (alternate: gradient pin on Night navy).
+- [x] App icon approved 15 Nov: **A, white bitten pin on the Sun → Grill → Chili gradient** (B, gradient pin on Night navy, rejected: too dark at small sizes). Built into assets/icon.png, the Android adaptive foreground, background and monochrome, and the favicon. Name under the icon still "qave-app", pending founder.
 - Logo colors: Sun #FFCC33, Grill #FF7A45, Chili #FF2D6F, Night #0D0E19, Moon #F5F2FF. Wordmark: Unbounded ExtraBold (Google Fonts, OFL).
 - Splash timing (smoothed): fade in, pin rises and pops by 0.45 s; three teeth sink in with eased, overlapping timing at 0.6–0.9 s; soft recoil tilt instead of a shake; crumbs arc out and fall; wordmark by 1.45 s, tagline by 1.75 s; scene fades out before the loop. No springy overshoot on the bite.
 - [ ] Refine the bite so it reads as a **food bite, not Apple's logo**: keep three clear rounded "teeth" scallops at the top right, keep the pin's pointed tail and the hole as the main silhouette, no leaf, never on a round fruit-like shape.
