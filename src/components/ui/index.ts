@@ -1,6 +1,7 @@
 export { Badge, type BadgeTone } from './Badge';
 export { Button } from './Button';
 export { Card } from './Card';
+export { Icon, iconFor, type IconName } from './Icon';
 export { Chip } from './Chip';
 export { Screen } from './Screen';
 export { Emoji, Text, type TextTone } from './Text';

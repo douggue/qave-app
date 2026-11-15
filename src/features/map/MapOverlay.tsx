@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Chip, Emoji, Text, useToast } from '@/components/ui';
+import { Chip, Emoji, Icon, iconFor, Text, useToast } from '@/components/ui';
 import { getPeople, getTicks } from '@/data/repo';
 import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -156,8 +156,6 @@ function Ticker() {
   );
 }
 
-/** Text glyphs (not emoji) that need the ink color to show on the night map. */
-const GLYPHS = new Set<string>([ui.plus, ui.minus]);
 
 /** A 44 pt glass icon button used over the map. */
 export function IconButton({
@@ -187,16 +185,8 @@ export function IconButton({
         pressed && styles.pressed,
       ]}
     >
-      {GLYPHS.has(icon) ? (
-        <Text
-          variant="heading"
-          accessible={false}
-          importantForAccessibility="no"
-          accessibilityElementsHidden
-          style={{ color: c.ink, fontSize: 22, lineHeight: 24 }}
-        >
-          {icon}
-        </Text>
+      {iconFor(icon) ? (
+        <Icon name={iconFor(icon)!} size={22} color={c.ink} />
       ) : (
         <Emoji size={19}>{icon}</Emoji>
       )}
@@ -221,15 +211,7 @@ export function ZoomPill({ onIn, onOut }: { onIn: () => void; onOut: () => void 
       accessibilityLabel={label}
       style={({ pressed }) => [styles.zoomHalf, pressed && styles.pressed]}
     >
-      <Text
-        variant="heading"
-        accessible={false}
-        importantForAccessibility="no"
-        accessibilityElementsHidden
-        style={{ color: c.ink, fontSize: 22, lineHeight: 24 }}
-      >
-        {glyph}
-      </Text>
+      <Icon name={glyph === ui.plus ? 'plus' : 'minus'} size={22} color={c.ink} />
     </Pressable>
   );
   return (

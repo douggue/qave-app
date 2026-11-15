@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FoodArt } from '@/components/cards/FoodArt';
 import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
-import { Badge, Button, Card, Emoji, LiveText, Placeholder, Text, useToast } from '@/components/ui';
+import { Badge, Button, Card, Emoji, Icon, iconFor, LiveText, Placeholder, Text, useToast } from '@/components/ui';
 import { formatDistance, friendsText, isMobile, kindLabel, priceText, statusText } from '@/data/format';
 import { directionsUrl } from '@/data/links';
 import type { Spot } from '@/data/types';
@@ -214,7 +214,9 @@ function GlassButton({ icon, label, onPress, big }: { icon: string; label: strin
       accessibilityLabel={label}
       style={({ pressed }) => [styles.glass, { backgroundColor: c.glass, borderColor: c.line }, pressed && { opacity: 0.85 }]}
     >
-      {big ? (
+      {iconFor(icon) ? (
+        <Icon name={iconFor(icon)!} size={big ? 24 : 20} color={c.ink} strokeWidth={2.4} />
+      ) : big ? (
         <Text variant="title" style={styles.backGlyph}>
           {icon}
         </Text>

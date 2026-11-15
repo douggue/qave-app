@@ -3,17 +3,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Emoji, Text, useToast } from '@/components/ui';
+import { Emoji, Icon, Text, useToast, type IconName } from '@/components/ui';
 import { getBusiness } from '@/data/repo';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t, type StringKey } from '@/i18n';
 import { useStore } from '@/state/store';
-import { status as statusEmoji, tab as tabEmoji, type TabEmojiKey } from '@/theme/emoji';
+import { status as statusEmoji } from '@/theme/emoji';
 import { dur, ease, native } from '@/theme/motion';
 import { glow, gradients } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-type TabSpec = { route: string; label: StringKey; icon: TabEmojiKey };
+type TabSpec = { route: string; label: StringKey; icon: IconName };
 
 type TabSet = { left: TabSpec[]; right: TabSpec[]; a11y: StringKey };
 
@@ -145,14 +145,13 @@ function TabItem({ spec, selected, onPress }: { spec: TabSpec; selected: boolean
     >
       <Animated.View
         style={{
-          opacity: selected ? 1 : 0.5,
           transform: [
             { translateY: lift.interpolate({ inputRange: [0, 1], outputRange: [0, -2] }) },
             { scale: lift.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] }) },
           ],
         }}
       >
-        <Emoji size={22}>{tabEmoji[spec.icon]}</Emoji>
+        <Icon name={spec.icon} size={25} color={c.ink3} active={selected} cut={c.card} />
       </Animated.View>
       <Text variant="micro" maxFontSizeMultiplier={1.4} tone={selected ? 'ink' : 'ink2'} center style={styles.label}>
         {label}
@@ -198,15 +197,9 @@ function CenterAction({ open, onPress }: { open: boolean; onPress: () => void })
           end={{ x: 1, y: 1 }}
           style={[styles.circle, isNight && glow('#ff3c5a', 20, 0.9)]}
         >
-          <Animated.Text
-            accessible={false}
-            importantForAccessibility="no-hide-descendants"
-            accessibilityElementsHidden
-            allowFontScaling={false}
-            style={[styles.plus, { color: c.onHot, transform: [{ rotate }] }]}
-          >
-            {tabEmoji.report}
-          </Animated.Text>
+          <Animated.View style={{ transform: [{ rotate }] }}>
+            <Icon name="plus" size={30} color={c.onHot} strokeWidth={2.8} />
+          </Animated.View>
         </LinearGradient>
       </View>
       <Text variant="micro" maxFontSizeMultiplier={1.4} tone="ink2" center style={styles.label}>
@@ -236,7 +229,7 @@ function GoLiveAction({ live, onPress }: { live: boolean; onPress: () => void })
             isNight && glow(c.mint, 18, 0.8),
           ]}
         >
-          <Emoji size={26}>{live ? statusEmoji.live : tabEmoji.golive}</Emoji>
+          {live ? <Emoji size={26}>{statusEmoji.live}</Emoji> : <Icon name="golive" size={28} color={c.mint} strokeWidth={2.4} />}
         </View>
       </View>
       <Text variant="micro" maxFontSizeMultiplier={1.4} tone={live ? 'mint' : 'ink2'} center style={styles.label}>

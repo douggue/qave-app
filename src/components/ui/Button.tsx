@@ -5,6 +5,7 @@ import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { glow, gradients, minTap, radius, withAlpha } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
+import { iconFor, Icon } from './Icon';
 import { Emoji, Text, type TextTone } from './Text';
 
 /** `danger` is an outlined chili button for destructive actions; `dangerSolid` confirms one. */
@@ -62,7 +63,13 @@ export function Button({
 
   const content = (
     <View style={[styles.row, { gap: md ? 8 : 6 }]}>
-      {icon ? <Emoji size={md ? 18 : 16}>{icon}</Emoji> : null}
+      {icon ? (
+        iconFor(icon) ? (
+          <Icon name={iconFor(icon)!} size={md ? 19 : 17} color={c[labelTone[variant]]} strokeWidth={2.4} />
+        ) : (
+          <Emoji size={md ? 18 : 16}>{icon}</Emoji>
+        )
+      ) : null}
       <Text variant={md ? 'ui' : 'label'} tone={labelTone[variant]} center style={styles.label}>
         {label}
       </Text>

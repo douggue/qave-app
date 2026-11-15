@@ -4,6 +4,7 @@ import { useHydrated } from '@/hooks/use-hydrated';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
+import { iconFor, Icon } from './Icon';
 import { Emoji, Text, type TextTone } from './Text';
 
 export type BadgeTone = 'grape' | 'mint' | 'neon' | 'amber' | 'hot' | 'neutral';
@@ -47,7 +48,13 @@ export function Badge({ label, tone = 'neutral', icon, accessibilityLabel, style
       accessibilityLabel={accessibilityLabel ?? label}
       style={[styles.badge, { backgroundColor: bg[tone] }, style]}
     >
-      {icon ? <Emoji size={12}>{icon}</Emoji> : null}
+      {icon ? (
+        iconFor(icon) ? (
+          <Icon name={iconFor(icon)!} size={13} color={c[ink[tone]]} strokeWidth={2.6} />
+        ) : (
+          <Emoji size={12}>{icon}</Emoji>
+        )
+      ) : null}
       <Text variant="caption" tone={ink[tone]} style={styles.label}>
         {label}
       </Text>
