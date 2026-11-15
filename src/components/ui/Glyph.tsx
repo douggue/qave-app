@@ -1,7 +1,7 @@
 import { memo } from 'react';
-import { View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { Image, View, type ImageSourcePropType, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 
-import { avatar } from '@/theme/emoji';
+import { type AvatarKey } from '@/theme/emoji';
 import { resolveGlyph, toneColor, type GlyphSource, type GlyphTone } from '@/theme/glyphs';
 import { palettes } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -9,6 +9,19 @@ import { useTheme } from '@/theme/use-theme';
 import { FoodSticker } from './FoodSticker';
 import { BRAND_TINT, Icon } from './Icon';
 import { Emoji } from './Text';
+
+// Approved avatar stickers (design/emoji/approved). Owl, chef and cat are ready for new keys.
+const AVATARS: Record<AvatarKey, ImageSourcePropType> = {
+  me: require('../../../assets/emoji/avatar-me.png'),
+  cowboy: require('../../../assets/emoji/avatar-cowboy.png'),
+  fox: require('../../../assets/emoji/avatar-fox.png'),
+  panda: require('../../../assets/emoji/avatar-panda.png'),
+  frog: require('../../../assets/emoji/avatar-frog.png'),
+  unicorn: require('../../../assets/emoji/avatar-unicorn.png'),
+  octopus: require('../../../assets/emoji/avatar-octopus.png'),
+  alien: require('../../../assets/emoji/avatar-alien.png'),
+  robot: require('../../../assets/emoji/avatar-robot.png'),
+};
 
 type Props = {
   /** An emoji from src/theme/emoji.ts, or a glyph from src/theme/glyphs.ts. */
@@ -70,7 +83,21 @@ export const Glyph = memo(function Glyph({ of, size, color, plain, tone, palette
     );
   }
 
-  const text = glyph && 'avatar' in glyph ? avatar[glyph.avatar] : typeof of === 'string' ? of : '';
+  if (glyph && 'avatar' in glyph) {
+    const box = Math.round(size * 1.12);
+    return (
+      <View aria-hidden importantForAccessibility="no-hide-descendants" style={style}>
+        <Image
+          source={AVATARS[glyph.avatar]}
+          accessible={false}
+          resizeMode="contain"
+          style={{ width: box, height: box, opacity: dim ? 0.55 : 1 }}
+        />
+      </View>
+    );
+  }
+
+  const text = typeof of === 'string' ? of : '';
   return (
     <Emoji size={size} style={[dim && { opacity: 0.55 }, style as StyleProp<TextStyle>]}>
       {text}

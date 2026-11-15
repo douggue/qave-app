@@ -92,3 +92,8 @@ Plan: [Lokal Design Refinement Plan](https://claude.ai/artifact/3UVpN6mkgaHTT1vs
 - [x] All round 2 stickers get one consistent white rim from `tools/sticker-rim.py` (ChatGPT drew them on white, so the split removed most rims).
 - [x] **Fries: redone and approved** (kraft cone, red checkered liner). The plain red scoop carton reads as a fast-food brand. Fix: "Redo only the top left emoji: put the fries in a kraft-brown paper cone with a small red checkered paper liner, no logo." Draft kept in `emoji/drafts/`.
 - [x] Sheet 1 approved: croissant, kolache, coffee live in the app; donut saved for later. All 15 sample foods now use our own stickers.
+
+## 2026-11-15 · No system emoji left
+
+- [x] Every icon in the app is our own art. Controls, moods, reports and statuses use the drawn icon set, tinted by meaning (hot = brand gradient, line/wait/closing = amber, deal/live = mint, sold out = red, photo/parked = sky, new/seats = grape, closed = grey); see `src/theme/glyphs.ts`. Foods use the 15 custom stickers; avatars use the 9 custom avatar stickers. Celebrations rain stickers and drawn sparkles.
+- [x] Approved spares ready for later: donut, ribs, hot dog, pizza, ramen, and the owl (Night Owl badge), chef (owner accounts) and cat avatars.
