@@ -197,13 +197,13 @@ input.txt,select.txt{width:100%;height:48px;border-radius:14px;border:2px solid 
 const SPOTS=[
  {id:'guera',n:'Taquería La Güera',k:'truck',e:'🌮',c:'tacos',x:800,y:480,p:'$',r:4.8,rv:212,hood:'East 6th',open:true,status:'Here now · until 10pm',mood:'🔥 Hot right now',hot:1,bg:'#ffe1d6',badges:['Family-owned','Food truck'],own:'Rosa & Miguel',
   ai:'Locals rave about the al pastor and the green salsa. Short line after 7pm, moves fast. Takes cash and cards.',menu:[['Al pastor taco',3.5],['Birria plate',13],['Horchata',4]]},
- {id:'smoke',n:'Smoke Signal BBQ',k:'trailer',e:'🍖',c:'bbq',x:885,y:575,p:'$$',r:4.7,rv:388,hood:'East Cesar Chavez',open:true,status:'Open · until it sells out',mood:'⏳ 25-min line',bg:'#f6e2cf',badges:['Trailer','Pitmaster-owned'],own:'Dez',
+ {id:'smoke',n:'Post Oak Pit BBQ',k:'trailer',e:'🍖',c:'bbq',x:885,y:575,p:'$$',r:4.7,rv:388,hood:'East Cesar Chavez',open:true,status:'Open · until it sells out',mood:'⏳ 25-min line',bg:'#f6e2cf',badges:['Trailer','Pitmaster-owned'],own:'Dez',
   ai:'Brisket is the star: peppery bark, very tender. Lines peak noon to 1pm. Sells out of ribs most days by 2pm.',menu:[['Brisket (½ lb)',16],['Pork ribs (3)',14],['Jalapeño mac',5]]},
  {id:'dough',n:'Little Dough Bakery',k:'restaurant',e:'🥐',c:'sweets',x:360,y:880,p:'$',r:4.9,rv:146,hood:'Bouldin',open:true,status:'Open · until 3pm',mood:'🆕 Pecan croissant',bg:'#fff0c9',badges:['Women-owned','Small bakery'],own:'June',
   ai:'Tiny counter, huge flavor. The pecan croissant is new this week and people love it. Come before 10am for the full case.',menu:[['Pecan croissant',5],['Kolache box (6)',14],['Cold brew',4.5]]},
  {id:'pho',n:'Phở Bà Năm',k:'restaurant',e:'🍜',c:'asian',x:720,y:250,p:'$$',r:4.6,rv:301,hood:'Cherrywood',open:true,status:'Open · until 9pm',mood:'',bg:'#e3f1ff',badges:['Family-owned','12 tables'],own:'The Nguyen family',
   ai:'Rich, slow-cooked broth and generous portions. Quiet spot, great for rainy days. Grandma still makes the broth.',menu:[['Phở tái',13],['Bánh mì',8],['Iced coffee',5]]},
- {id:'smash',n:'Smash Bros. Burgers',k:'truck',e:'🍔',c:'burgers',x:610,y:520,p:'$',r:4.5,rv:97,hood:'Downtown',open:true,status:'Here now · until 11pm',mood:'🚚 Just parked',bg:'#ffe9b8',badges:['Food truck','Brothers-owned'],own:'Leo & Sam',
+ {id:'smash',n:'Ember & Bun',k:'truck',e:'🍔',c:'burgers',x:610,y:520,p:'$',r:4.5,rv:97,hood:'Downtown',open:true,status:'Here now · until 11pm',mood:'🚚 Just parked',bg:'#ffe9b8',badges:['Food truck','Brothers-owned'],own:'Leo & Sam',
   ai:'Crispy-edged smash burgers and very fast service. Late-night favorite. Fries are just okay; get the onion rings.',menu:[['Double smash',11],['Onion rings',5],['Shake',6]]},
  {id:'kolache',n:'Kolache Corner',k:'restaurant',e:'🥟',c:'sweets',x:560,y:330,p:'$',r:4.4,rv:80,hood:'Downtown',open:true,status:'Open · until 1pm',mood:'🛑 Sausage sold out',bg:'#f9e5d0',badges:['Since 1998'],own:'Hana',
   ai:'Classic Czech-Texan kolaches. Fruit ones last all morning; sausage ones sell out by about 10am.',menu:[['Fruit kolache',2.5],['Sausage klobasnek',3],['Coffee',2]]},
@@ -231,7 +231,7 @@ const QUESTS=[
  {e:'🕵️',t:'First to Find',d:'Add a spot nobody has posted yet',p:0,n:1,r:50},
  {e:'🦉',t:'Night Owl',d:'3 check-ins after 10pm',p:1,n:3,r:40},
 ];
-const BATTLE={q:'Best smash burger in Austin?',opts:[['Smash Bros. Burgers',46],['Patty Wagon',31],['Bun Voyage',23]]};
+const BATTLE={q:'Best smash burger in Austin?',opts:[['Ember & Bun',46],['Patty Wagon',31],['Bun Voyage',23]]};
 const LEVELS=[['Snacker',0],['Foodie',100],['Taste Scout',250],['Spot Hunter',500],['Street Food Legend',1000]];
 const BADGES=[['🌮','Taco Hunter',1],['🚚','Truck Chaser',1],['🦉','Night Owl',1],['🕵️','First to Find',0],['🔥','Hot Spotter',1],['🧁','Sweet Tooth',0],['📸','Food Paparazzi',1],['👑','Local Legend',0]];
 const LEADERS=[['🦄','@tacotania',1240],['🤠','@brisketbrad',1105],['🐙','@ellie.eats',980],['🦊','@k.lo',760],['🐼','@hungryhank',655],['🐸','@noodle.nina',512]];
@@ -385,7 +385,7 @@ function answer(q){
   q=q.toLowerCase();
   if(/spic|hot|jerk|heat/.test(q))return['Spicy and open now, all under $12 for a main:',['jerk','guera','curry']];
   if(/sweet|dessert|bak|ice|paleta|croissant/.test(q))return['Sweet tooth? These are loved right now:',['dough','paleta','kolache']];
-  if(/bbq|brisket|rib/.test(q))return['Smoke Signal has the best brisket nearby. The line is about 25 min, so here are shorter waits too:',['smoke','jerk']];
+  if(/bbq|brisket|rib/.test(q))return['Post Oak Pit has the best brisket nearby. The line is about 25 min, so here are shorter waits too:',['smoke','jerk']];
   if(/late|night|midnight/.test(q))return['Still open late near you:',['smash','guera']];
   if(/taco|mex|burrito/.test(q))return['Tacos nearby, freshest reports first:',['guera','curry']];
   if(/cheap|\$|budget|under/.test(q))return['Big flavor, small price:',['jerk','curry','guera']];

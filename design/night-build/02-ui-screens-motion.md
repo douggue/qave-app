@@ -491,7 +491,7 @@ Real AI answers are coming. These are sample answers.   caption ink2 (always vis
 ┌ Map look ────────────────────────────────┐
 │ [ Auto ] [ Night ] [ Day ]                │  segmented chips, selected = sun; caption under: "Auto: night from 7pm to 7am"
 └───────────────────────────────────────────┘
-┌ 🏪 Switch to Business mode            ›  ┐  card row, label + caption "Smash Bros. Burgers"
+┌ 🏪 Switch to Business mode            ›  ┐  card row, label + caption "Ember & Bun"
 └───────────────────────────────────────────┘
 ```
 - Levels and thresholds live in one place (`src/data/levels.ts` or the store): Newcomer 0, Regular 100, Local 250, Legend 1000 (the plan lists four; the mockup's "Insider 500" is LATER).
@@ -501,7 +501,7 @@ Real AI answers are coming. These are sample answers.   caption ink2 (always vis
 ### 9.4 Business Today (C5) — `src/app/(tabs)/today.tsx` (business set)
 
 ```
-[FoodArt 42] Smash Bros. Burgers (✓)   [BUSINESS]    header row; ✓ = 18px sky circle; pill mint tint micro
+[FoodArt 42] Ember & Bun (✓)   [BUSINESS]    header row; ✓ = 18px sky circle; pill mint tint micro
              Today                                   caption
 ┌ LiveCard (offline) ───────────────────────────┐
 │ ● You're offline                               │  grey 14px dot, display variant

@@ -240,7 +240,7 @@ export const en = {
   'you.statA11y': '{label}: {n}',
   'you.theme': 'Map look',
   'you.toBiz': 'Switch to Business mode',
-  'you.toBizSub': 'Smash Bros. Burgers',
+  'you.toBizSub': 'Ember & Bun',
   'theme.auto': 'Auto',
   'theme.night': 'Night',
   'theme.day': 'Day',

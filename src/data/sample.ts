@@ -59,7 +59,7 @@ export const SPOTS: Spot[] = [
     friends: [{ name: 'Maya', avatar: 'unicorn' }, { name: 'Ellie', avatar: 'octopus' }, { name: 'Brad', avatar: 'cowboy' }],
   },
   {
-    id: 'smoke', name: 'Smoke Signal BBQ', kind: 'trailer', food: 'bbq', category: 'bbq',
+    id: 'smoke', name: 'Post Oak Pit BBQ', kind: 'trailer', food: 'bbq', category: 'bbq',
     x: 1130, y: 760, ...geo(1130, 760), price: 2, rating: 4.7, reviewCount: 388, hood: 'East Cesar Chavez',
     open: true, until: { key: 'until.soldOut' }, closesInMin: 25, mood: { emoji: 'line', key: 'mood.line25' }, hot: false,
     badges: ['Trailer', 'Pitmaster-owned'], owner: 'Dez', vibe: ['Worth the wait', 'Shaded seating', 'BYOB'],
@@ -89,7 +89,7 @@ export const SPOTS: Spot[] = [
     busy: [0, 0, 1, 3, 6, 7, 4, 2, 2, 4, 6, 7, 5, 3, 1, 0],
   },
   {
-    id: 'smash', name: 'Smash Bros. Burgers', kind: 'truck', food: 'burger', category: 'burgers',
+    id: 'ember', name: 'Ember & Bun', kind: 'truck', food: 'burger', category: 'burgers',
     x: 780, y: 690, ...geo(780, 690), price: 1, rating: 4.5, reviewCount: 97, hood: 'Downtown',
     open: true, until: { h: 23, m: 0 }, mood: { emoji: 'parked', key: 'mood.justParked' }, hot: false,
     badges: ['Food truck', 'Brothers-owned'], owner: 'Leo & Sam', vibe: ['Late night', 'Fast', 'Cheap eats'],
@@ -148,7 +148,7 @@ export const SPOTS: Spot[] = [
     schedule: [S1ST, S1ST, S1ST, S1ST, S1ST, null, null],
   },
   {
-    id: 'dumpling', name: 'Dumpling Dojo', kind: 'popup', food: 'dumpling', category: 'asian',
+    id: 'dumpling', name: 'Pleat & Steam', kind: 'popup', food: 'dumpling', category: 'asian',
     x: 1210, y: 1250, ...geo(1210, 1250), price: 2, rating: 4.8, reviewCount: 73, hood: 'Saturday market',
     open: false, until: { h: 9, m: 0, day: 6 }, mood: null, hot: false,
     badges: ['Market stall', 'Pop-up'], owner: 'Kenji & Mae', vibe: ['Market only', 'Sells out fast'],
@@ -184,7 +184,7 @@ export const REPORTS: Report[] = [
   { id: 'r-smoke-1', spotId: 'smoke', type: 'line', text: '25-min line, worth it', by: 1, ageMin: 6, votes: 9 },
   { id: 'r-smoke-2', spotId: 'smoke', type: 'soldOut', text: 'Ribs are gone already', by: 3, ageMin: 40, votes: 3 },
   { id: 'r-dough-1', spotId: 'dough', type: 'news', text: 'Pecan croissants just came out', by: 'owner', ageMin: 10, votes: 14 },
-  { id: 'r-smash-1', spotId: 'smash', type: 'parked', text: 'Just parked on Congress', by: 'owner', ageMin: 2, votes: 7 },
+  { id: 'r-ember-1', spotId: 'ember', type: 'parked', text: 'Just parked on Congress', by: 'owner', ageMin: 2, votes: 7 },
   { id: 'r-kolache-1', spotId: 'kolache', type: 'soldOut', text: 'Out of the sausage ones', by: 4, ageMin: 22, votes: 6 },
   { id: 'r-jerk-1', spotId: 'jerk', type: 'deal', text: '$10 lunch plate today only', by: 'owner', ageMin: 60, votes: 18 },
 ];
@@ -192,8 +192,8 @@ export const REPORTS: Report[] = [
 export const TICKS: Tick[] = [
   { by: 0, text: 'reported 🔥 Hot at Taquería La Güera' },
   { by: 4, text: 'checked in at Kolache Corner' },
-  { by: 2, text: 'added a new spot: Dumpling Dojo' },
-  { by: 1, text: 'says the line at Smoke Signal is 25 min' },
+  { by: 2, text: 'added a new spot: Pleat & Steam' },
+  { by: 1, text: 'says the line at Post Oak Pit is 25 min' },
   { by: 5, text: 'earned the Night Owl badge 🦉' },
   { by: 3, text: 'confirmed the $10 deal at Island Jerk Pit' },
 ];
@@ -203,21 +203,21 @@ const t0 = Date.now();
 
 export const DROPS: Drop[] = [
   { id: 'd-guera', spotId: 'guera', title: 'Birria drop', body: 'Only 40 portions of birria with consommé, tonight only.', startsAt: t0 + 72 * MIN + 14_000, left: 40, of: 40 },
-  { id: 'd-smash', spotId: 'smash', title: 'Free onion rings', body: 'For the next 20 people who show this in the app.', startsAt: t0 - 5 * MIN, left: 12, of: 20 },
+  { id: 'd-ember', spotId: 'ember', title: 'Free onion rings', body: 'For the next 20 people who show this in the app.', startsAt: t0 - 5 * MIN, left: 12, of: 20 },
   { id: 'd-dough', spotId: 'dough', title: 'Pecan croissants, round two', body: 'A second bake comes out of the oven soon.', startsAt: t0 + 24 * MIN + 40_000, left: 24, of: 24 },
   { id: 'd-supper', spotId: 'supper', title: 'Sunday Supper seats', body: 'West African and Texan family dinner this Sunday.', startsAt: t0 + 2 * 24 * 60 * MIN + 3 * 60 * MIN, left: 8, of: 24 },
 ];
 
 export const NOTES: Note[] = [
-  { id: 'n1', emoji: 'burger', tint: '#ffe7b0', text: 'Smash Bros. Burgers just parked 0.3 mi away', ago: '2 min ago', go: 'smash', unread: true },
+  { id: 'n1', emoji: 'burger', tint: '#ffe7b0', text: 'Ember & Bun just parked 0.3 mi away', ago: '2 min ago', go: 'ember', unread: true },
   { id: 'n3', emoji: 'timer', tint: '#ffe3d1', text: 'Birria drop at La Güera starts in about an hour', ago: '3 hr ago', go: 'drops', unread: false },
-  { id: 'n4', emoji: 'dumpling', tint: '#ffe3d1', text: 'New pop-up near you: Dumpling Dojo (Sat 9am)', ago: 'Yesterday', go: 'dumpling', unread: false },
+  { id: 'n4', emoji: 'dumpling', tint: '#ffe3d1', text: 'New pop-up near you: Pleat & Steam (Sat 9am)', ago: 'Yesterday', go: 'dumpling', unread: false },
 ];
 
 /** The sample business the demo user owns (mockup `B`). */
 export const B: Business = {
-  spotId: 'smash',
-  name: 'Smash Bros. Burgers',
+  spotId: 'ember',
+  name: 'Ember & Bun',
   verified: true,
   followers: 128,
   stops: [

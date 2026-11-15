@@ -57,7 +57,7 @@ export const REPORT_DEDUPE_MS = 10 * 60_000;   // same type, same spot, by you
 
 - Distance: `miles = hypot(dx, dy) / 600` on the 1400x1800 world from ME (820,700), as in the mockup. Under 0.25 mi, show `"{n} min walk"` with n = max(1, round(miles*20)); otherwise `"{d} mi"` with 1 decimal. If the locale region is CA, show km instead (`miles*1.609`, `"{d} km"`). Read the region from `Intl.DateTimeFormat().resolvedOptions().locale`.
 - Status (open): trucks, carts and trailers read "Here now · until {until}". Restaurants read "Open · until {until}". Status (closed): "Next: {until}". Tonight the sample's `open` flag is static. Do not compute it from the clock, otherwise the map is empty at 3am.
-- **Closing soon (idea B):** add `closesInMin` to the sample spots that close soonest (features builder: Smoke Signal 25, Kolache Corner 40, Bean Bike 55). Compute the minutes left as `closesInMin - minutesSinceAppStart` from `use-clock`. The label shows when 0 < left <= 60: amber "Closes in {min} min". At 0 or below, show "Closing now". Sort the "Closest to you" list as closing-soon first (fewest minutes first), then by distance.
+- **Closing soon (idea B):** add `closesInMin` to the sample spots that close soonest (features builder: Post Oak Pit 25, Kolache Corner 40, Bean Bike 55). Compute the minutes left as `closesInMin - minutesSinceAppStart` from `use-clock`. The label shows when 0 < left <= 60: amber "Closes in {min} min". At 0 or below, show "Closing now". Sort the "Closest to you" list as closing-soon first (fewest minutes first), then by distance.
 - **Freshness (idea A)**, computed from the newest report or still-here confirmation for that spot (sample reports carry an age in minutes):
 
 | Newest confirmation | Label (`fresh.*`) | Tone |
@@ -323,13 +323,13 @@ Lowercase the question, then test the keyword groups in order. Return the first 
 |---|---|---|---|
 | 1 | `taco\|mex\|burrito\|birria` | `ask.a.tacos` "{name} is hot right now, with a fresh report {min} min ago. Get the al pastor." | guera, (curry as a cheap backup) |
 | 2 | `rain\|cold\|soup\|cozy` | `ask.a.rainy` "Rainy day? Warm bowls: {name} has rich broth and big portions." | pho, curry |
-| 3 | `late\|night\|midnight` | `ask.a.late` "Still open late near you: Smash Bros. until 11pm and La Güera until 10pm." | smash, guera |
+| 3 | `late\|night\|midnight` | `ask.a.late` "Still open late near you: Ember & Bun until 11pm and La Güera until 10pm." | smash, guera |
 | 4 | `sweet\|dessert\|bak\|croissant\|ice\|paleta` | `ask.a.sweet` "For a sweet tooth: Little Dough's pecan croissant, or a paleta if you want something cold." | dough, paleta |
-| 5 | `bbq\|brisket\|rib\|smok` | `ask.a.bbq` "Smoke Signal has the best brisket, but the line is about 25 min. Island Jerk Pit is smoky and faster." | smoke, jerk |
+| 5 | `bbq\|brisket\|rib\|smok` | `ask.a.bbq` "Post Oak Pit has the best brisket, but the line is about 25 min. Island Jerk Pit is smoky and faster." | smoke, jerk |
 | 6 | `coffee\|latte\|lake` | `ask.a.coffee` "Bean Bike is by the lake trail until 2pm. The honey latte is the move." | bean, dough |
 | 7 | `spic\|hot\|jerk\|heat` | `ask.a.spicy` "Real heat: Island Jerk Pit, with a $10 lunch plate today." | jerk, guera |
-| 8 | `burger` | `ask.a.burger` "Smash Bros. just parked downtown. Get the onion rings." | smash |
-| 9 | `pho\|noodle\|asian\|curry\|dumpling` | `ask.a.asian` "Warm bowls nearby. Dumpling Dojo is only at the Saturday market." | pho, curry, dumpling |
+| 8 | `burger` | `ask.a.burger` "Ember & Bun just parked downtown. Get the onion rings." | smash |
+| 9 | `pho\|noodle\|asian\|curry\|dumpling` | `ask.a.asian` "Warm bowls nearby. Pleat & Steam is only at the Saturday market." | pho, curry, dumpling |
 | 10 | `cheap\|\$\|budget\|under` | `ask.a.cheap` "Big flavor, small price. All of these have mains under $12." | jerk, curry, guera |
 | none | | `ask.a.fallback` "Hmm, I don't know that one yet. Try tacos, late night or rainy day." | (no cards; show the chips again) |
 
@@ -350,7 +350,7 @@ Lowercase the question, then test the keyword groups in order. Return the first 
 2. The rep line, quiet: "{level} · {rep} rep". Under it: "{toNext} rep to {nextLevel}" (hidden at Legend). One line of explanation: "You earn rep by helping other eaters: reports, check-ins and confirming what's still true." (`you.repHow`).
 3. Stats row (wrapping cards): "Check-ins" {checkIns.length} · "Reports" {count of reports by you} · "Confirmed" {still-here taps plus first votes}.
 4. Theme: a segmented control "Auto" · "Night" · "Day" with `accessibilityRole="radiogroup"`; each option is `radio` with `checked`. Under Auto, a caption: "Night from 7pm to 7am".
-5. Business row: "Switch to Business mode" / "Smash Bros. Burgers". Until C5, tapping shows `toast.bizSoon` "Business mode is coming next". In C5, the switch swaps the tabs and shows the toast "You're in Business mode". In business mode, the same row on Today reads "Switch to eater mode".
+5. Business row: "Switch to Business mode" / "Ember & Bun". Until C5, tapping shows `toast.bizSoon` "Business mode is coming next". In C5, the switch swaps the tabs and shows the toast "You're in Business mode". In business mode, the same row on Today reads "Switch to eater mode".
 
 **Decisions**
 - No streaks, no daily goals, no leaderboard tonight (section 11).
@@ -460,7 +460,7 @@ The column FR marks strings likely to run long in Canadian French (over ~20% lon
 | `you.rep` / `you.toNext` / `you.repHow` | {level} · {rep} rep / {n} rep to {level} / You earn rep by helping other eaters: reports, check-ins and confirming what's still true. | FR long |
 | `you.checkIns` / `you.reports` / `you.confirmed` | Check-ins / Reports / Confirmed | FR: "Visites", "Signalements", "Confirmations" (long) |
 | `you.theme` / `theme.auto` / `theme.night` / `theme.day` / `theme.autoNote` | Map look / Auto / Night / Day / Night from 7pm to 7am | |
-| `you.toBiz` / `you.toBizSub` / `you.toEater` | Switch to Business mode / Smash Bros. Burgers / Switch to eater mode | FR long: "Passer au mode Entreprise" |
+| `you.toBiz` / `you.toBizSub` / `you.toEater` | Switch to Business mode / Ember & Bun / Switch to eater mode | FR long: "Passer au mode Entreprise" |
 | `level.newcomer` / `level.regular` / `level.local` / `level.legend` | Newcomer / Regular / Local / Legend | FR: "Nouveau venu", "Habitué", "Local", "Légende" |
 
 **Test:** with the dev `PAD_STRINGS` flag from 01 section 8 on, walk sections 2 to 10 once. Nothing should clip mid-word; the radial labels wrap to 2 lines; the sheet buttons wrap.
@@ -470,7 +470,7 @@ The column FR marks strings likely to run long in Canadian French (over ~20% lon
 ## 13. Acceptance walk for UX (run after C3 and again after C4)
 
 1. Cold start: splash, map, welcome toast. The peek sheet shows the count.
-2. Tap Smoke Signal BBQ: it centers, the preview appears and shows amber "Closes in 25 min" plus the freshness label.
+2. Tap Post Oak Pit BBQ: it centers, the preview appears and shows amber "Closes in 25 min" plus the freshness label.
 3. "Yep, still here": +2, "Thanks", the label reads "You confirmed it just now".
 4. Open, then the spot page: every section is there and "Not a chain" is visible. Back returns to the same map.
 5. Check in at La Güera: rain, +10, "You're here". Check in again: nothing happens.
@@ -478,7 +478,7 @@ The column FR marks strings likely to run long in Canadian French (over ~20% lon
 7. Turn reduce motion on (OS setting, or the web devtools media emulation): no bob, the radial is a list, the check-in is a fade.
 8. VoiceOver / TalkBack / web a11y tree: pins read "name, kind, status, distance"; the sheet handle cycles; the radial list is reachable and closable.
 9. You: rep = 17 (2+10+5), Newcomer, "83 rep to Regular", 1 check-in, 1 report.
-10. Ask "Late night": answer plus 2 cards. "Show on map" lands on the map with Smash Bros. selected.
+10. Ask "Late night": answer plus 2 cards. "Show on map" lands on the map with Ember & Bun selected.
 11. Drops: countdowns tick in sync. Remind me toggles. Claim on the live drop shows the code.
 
 ---

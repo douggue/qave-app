@@ -45,7 +45,7 @@ In `src/data/sample.ts` (port of mockup `B`, lines 928 to 933), exported through
 // Clearly fictional sample business (Austin, TX).
 export const BUSINESS = {
   spotId: 'smash',
-  name: 'Smash Bros. Burgers',
+  name: 'Ember & Bun',
   verified: true,
   followers: 128,
   stops: [
@@ -82,10 +82,10 @@ Store (`src/state/store.tsx`), actions for C5:
 ### 2.2 Journey A: switch modes
 
 **Eater to Business** (You tab, last card):
-- Row component: `ModeSwitchRow` in `src/components/business/ModeSwitchRow.tsx`. Card row, `minHeight: 64`, emoji `emoji.biz.store` (hidden from a11y), title `t('you.switchBiz')`, caption `t('you.switchBizCaption', { name })` = "Smash Bros. Burgers", chevron.
-- `accessibilityRole="button"`, label `t('you.switchBizA11y', { name })` = "Switch to Business mode for Smash Bros. Burgers", hint `t('you.switchBizHint')` = "Shows your business tabs".
+- Row component: `ModeSwitchRow` in `src/components/business/ModeSwitchRow.tsx`. Card row, `minHeight: 64`, emoji `emoji.biz.store` (hidden from a11y), title `t('you.switchBiz')`, caption `t('you.switchBizCaption', { name })` = "Ember & Bun", chevron.
+- `accessibilityRole="button"`, label `t('you.switchBizA11y', { name })` = "Switch to Business mode for Ember & Bun", hint `t('you.switchBizHint')` = "Shows your business tabs".
 - On press: `setBizMode(true)`, then `router.replace('/today')` (check the exact href shape of a route inside `(tabs)` in the SDK 58 Expo Router docs), toast `t('biz.switchedIn')` = "Business mode. Your customers see what you post here."
-- Tonight there is no claim flow: the sample user already owns Smash Bros.
+- Tonight there is no claim flow: the sample user already owns Ember & Bun
 
 **Business to Eater**:
 - `BizHeader` (`src/components/business/BizHeader.tsx`) on Today, Where, Menu, Promote: FoodArt 42, name + verified check, `BUSINESS` pill, screen caption, and at the right a pill button `t('biz.toPersonal')` = "Personal" with `emoji.avatar.me`. `minHeight: 48`, `paddingHorizontal: 14`, no fixed width (French "Personnel" fits; the label can wrap under the name on narrow screens because the header row uses `flexWrap: 'wrap'`).
@@ -117,7 +117,7 @@ On confirm:
 - Toast `t('biz.liveToast', { place })` "You're live at {place}. {count} followers were told." (`count` from sample).
 - Small celebration: `EmojiRain` with `count={12}` and emoji `food.burger, biz.truck, fx.sparkle`. Reduce motion: toast only.
 - Focus: after the sheet closes, move screen reader focus to the LiveCard heading (`AccessibilityInfo.setAccessibilityFocus(findNodeHandle(ref))` on native; on web `ref.current?.focus?.()` guarded). If it fails, the toast announcement is enough.
-- The eater map reads the spot override, so switching to Personal shows Smash Bros. at the chosen stop with the bubble "Just parked" and a green live dot.
+- The eater map reads the spot override, so switching to Personal shows Ember & Bun at the chosen stop with the bubble "Just parked" and a green live dot.
 
 ### 2.4 Journey C: live statuses
 
@@ -290,7 +290,7 @@ Numbers through `Intl.NumberFormat(locale, { maximumFractionDigits: 1 })` so fr-
 
 ### 5.3 Time and price
 
-- `formatTime({h, m})` with `Intl.DateTimeFormat(locale, { hour: 'numeric', minute: m ? '2-digit' : undefined })`: en-US "10 PM", fr-CA "22 h". Store times in sample data as `{h, m}`, not "10pm" strings. If porting all 12 spots' `until` is too slow tonight, do it for Smash Bros. and the Go live chips (owner-facing), leave the rest as P1.
+- `formatTime({h, m})` with `Intl.DateTimeFormat(locale, { hour: 'numeric', minute: m ? '2-digit' : undefined })`: en-US "10 PM", fr-CA "22 h". Store times in sample data as `{h, m}`, not "10pm" strings. If porting all 12 spots' `until` is too slow tonight, do it for Ember & Bun and the Go live chips (owner-facing), leave the rest as P1.
 - `formatPrice(n, currency)` with `Intl.NumberFormat(locale, { style: 'currency', currency })`. Sample spots are in Austin: `USD`.
 - Duration for the live timer and Drops via `t()` keys (`time.min`, `time.hm`, `drops.countdownA11y`), not `toLocaleString`.
 
@@ -362,7 +362,7 @@ Pass = no clipped word, no overlap, buttons grow taller, tab bar grows taller, n
 
 1. With VoiceOver (iOS Safari on the dev server) or TalkBack, or the web a11y tree in Chrome DevTools: tab through Map; every pin reads "name, kind, status, distance"; no emoji names are spoken.
 2. You, then "Switch to Business mode", lands on Today; the tab bar reads "Business tabs"; "Personal" returns to Map. Reload in Business mode lands on Today.
-3. Go live now, then Go live here (two taps, defaults). Toast announces the place. Personal mode: Smash Bros. pin at the chosen stop, "Just parked", open.
+3. Go live now, then Go live here (two taps, defaults). Toast announces the place. Personal mode: Ember & Bun pin at the chosen stop, "Just parked", open.
 4. Each quick status changes the bubble and announces "Customers see: ...". Tapping it again clears. Closed for today dims the pin.
 5. End service needs two taps within 4 s; the pin goes closed.
 6. Device reduce motion on: no bob, no rain, radial is a list, no live pulse.

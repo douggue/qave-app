@@ -28,12 +28,12 @@ const RULES: Rule[] = [
   {
     re: /late|night|midnight/,
     build: (find) => {
-      const a = find('smash');
+      const a = find('ember');
       const b = find('guera');
       return {
         key: 'ask.a.late',
         params: { a: name(a), aUntil: a ? formatUntil(a.until) : '', b: name(b), bUntil: b ? formatUntil(b.until) : '' },
-        spotIds: ['smash', 'guera'],
+        spotIds: ['ember', 'guera'],
       };
     },
   },
@@ -56,7 +56,7 @@ const RULES: Rule[] = [
     re: /spic|hot|jerk|heat/,
     build: (find) => ({ key: 'ask.a.spicy', params: { name: name(find('jerk')) }, spotIds: ['jerk', 'guera'] }),
   },
-  { re: /burger|fries|rings/, build: (find) => ({ key: 'ask.a.burger', params: { name: name(find('smash')) }, spotIds: ['smash'] }) },
+  { re: /burger|fries|rings/, build: (find) => ({ key: 'ask.a.burger', params: { name: name(find('ember')) }, spotIds: ['ember'] }) },
   {
     re: /pho|noodle|asian|curry|dumpling|ramen/,
     build: (find) => ({ key: 'ask.a.asian', params: { name: name(find('dumpling')) }, spotIds: ['pho', 'curry', 'dumpling'] }),
