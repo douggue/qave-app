@@ -76,3 +76,12 @@ Plan: [Lokal Design Refinement Plan](https://claude.ai/artifact/3UVpN6mkgaHTT1vs
 - [ ] R3 · Reasons to come back: Been and Want to try lists, tried-X-of-Y, Ask suggestion cards, grouped Inbox, Business Where schedule editor, French review.
 - [ ] R4 · Social and alerts (after the backend): friends activity, opt-in streaks, alert radius, Menu sold-out toggles, Promote creates a Drop.
 - Plan approved by the founder on 15 Nov. Sample brands renamed: Ember & Bun, Post Oak Pit BBQ, Pleat & Steam.
+
+## 2026-11-15 · Spot icons in the app
+
+| Date | Decision |
+|---|---|
+| 2026-11-15 | **Spot-type badges are drawn line icons** (truck, trailer, cart, pop-up tent, store) in the UI icon style, not 3D emoji: detailed art does not read at 12 pt. The glossy 3D spot-type emoji stay for bigger uses (spot page, filters, Business). |
+| 2026-11-15 | **Approved custom food stickers are live on pins**, spot art, the report menu and Drops: taco, burger, dumplings, pho, and fried chicken (for jerk). Other foods show the system emoji until their sheet is approved; swapping one in is one line in `src/components/ui/FoodSticker.tsx`. |
+
+- [ ] Next food stickers needed by the sample data: BBQ (redo), croissant, kolache, paleta, supper bowl, curry (redo), coffee, onion rings, fries, shake.

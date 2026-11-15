@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge, Button, Emoji, Text, useToast } from '@/components/ui';
+import { Badge, Button, Emoji, FoodSticker, Text, useToast } from '@/components/ui';
 import type { Spot } from '@/data/types';
 import { isDuplicate, newReport, REPORT_OPTIONS, reportTarget, type ReportOption } from '@/features/report/options';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -21,7 +21,7 @@ import { useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { REP } from '@/state/rep';
 import { useStore } from '@/state/store';
-import { food, report as reportEmoji, tab as tabEmoji } from '@/theme/emoji';
+import { report as reportEmoji, tab as tabEmoji } from '@/theme/emoji';
 import { dur, ease, native, spring } from '@/theme/motion';
 import { glow, gradients, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -191,7 +191,7 @@ function RadialOverlay() {
                 <Text variant="ui" center style={[styles.white, styles.dim, styles.shrink]}>
                   {t('report.at')} {target.name}
                 </Text>
-                <Emoji size={18}>{food[target.food]}</Emoji>
+                <FoodSticker food={target.food} size={18} />
               </View>
             ) : (
               <Text variant="ui" center style={[styles.white, styles.dim]}>

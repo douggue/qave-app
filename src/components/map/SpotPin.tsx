@@ -1,12 +1,12 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Emoji, Text } from '@/components/ui';
+import { Emoji, FoodSticker, Icon, Text, type IconName } from '@/components/ui';
 import { moodText, pinLabel } from '@/data/format';
 import type { Spot } from '@/data/types';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t } from '@/i18n';
-import { food, kind as kindEmoji, mood as moodEmoji, pinGlow } from '@/theme/emoji';
+import { mood as moodEmoji, pinGlow, type KindKey } from '@/theme/emoji';
 import { dur, ease, native, spring } from '@/theme/motion';
 import { elevation, glow } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -141,11 +141,14 @@ export const SpotPin = memo(function SpotPin({ spot, selected, label, tag, dimme
               <View style={[styles.halo, styles.haloInner, { backgroundColor: glowColor }, webBlur]} />
             </>
           ) : null}
-          <Emoji size={40} style={[styles.emoji, !spot.open && styles.closed, !isNight && Platform.OS !== 'ios' && styles.dayTextShadow]}>
-            {food[spot.food]}
-          </Emoji>
+          <FoodSticker
+            food={spot.food}
+            size={40}
+            dim={!spot.open}
+            style={[styles.emoji, !isNight && Platform.OS !== 'ios' && styles.dayTextShadow]}
+          />
           <View style={[styles.kind, { backgroundColor: c.pinChip, borderColor: c.pinChipBorder }]}>
-            <Emoji size={12}>{kindEmoji[spot.kind]}</Emoji>
+            <Icon name={KIND_ICON[spot.kind]} size={14} color={c.ink} strokeWidth={2.6} />
           </View>
           <View
             style={[
@@ -181,6 +184,15 @@ export const SpotPin = memo(function SpotPin({ spot, selected, label, tag, dimme
     </Animated.View>
   );
 });
+
+/** Spot-type badge icons: drawn, because detailed 3D art does not read at 12 pt. */
+const KIND_ICON: Record<KindKey, IconName> = {
+  truck: 'truck',
+  trailer: 'trailer',
+  cart: 'cart',
+  popup: 'tent',
+  restaurant: 'store',
+};
 
 const webBlur = (Platform.OS === 'web' ? { filter: 'blur(8px)' } : {}) as object;
 

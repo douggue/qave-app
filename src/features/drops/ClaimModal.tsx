@@ -2,7 +2,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Animated, Modal, Pressable, StyleSheet, View } from 'react-native';
 
-import { Button, Emoji, Text, useToast } from '@/components/ui';
+import { Button, Emoji, FoodSticker, Text, useToast } from '@/components/ui';
 import type { Spot } from '@/data/types';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t } from '@/i18n';
@@ -93,7 +93,7 @@ export function ClaimModal({ code, spot, onClose }: Props) {
                   : { transform: [{ scale: burst.interpolate({ inputRange: [0, 0.35, 1], outputRange: [0.5, 1.15, 1] }) }] }
               }
             >
-              <Emoji size={56}>{food[spot.food]}</Emoji>
+              <FoodSticker food={spot.food} size={56} />
             </Animated.View>
           </View>
 

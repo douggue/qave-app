@@ -1,8 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { Emoji } from '@/components/ui';
-import { food, foodGlow, glowFallback, type FoodKey } from '@/theme/emoji';
+import { FoodSticker } from '@/components/ui';
+import { foodGlow, glowFallback, type FoodKey } from '@/theme/emoji';
 import { gradients } from '@/theme/tokens';
 
 type Props = {
@@ -25,7 +25,7 @@ export function FoodArt({ food: key, width, height, radius = 18, emojiSize, styl
       style={[{ width, height, borderRadius: radius, overflow: 'hidden' }, style]}
     >
       <LinearGradient colors={[light, strong]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fill}>
-        <Emoji size={size}>{food[key]}</Emoji>
+        <FoodSticker food={key} size={size} />
       </LinearGradient>
       <LinearGradient
         colors={gradients.artShade}
