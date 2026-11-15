@@ -91,4 +91,4 @@ Plan: [Lokal Design Refinement Plan](https://claude.ai/artifact/3UVpN6mkgaHTT1vs
 - [x] Approved and live in the app: BBQ brisket (`bbq`), curry plate (`curry`), stew pot (`supper`), onion rings (`rings`), milkshake (`shake`), paleta with the three-tooth bite (`paleta`). Ribs approved and saved for later.
 - [x] All round 2 stickers get one consistent white rim from `tools/sticker-rim.py` (ChatGPT drew them on white, so the split removed most rims).
 - [ ] **Fries: redo.** The plain red scoop carton reads as a fast-food brand. Fix: "Redo only the top left emoji: put the fries in a kraft-brown paper cone with a small red checkered paper liner, no logo." Draft kept in `emoji/drafts/`.
-- [ ] Sheet 1 (croissant, kolache, coffee, donut) still to generate.
+- [x] Sheet 1 approved: croissant, kolache, coffee live in the app; donut saved for later. Only fries (redo) still uses a system emoji.
