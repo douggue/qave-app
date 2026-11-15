@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Chip, Emoji, Icon, iconFor, Text, useToast } from '@/components/ui';
+import { Chip, Glyph, Icon, Text, useToast } from '@/components/ui';
 import { getPeople, getTicks } from '@/data/repo';
 import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -14,8 +14,9 @@ import { matchesFilter, useAllReports, useSpots } from '@/hooks/use-spots';
 import { t, type StringKey } from '@/i18n';
 import { useNotes, useStore, type FilterKey } from '@/state/store';
 import { avatar, avatarBg, filterIcon, ui, type AvatarKey } from '@/theme/emoji';
+import type { GlyphSource } from '@/theme/glyphs';
 import { dur, ease, native, spring } from '@/theme/motion';
-import { elevation, minTap, radius } from '@/theme/tokens';
+import { elevation, minTap, palettes, radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 const FILTERS: { key: FilterKey; label: StringKey }[] = [
@@ -53,7 +54,7 @@ export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => v
           accessibilityHint={t('map.askHint')}
           style={({ pressed }) => [styles.ask, { backgroundColor: c.glass, borderColor: c.line }, pressed && styles.pressed]}
         >
-          <Emoji size={18}>{ui.sparkles}</Emoji>
+          <Glyph of={ui.sparkles} size={17} tone="brand" strokeWidth={2} />
           <Text variant="ui" tone="ink2" numberOfLines={1} style={styles.shrink}>
             {t('map.askPill')}
           </Text>
@@ -147,7 +148,7 @@ function Ticker() {
       ]}
     >
       <View style={[styles.avatar, { backgroundColor: avatarBg[person.avatar] }]}>
-        <Emoji size={14}>{avatar[person.avatar]}</Emoji>
+        <Glyph of={avatar[person.avatar]} size={14} />
       </View>
       <Text variant="caption" numberOfLines={2} style={styles.shrink}>
         {t('map.ticker', { handle: person.handle, text: tick.text })}
@@ -165,7 +166,7 @@ export function IconButton({
   badge,
   hint,
 }: {
-  icon: string;
+  icon: GlyphSource;
   label: string;
   onPress: () => void;
   badge?: number;
@@ -185,11 +186,7 @@ export function IconButton({
         pressed && styles.pressed,
       ]}
     >
-      {iconFor(icon) ? (
-        <Icon name={iconFor(icon)!} size={22} color={c.ink} />
-      ) : (
-        <Emoji size={19}>{icon}</Emoji>
-      )}
+      <Glyph of={icon} size={19} color={c.ink} strokeWidth={2.3} />
       {badge ? (
         <View style={[styles.badge, { backgroundColor: c.hotFill }]}>
           <Text variant="micro" style={styles.badgeText}>
@@ -226,7 +223,7 @@ export function ZoomPill({ onIn, onOut }: { onIn: () => void; onOut: () => void 
   );
 }
 
-type Face = { key: string; icon: string; bg: string };
+type Face = { key: string; icon: GlyphSource; bg: string };
 
 /** Who made a report, as a small avatar. */
 function faceFor(report: Report): Face {
@@ -293,7 +290,7 @@ export function ActivityPill({ spots, onOpen }: { spots: Spot[]; onOpen: (spot: 
                 { backgroundColor: f.bg, borderColor: c.paper, marginLeft: i ? -8 : 0, zIndex: 3 - i },
               ]}
             >
-              <Emoji size={13}>{f.icon}</Emoji>
+              <Glyph of={f.icon} size={13} color={palettes.day.ink} />
             </View>
           ))}
         </View>

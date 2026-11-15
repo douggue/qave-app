@@ -5,8 +5,10 @@ import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { glow, gradients, minTap, radius, withAlpha } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-import { iconFor, Icon } from './Icon';
-import { Emoji, Text, type TextTone } from './Text';
+import type { GlyphSource } from '@/theme/glyphs';
+
+import { Glyph } from './Glyph';
+import { Text, type TextTone } from './Text';
 
 /** `danger` is an outlined chili button for destructive actions; `dangerSolid` confirms one. */
 type Variant = 'primary' | 'mint' | 'ghost' | 'soft' | 'danger' | 'dangerSolid';
@@ -16,7 +18,8 @@ type Props = {
   onPress?: () => void;
   variant?: Variant;
   size?: 'md' | 'sm';
-  icon?: string;
+  /** An emoji key's glyph from src/theme/emoji.ts, drawn in the label color. */
+  icon?: GlyphSource;
   disabled?: boolean;
   accessibilityLabel?: string;
   accessibilityHint?: string;
@@ -63,13 +66,7 @@ export function Button({
 
   const content = (
     <View style={[styles.row, { gap: md ? 8 : 6 }]}>
-      {icon ? (
-        iconFor(icon) ? (
-          <Icon name={iconFor(icon)!} size={md ? 19 : 17} color={c[labelTone[variant]]} strokeWidth={2.4} />
-        ) : (
-          <Emoji size={md ? 18 : 16}>{icon}</Emoji>
-        )
-      ) : null}
+      {icon ? <Glyph of={icon} size={md ? 16.5 : 15} color={c[labelTone[variant]]} plain strokeWidth={2.4} /> : null}
       <Text variant={md ? 'ui' : 'label'} tone={labelTone[variant]} center style={styles.label}>
         {label}
       </Text>

@@ -1,28 +1,31 @@
 import { memo, useId } from 'react';
 import Svg, { Circle, Defs, G, LinearGradient, Mask, Path, Rect, Stop } from 'react-native-svg';
 
-import { ui } from '@/theme/emoji';
 import { brand } from '@/constants/brand';
 
 // Lokal UI icons: a chunky rounded line on a 24 grid, drawn in code so they look the same on
-// iPhone, Android and the web. Food, spot types, moods and avatars stay emoji (the custom set).
+// iPhone, Android and the web. Food uses the custom stickers (FoodSticker); avatars stay emoji.
 // `shape` paths fill with the sun-to-chili gradient when active; `detail` paths are then cut out
-// of that fill with the `cut` color (the surface behind the icon).
+// of that fill with the `cut` color (the surface behind the icon). With `tint`, shapes fill with
+// the tint color at low opacity and every line is drawn in it: a colored badge for moods.
 
 type Def = { shape?: string[]; detail?: string[]; dots?: [number, number, number][]; bite?: boolean };
 
 const PIN = 'M12 2.6c-4.4 0-7.9 3.4-7.9 7.8 0 5.7 7.9 11 7.9 11s7.9-5.3 7.9-11c0-4.4-3.5-7.8-7.9-7.8z';
+
+const TICKET: Def = {
+  shape: ['M4.2 6h15.6a1.2 1.2 0 0 1 1.2 1.2v2.6a2.2 2.2 0 0 0 0 4.4v2.6a1.2 1.2 0 0 1-1.2 1.2H4.2A1.2 1.2 0 0 1 3 16.8v-2.6a2.2 2.2 0 0 0 0-4.4V7.2A1.2 1.2 0 0 1 4.2 6z'],
+  detail: ['M15.5 8.6v.8', 'M15.5 11.6v.8', 'M15.5 14.6v.8'],
+  dots: [[9.2, 12, 1.9]],
+};
 
 const DEFS = {
   map: {
     shape: ['M3 6.6l6-2.5 6 2.5 6-2.5v13.4l-6 2.5-6-2.5-6 2.5z'],
     detail: ['M12 7.8c-1.7 0-3 1.3-3 2.9 0 2.3 3 4.6 3 4.6s3-2.3 3-4.6c0-1.6-1.3-2.9-3-2.9z'],
   },
-  drops: {
-    shape: ['M4.2 6h15.6a1.2 1.2 0 0 1 1.2 1.2v2.6a2.2 2.2 0 0 0 0 4.4v2.6a1.2 1.2 0 0 1-1.2 1.2H4.2A1.2 1.2 0 0 1 3 16.8v-2.6a2.2 2.2 0 0 0 0-4.4V7.2A1.2 1.2 0 0 1 4.2 6z'],
-    detail: ['M15.5 8.6v.8', 'M15.5 11.6v.8', 'M15.5 14.6v.8'],
-    dots: [[9.2, 12, 1.9]],
-  },
+  drops: TICKET,
+  ticket: TICKET,
   ask: {
     shape: [
       'M10.5 2.8c.6 4.4 2.8 6.6 7.2 7.2-4.4.6-6.6 2.8-7.2 7.2-.6-4.4-2.8-6.6-7.2-7.2 4.4-.6 6.6-2.8 7.2-7.2z',
@@ -65,6 +68,67 @@ const DEFS = {
   surprise: {
     shape: ['M7.5 4h9A3.5 3.5 0 0 1 20 7.5v9a3.5 3.5 0 0 1-3.5 3.5h-9A3.5 3.5 0 0 1 4 16.5v-9A3.5 3.5 0 0 1 7.5 4z'],
     dots: [[8.8, 8.8, 1.5], [12, 12, 1.5], [15.2, 15.2, 1.5]],
+  },
+  // Moods, reports and statuses (read as tinted badges at 12 to 16 pt).
+  flame: {
+    shape: ['M12 2.8c.5 3 2.4 4.4 4.1 6.3 1.5 1.7 2.4 3.5 2.4 5.6a6.5 6.5 0 0 1-13 0c0-2.3 1-4.2 2.6-5.7.3 1.5 1 2.6 2.1 3.1-.4-3.4.3-6.9 1.8-9.3z'],
+    detail: ['M12 14.6c1.2 1.2 1.9 2.2 1.9 3.2a1.9 1.9 0 0 1-3.8 0c0-1 .7-2 1.9-3.2z'],
+  },
+  cash: {
+    shape: ['M4 6.5h16A1.5 1.5 0 0 1 21.5 8v8a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 16V8A1.5 1.5 0 0 1 4 6.5z'],
+    detail: ['M12 9.4a2.6 2.6 0 1 0 0 5.2 2.6 2.6 0 0 0 0-5.2z'],
+    dots: [[6.3, 12, 1.1], [17.7, 12, 1.1]],
+  },
+  stop: {
+    shape: ['M8.4 3.3h7.2l5.1 5.1v7.2l-5.1 5.1H8.4l-5.1-5.1V8.4z'],
+    detail: ['M7.9 12h8.2'],
+  },
+  camera: {
+    shape: ['M4.5 7.6h2.9l1.7-2.5h5.8l1.7 2.5h2.9A1.5 1.5 0 0 1 21 9.1v8.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.9V9.1a1.5 1.5 0 0 1 1.5-1.5z'],
+    detail: ['M12 10.2a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z'],
+  },
+  new: {
+    shape: ['M10 5.2c.7 4.4 2.4 6.1 6.8 6.8-4.4.7-6.1 2.4-6.8 6.8-.7-4.4-2.4-6.1-6.8-6.8 4.4-.7 6.1-2.4 6.8-6.8z'],
+    detail: ['M18.6 3v4', 'M16.6 5h4'],
+    dots: [[19.2, 18.4, 1.5]],
+  },
+  sparkle: {
+    shape: ['M12 3c.8 5.2 3.8 8.2 9 9-5.2.8-8.2 3.8-9 9-.8-5.2-3.8-8.2-9-9 5.2-.8 8.2-3.8 9-9z'],
+  },
+  alarm: {
+    shape: ['M12 5.6a7.4 7.4 0 1 0 0 14.8 7.4 7.4 0 0 0 0-14.8z'],
+    detail: ['M12 9.6V13l2.2 1.5', 'M3.4 6.4l3-2.7', 'M20.6 6.4l-3-2.7', 'M6.8 18.6l-1.6 2', 'M17.2 18.6l1.6 2'],
+  },
+  sleep: {
+    shape: ['M15.4 18.2A7.1 7.1 0 1 1 6 8.8a5.7 5.7 0 0 0 9.4 9.4z'],
+    detail: ['M14.2 2.8h4l-4 4.4h4', 'M19.4 9.8h2.4l-2.4 2.8h2.4'],
+  },
+  live: {
+    detail: ['M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8z'],
+    dots: [[12, 12, 4.2]],
+  },
+  star: {
+    shape: ['M12 3.1l2.35 6.26 6.69.3-5.24 4.18 1.78 6.45L12 16.6l-5.58 3.69 1.78-6.45-5.24-4.18 6.69-.3z'],
+  },
+  gift: {
+    shape: ['M4.8 11h14.4v8.2a1.3 1.3 0 0 1-1.3 1.3H6.1a1.3 1.3 0 0 1-1.3-1.3z', 'M4 7.4h16a.8.8 0 0 1 .8.8V11H3.2V8.2a.8.8 0 0 1 .8-.8z'],
+    detail: ['M12 7.4v13.1', 'M12 7.4c-.9-2.6-4.4-3.8-4.6-1.8-.1 1.5 2.4 1.8 4.6 1.8 2.2 0 4.7-.3 4.6-1.8-.2-2-3.7-.8-4.6 1.8z'],
+  },
+  chef: {
+    shape: ['M7 13.6A3.9 3.9 0 0 1 7.6 5.8a4.6 4.6 0 0 1 8.8 0 3.9 3.9 0 0 1 .6 7.8V20H7z'],
+    detail: ['M7 16.6h10'],
+  },
+  heart: {
+    shape: ['M12 20c-4.6-2.9-8-6.2-8-10.2A4.3 4.3 0 0 1 12 7.4a4.3 4.3 0 0 1 8 2.4c0 4-3.4 7.3-8 10.2z'],
+  },
+  party: {
+    shape: ['M3.6 20.4l4.3-11.3 7 7z'],
+    detail: ['M13.2 3.4c.7 1.6.1 2.9-1.4 3.6', 'M20.6 10.8c-1.6-.7-2.9-.1-3.6 1.4', 'M14.6 9.4c1.5-1.9 3.2-2.6 5.3-2'],
+    dots: [[17.4, 3.6, 1.3], [20.4, 15.6, 1.3], [9.4, 4.4, 1.1]],
+  },
+  cone: {
+    shape: ['M10.3 3.8h3.4L18 18.4H6z'],
+    detail: ['M8.4 12.4h7.2', 'M4 20.2h16'],
   },
   plus: { detail: ['M12 5v14', 'M5 12h14'] },
   minus: { detail: ['M5 12h14'] },
@@ -122,6 +186,9 @@ const DEFS = {
 
 export type IconName = keyof typeof DEFS;
 
+/** Fill opacity of a tinted shape: enough to read as a colored badge, light enough for the lines. */
+const TINT_FILL = 0.22;
+
 // The three-tooth bite, as on the app icon (pin space 100x130 scaled to the 24 grid).
 const BITE = [
   [17.4, 2.2],
@@ -129,26 +196,35 @@ const BITE = [
   [21.5, 7.4],
 ] as const;
 
+/** `tint` value that draws the icon with the sun-to-chili brand gradient. */
+export const BRAND_TINT = 'brand';
+
 type Props = {
   name: IconName;
   size?: number;
-  color: string;
+  /** Line color. Ignored when `active` or `tint` is set. */
+  color?: string;
   /** Active tab state: shapes fill with the brand gradient. */
   active?: boolean;
+  /** Colored badge look: shapes fill with this color at low opacity, lines in it. BRAND_TINT for the gradient. */
+  tint?: string;
   /** Surface color behind the icon, used to cut details out of an active fill. */
   cut?: string;
   strokeWidth?: number;
 };
 
-export const Icon = memo(function Icon({ name, size = 24, color, active, cut, strokeWidth = 2.3 }: Props) {
+export const Icon = memo(function Icon({ name, size = 24, color, active, tint, cut, strokeWidth = 2.3 }: Props) {
   const def: Def = DEFS[name];
   const raw = useId();
   const id = raw.replace(/[^a-zA-Z0-9]/g, '');
   const grad = `url(#g${id})`;
   const hasShape = !!def.shape?.length;
-  const ink = active ? grad : color;
+  const tintInk = tint ? (tint === BRAND_TINT ? grad : tint) : undefined;
+  const ink = active ? grad : (tintInk ?? color ?? '#000000');
   const detailInk = active && hasShape ? (cut ?? '#ffffff') : ink;
   const dotInk = active && hasShape ? (cut ?? '#ffffff') : ink;
+  const shapeFill = active ? grad : (tintInk ?? 'none');
+  const shapeOpacity = !active && tintInk ? TINT_FILL : 1;
 
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessible={false} pointerEvents="none">
@@ -175,7 +251,7 @@ export const Icon = memo(function Icon({ name, size = 24, color, active, cut, st
         strokeLinejoin="round"
         mask={def.bite ? `url(#b${id})` : undefined}
       >
-        {def.shape?.map((d) => <Path key={d} d={d} fill={active ? grad : 'none'} />)}
+        {def.shape?.map((d) => <Path key={d} d={d} fill={shapeFill} fillOpacity={shapeOpacity} />)}
       </G>
       <G fill="none" stroke={detailInk} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
         {def.detail?.map((d) => <Path key={d} d={d} />)}
@@ -184,28 +260,3 @@ export const Icon = memo(function Icon({ name, size = 24, color, active, cut, st
     </Svg>
   );
 });
-
-/** Map the old emoji placeholders for controls to the drawn icons. Content emoji are not mapped. */
-const FROM_EMOJI: Record<string, IconName> = {
-  [ui.bell]: 'bell',
-  [ui.sun]: 'sun',
-  [ui.moon]: 'moon',
-  [ui.recenter]: 'recenter',
-  [ui.dice]: 'surprise',
-  [ui.plus]: 'plus',
-  [ui.minus]: 'minus',
-  [ui.check]: 'check',
-  [ui.close]: 'close',
-  [ui.back]: 'back',
-  [ui.chevron]: 'chevron',
-  [ui.go]: 'go',
-  [ui.pin]: 'where',
-  [ui.share]: 'share',
-  [ui.send]: 'send',
-  [ui.thumbUp]: 'confirm',
-  [ui.copy]: 'copy',
-  [ui.timer]: 'timer',
-  [ui.store]: 'store',
-};
-
-export const iconFor = (emoji: string | undefined): IconName | undefined => (emoji ? FROM_EMOJI[emoji] : undefined);

@@ -2,11 +2,12 @@ import * as Clipboard from 'expo-clipboard';
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Animated, Modal, Pressable, StyleSheet, View } from 'react-native';
 
-import { Button, Emoji, FoodSticker, Text, useToast } from '@/components/ui';
+import { Button, FoodSticker, Glyph, Text, useToast } from '@/components/ui';
 import type { Spot } from '@/data/types';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t } from '@/i18n';
-import { food, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { uiGlyph } from '@/theme/glyphs';
 import { dur, ease, native } from '@/theme/motion';
 import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -82,7 +83,11 @@ export function ClaimModal({ code, spot, onClose }: Props) {
                         },
                       ]}
                     >
-                      <Emoji size={16}>{i % 2 ? ui.sparkles : food[spot.food]}</Emoji>
+                      {i % 2 ? (
+                        <Glyph of={uiGlyph.sparkle} size={15} tone="brand" strokeWidth={2} />
+                      ) : (
+                        <FoodSticker food={spot.food} size={16} />
+                      )}
                     </Animated.View>
                   );
                 })}

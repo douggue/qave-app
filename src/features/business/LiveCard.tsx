@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { AccessibilityInfo, Pressable, StyleSheet, View } from 'react-native';
 
-import { Button, Card, Emoji, Text, useToast } from '@/components/ui';
+import { Button, Card, Glyph, Text, useToast } from '@/components/ui';
 import { formatClock, formatCountdown } from '@/data/format';
 import { getBusiness, getStatuses } from '@/data/repo';
 import type { LiveSession, LiveStatusId } from '@/data/types';
 import { useClock } from '@/hooks/use-clock';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { status as statusEmoji, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { statusGlyph } from '@/theme/glyphs';
 import { glow, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -67,7 +68,7 @@ function LiveState({ session }: { session: LiveSession }) {
     actions.setLiveStatus(id);
     const status = getStatuses().find((s) => s.id === id);
     if (clearing || !status) toast.show(t('biz.statusCleared'));
-    else toast.show(t('biz.statusToast', { status: t(status.moodKey) }), { emoji: statusEmoji[status.emoji] });
+    else toast.show(t('biz.statusToast', { status: t(status.moodKey) }), { emoji: statusGlyph[status.emoji] });
   };
 
   const end = () => {
@@ -125,14 +126,12 @@ function LiveState({ session }: { session: LiveSession }) {
                 pressed && { opacity: 0.85 },
               ]}
             >
-              <Emoji size={20}>{statusEmoji[s.emoji]}</Emoji>
+              <Glyph of={statusGlyph[s.emoji]} size={20} color={c.onNeon} plain={selected} />
               <Text variant="cardTitle" tone={selected ? 'onNeon' : 'ink'} style={styles.grow}>
                 {t(s.labelKey)}
               </Text>
               {selected ? (
-                <Text variant="ui" tone="onNeon" accessibilityElementsHidden importantForAccessibility="no">
-                  {ui.check}
-                </Text>
+                <Glyph of={ui.check} size={16} color={c.onNeon} strokeWidth={2.6} />
               ) : null}
             </Pressable>
           );

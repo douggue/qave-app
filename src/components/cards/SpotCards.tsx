@@ -1,10 +1,10 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Badge, Emoji, LiveText, Text } from '@/components/ui';
+import { Badge, Glyph, LiveText, Text } from '@/components/ui';
 import { closingText, formatDistance, kindLabel, moodText, priceText, statusText } from '@/data/format';
 import type { Spot } from '@/data/types';
 import { t } from '@/i18n';
-import { mood as moodEmoji, status as statusEmoji, ui } from '@/theme/emoji';
+import { moodGlyph, statusGlyph, uiGlyph } from '@/theme/glyphs';
 import { useTheme } from '@/theme/use-theme';
 
 import { FoodArt } from './FoodArt';
@@ -25,7 +25,7 @@ export function TrendCard({ spot, onPress }: { spot: Spot; onPress: (spot: Spot)
         {spot.name}
       </Text>
       <View style={styles.inline}>
-        {spot.mood ? <Emoji size={12}>{moodEmoji[spot.mood.emoji]}</Emoji> : null}
+        {spot.mood ? <Glyph of={moodGlyph[spot.mood.emoji]} size={12} /> : null}
         <LiveText variant="caption" tone="ink2" numberOfLines={2} style={styles.shrink} placeholderWidth="80%">
           {line}
         </LiveText>
@@ -64,7 +64,7 @@ export function SpotRow({
       <FoodArt food={spot.food} width={56} height={56} radius={16} />
       <View style={styles.middle}>
         <Text variant="ui">{spot.name}</Text>
-        {closing ? <Badge live tone="amber" icon={statusEmoji.closingSoon} label={closing} /> : null}
+        {closing ? <Badge live tone="amber" icon={statusGlyph.closingSoon} label={closing} /> : null}
         <View style={styles.inline}>
           <View style={[styles.dot, { backgroundColor: spot.open ? c.mintFill : c.ink3 }]} />
           <LiveText variant="label" tone={spot.open ? 'mint' : 'ink2'} style={styles.shrink} placeholderWidth="70%">
@@ -72,7 +72,7 @@ export function SpotRow({
           </LiveText>
         </View>
         <View style={styles.inline}>
-          <Emoji size={11}>{ui.star}</Emoji>
+          <Glyph of={uiGlyph.star} size={11} />
           <Text variant="caption" tone="ink2" style={styles.shrink}>
             {t('spot.meta', { r: spot.rating, price: priceText(spot), kind: kindLabel(spot) })}
           </Text>
@@ -123,7 +123,7 @@ export function CompactSpotRow({
         </Text>
         <View style={styles.inline}>
           {closing ? (
-            <Emoji size={11}>{statusEmoji.closingSoon}</Emoji>
+            <Glyph of={statusGlyph.closingSoon} size={11} />
           ) : (
             <View style={[styles.dot, { backgroundColor: spot.open ? c.mintFill : c.ink3 }]} />
           )}

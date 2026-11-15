@@ -4,7 +4,7 @@ import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { FoodArt } from '@/components/cards/FoodArt';
 import { CompactSpotRow, SpotRow, TrendCard } from '@/components/cards/SpotCards';
 import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
-import { Badge, Button, Emoji, LiveText, Text, useToast } from '@/components/ui';
+import { Badge, Button, Glyph, LiveText, Text, useToast } from '@/components/ui';
 import {
   closingLeft,
   friendsText,
@@ -22,7 +22,8 @@ import { useCheckIn } from '@/hooks/use-check-in';
 import { matchesFilter } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { mood as moodEmoji, report as reportEmoji, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { moodGlyph, reportGlyph } from '@/theme/glyphs';
 import { minTap } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -88,7 +89,7 @@ export function SheetExplore({ spots, onFocus }: ExploreProps) {
         {t('sheet.hint')}
       </Text>
       <View style={styles.sectionTitle}>
-        <Emoji size={18}>{reportEmoji.amazing}</Emoji>
+        <Glyph of={reportGlyph.amazing} size={18} />
         <Text variant="heading" accessibilityRole="header" style={styles.shrink}>
           {t('sheet.trending')}
         </Text>
@@ -132,7 +133,7 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
             {spot.name}
           </Text>
           <View style={styles.inline}>
-            <Emoji size={12}>{ui.star}</Emoji>
+            <Glyph of={ui.star} size={12} />
             <Text
               variant="caption"
               tone="ink2"
@@ -156,14 +157,12 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
           accessibilityLabel={t('sheet.close')}
           style={[styles.close, { backgroundColor: c.card2 }]}
         >
-          <Text variant="ui" tone="ink2" accessible={false} accessibilityElementsHidden importantForAccessibility="no">
-            {ui.close}
-          </Text>
+          <Glyph of={ui.close} size={14} color={c.ink2} strokeWidth={2.6} />
         </Pressable>
       </View>
 
       <View style={styles.wrapRow}>
-        {mood && spot.mood ? <Badge tone="neon" icon={moodEmoji[spot.mood.emoji]} label={mood} /> : null}
+        {mood && spot.mood ? <Badge tone="neon" icon={moodGlyph[spot.mood.emoji]} label={mood} /> : null}
         <LiveText variant="caption" tone="ink2" placeholderWidth={140}>
           {t('spot.distHood', { distance: formatDistance(spot), hood: spot.hood })}
         </LiveText>

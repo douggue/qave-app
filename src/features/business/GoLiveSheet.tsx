@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Animated, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Chip, Emoji, Text, useToast } from '@/components/ui';
+import { Button, Chip, Glyph, Text, useToast } from '@/components/ui';
 import { getBusiness } from '@/data/repo';
 import type { ClockTime, Stop } from '@/data/types';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { status as statusEmoji, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { statusGlyph } from '@/theme/glyphs';
 import { dur, ease, native } from '@/theme/motion';
 import { hitSlop, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -60,7 +61,7 @@ function Sheet() {
   const confirm = () => {
     actions.goLive(stop, until);
     if (!reduceMotion) actions.celebrate({ kind: 'goLive', spotId: biz.spotId, rep: 0 });
-    toast.show(t('biz.liveToast', { place: stop.name, count: biz.followers }), { emoji: statusEmoji.live });
+    toast.show(t('biz.liveToast', { place: stop.name, count: biz.followers }), { emoji: statusGlyph.live });
   };
 
   const translateY = reduceMotion ? 0 : show.interpolate({ inputRange: [0, 1], outputRange: [60, 0] });
@@ -93,9 +94,7 @@ function Sheet() {
                 accessibilityLabel={t('common.close')}
                 style={[styles.close, { backgroundColor: c.card2 }]}
               >
-                <Text variant="ui" tone="ink2" accessibilityElementsHidden importantForAccessibility="no">
-                  {ui.close}
-                </Text>
+                <Glyph of={ui.close} size={14} color={c.ink2} strokeWidth={2.6} />
               </Pressable>
             </View>
 
@@ -119,7 +118,7 @@ function Sheet() {
                       pressed && { opacity: 0.85 },
                     ]}
                   >
-                    <Emoji size={20}>{ui.pin}</Emoji>
+                    <Glyph of={ui.pin} size={19} tone="hot" />
                     <View style={styles.grow}>
                       <Text variant="ui">{s.name}</Text>
                       <Text variant="caption" tone="ink2">
@@ -127,9 +126,7 @@ function Sheet() {
                       </Text>
                     </View>
                     {checked ? (
-                      <Text variant="heading" tone="mint" accessibilityElementsHidden importantForAccessibility="no">
-                        {ui.check}
-                      </Text>
+                      <Glyph of={ui.check} size={18} color={c.mint} strokeWidth={2.6} />
                     ) : null}
                   </Pressable>
                 );
@@ -159,7 +156,7 @@ function Sheet() {
           <View style={[styles.footer, { paddingBottom: insets.bottom + space.lg }]}>
             <Button
               variant="mint"
-              icon={statusEmoji.live}
+              icon={statusGlyph.live}
               label={t('biz.goLiveHere')}
               accessibilityLabel={t('biz.goLiveHereA11y', { place: stop.name, until: untilLabel(until) })}
               onPress={confirm}

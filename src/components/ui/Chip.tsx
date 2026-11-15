@@ -3,11 +3,15 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { glow, hitSlop, radius, tapComfort } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-import { Emoji, Text } from './Text';
+import type { GlyphSource } from '@/theme/glyphs';
+
+import { Glyph } from './Glyph';
+import { Text } from './Text';
 
 type Props = {
   label: string;
-  icon?: string;
+  /** An emoji key's glyph from src/theme/emoji.ts: a food sticker or a drawn icon. */
+  icon?: GlyphSource;
   selected?: boolean;
   onPress?: () => void;
   /** glass over the map, solid on screens. */
@@ -53,7 +57,7 @@ export function Chip({
       ]}
     >
       <View style={styles.row}>
-        {icon ? <Emoji size={14}>{icon}</Emoji> : null}
+        {icon ? <Glyph of={icon} size={14} color={selected ? c.onNeon : c.ink} plain /> : null}
         <Text variant="label" tone={selected ? 'onNeon' : 'ink'} style={styles.label}>
           {label}
         </Text>

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Badge, Button, Card, Chip, Emoji, Screen, Text, useToast } from '@/components/ui';
+import { Badge, Button, Card, Chip, Glyph, Screen, Text, useToast } from '@/components/ui';
 import { getBusiness } from '@/data/repo';
 import { t, type StringKey } from '@/i18n';
 import { levelFor } from '@/state/rep';
@@ -46,7 +46,7 @@ export default function YouScreen() {
           style={[styles.ring, { borderColor: c.sun, backgroundColor: c.paper }]}
         >
           <View style={[styles.avatar, { backgroundColor: avatarBg.me }]}>
-            <Emoji size={44}>{avatar.me}</Emoji>
+            <Glyph of={avatar.me} size={44} />
           </View>
         </View>
         <View style={styles.headerText}>
@@ -69,7 +69,7 @@ export default function YouScreen() {
 
       {empty ? (
         <Card style={styles.empty}>
-          <Emoji size={56}>{food.taco}</Emoji>
+          <Glyph of={food.taco} size={56} />
           <Text variant="heading" center accessibilityRole="header">
             {t('you.emptyTitle')}
           </Text>
@@ -158,16 +158,14 @@ export default function YouScreen() {
           pressed && { opacity: 0.85 },
         ]}
       >
-        <Emoji size={24}>{ui.store}</Emoji>
+        <Glyph of={ui.store} size={21} tone="grape" />
         <View style={styles.rowText}>
           <Text variant="ui">{t('you.toBiz')}</Text>
           <Text variant="caption" tone="ink2">
             {getBusiness().name}
           </Text>
         </View>
-        <Text variant="heading" tone="ink2" accessibilityElementsHidden importantForAccessibility="no">
-          {ui.chevron}
-        </Text>
+        <Glyph of={ui.chevron} size={17} color={c.ink2} strokeWidth={2.4} />
       </Pressable>
     </Screen>
   );

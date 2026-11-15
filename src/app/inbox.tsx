@@ -2,11 +2,12 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Badge, Card, Emoji, Screen, Text } from '@/components/ui';
+import { Badge, Card, Glyph, Screen, Text } from '@/components/ui';
 import type { Note } from '@/data/types';
 import { t } from '@/i18n';
 import { useNotes, useStore } from '@/state/store';
-import { note as noteEmoji, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { noteGlyph } from '@/theme/glyphs';
 import { hitSlop, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -45,9 +46,7 @@ export default function InboxScreen() {
           accessibilityLabel={t('common.back')}
           style={[styles.back, { backgroundColor: c.card, borderColor: c.line }]}
         >
-          <Text variant="heading" accessibilityElementsHidden importantForAccessibility="no">
-            {ui.back}
-          </Text>
+          <Glyph of={ui.back} size={19} color={c.ink} strokeWidth={2.4} />
         </Pressable>
         <View style={styles.grow}>
           <Text variant="title" accessibilityRole="header">
@@ -83,7 +82,7 @@ export default function InboxScreen() {
               ]}
             >
               <View style={[styles.icon, { backgroundColor: n.tint }]}>
-                <Emoji size={22}>{noteEmoji[n.emoji]}</Emoji>
+                <Glyph of={noteGlyph[n.emoji]} size={22} palette="day" />
               </View>
               <View style={styles.grow}>
                 <Text variant="ui">{n.text}</Text>

@@ -1,6 +1,7 @@
 // The only place (with src/data/sample.ts) where emoji characters live.
-// Built-in emoji are placeholders: swap them here for the custom Lokal emoji later.
-// Emoji are decorative everywhere: hide them from screen readers and put the meaning in a label.
+// These are keys, not art: <Glyph> (src/components/ui/Glyph.tsx) draws each one as a custom food
+// sticker or a drawn icon (src/theme/glyphs.ts). Only avatars still render as system emoji.
+// Glyphs are decorative everywhere: hide them from screen readers and put the meaning in a label.
 
 export const food = {
   taco: '🌮',

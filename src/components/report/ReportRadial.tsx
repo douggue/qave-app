@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge, Button, Emoji, FoodSticker, Text, useToast } from '@/components/ui';
+import { Badge, Button, FoodSticker, Glyph, Icon, Text, useToast } from '@/components/ui';
 import type { Spot } from '@/data/types';
 import { isDuplicate, newReport, REPORT_OPTIONS, reportTarget, type ReportOption } from '@/features/report/options';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -21,7 +21,7 @@ import { useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { REP } from '@/state/rep';
 import { useStore } from '@/state/store';
-import { report as reportEmoji, tab as tabEmoji } from '@/theme/emoji';
+import { reportGlyph } from '@/theme/glyphs';
 import { dur, ease, native, spring } from '@/theme/motion';
 import { glow, gradients, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -109,16 +109,16 @@ function RadialOverlay() {
   const pick = (option: ReportOption) => {
     if (closing) return; // A second tap while closing must not post twice.
     if (!target) return dismiss();
-    if (option.type === 'photo') return dismiss(() => toast.show(t('toast.photoSoon'), { emoji: reportEmoji.photo }));
-    if (option.type === 'newSpot') return dismiss(() => toast.show(t('toast.newSpotSoon'), { emoji: reportEmoji.newSpot }));
+    if (option.type === 'photo') return dismiss(() => toast.show(t('toast.photoSoon'), { emoji: reportGlyph.photo }));
+    if (option.type === 'newSpot') return dismiss(() => toast.show(t('toast.newSpotSoon'), { emoji: reportGlyph.newSpot }));
 
     if (isDuplicate(state.reports, target.id, option.type)) {
-      return dismiss(() => toast.show(t('toast.alreadyReported'), { emoji: reportEmoji[option.type] }));
+      return dismiss(() => toast.show(t('toast.alreadyReported'), { emoji: reportGlyph[option.type] }));
     }
 
     actions.addReport(newReport(target.id, option), REP.report, option.mood);
     actions.celebrate({ kind: 'report', spotId: target.id, report: option.type, rep: REP.report });
-    toast.show(t('toast.reportLive', { spot: target.name }), { emoji: reportEmoji[option.type] });
+    toast.show(t('toast.reportLive', { spot: target.name }), { emoji: reportGlyph[option.type] });
     dismiss();
   };
 
@@ -165,7 +165,7 @@ function RadialOverlay() {
                     pressed && { opacity: 0.85 },
                   ]}
                 >
-                  <Emoji size={24}>{reportEmoji[o.type]}</Emoji>
+                  <Glyph of={reportGlyph[o.type]} size={24} />
                   <Text variant="ui" style={[styles.rowLabel, styles.grow]}>
                     {t(o.label)}
                   </Text>
@@ -238,7 +238,7 @@ function RadialOverlay() {
                                 pressed && { transform: [{ scale: 1.12 }] },
                               ]}
                             >
-                              <Emoji size={29}>{reportEmoji[o.type]}</Emoji>
+                              <Glyph of={reportGlyph[o.type]} size={27} palette="night" strokeWidth={2.2} />
                             </View>
                             <Text variant="caption" center style={styles.white}>
                               {t(o.label)}
@@ -259,14 +259,9 @@ function RadialOverlay() {
             style={[styles.close, { left: width / 2 - 31, bottom: originBottom - 31 }]}
           >
             <LinearGradient colors={gradients.hotIcon} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.closeCircle}>
-              <Text
-                accessible={false}
-                importantForAccessibility="no-hide-descendants"
-                allowFontScaling={false}
-                style={[styles.plus, { color: c.onHot }]}
-              >
-                {tabEmoji.report}
-              </Text>
+              <View accessible={false} importantForAccessibility="no-hide-descendants" style={styles.plus}>
+                <Icon name="plus" size={30} color={c.onHot} strokeWidth={2.8} />
+              </View>
             </LinearGradient>
           </Pressable>
         </>
@@ -296,13 +291,7 @@ const styles = StyleSheet.create({
   },
   close: { position: 'absolute', width: 62, height: 62 },
   closeCircle: { flex: 1, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
-  plus: {
-    fontFamily: 'Unbounded_800ExtraBold',
-    fontSize: 30,
-    lineHeight: 36,
-    textAlign: 'center',
-    transform: [{ rotate: '45deg' }],
-  },
+  plus: { transform: [{ rotate: '45deg' }] },
   listCard: {
     position: 'absolute',
     left: 0,

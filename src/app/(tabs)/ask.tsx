@@ -11,7 +11,7 @@ import {
   type ScrollViewInstance,
 } from 'react-native';
 
-import { Badge, Chip, Emoji, Screen, Text } from '@/components/ui';
+import { Badge, Chip, Glyph, Screen, Text } from '@/components/ui';
 import { answer } from '@/data/ask';
 import { AnswerCard } from '@/features/ask/AnswerCard';
 import { ChatBubble, TypingDots } from '@/features/ask/ChatBubble';
@@ -71,7 +71,7 @@ export default function AskScreen() {
       <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
-            <Emoji size={22}>{tab.ask}</Emoji>
+            <Glyph of={tab.ask} size={20} tone="brand" strokeWidth={2} />
             <Text variant="title" accessibilityRole="header" style={styles.title}>
               {t('ask.title')}
             </Text>
@@ -137,9 +137,7 @@ export default function AskScreen() {
                 pressed && { opacity: 0.85 },
               ]}
             >
-              <Text variant="heading" tone="onGrape">
-                {ui.send}
-              </Text>
+              <Glyph of={ui.send} size={19} color={c.onGrape} strokeWidth={2.6} />
             </Pressable>
           </View>
         </View>

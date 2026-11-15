@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { Button, Card, Emoji, LiveText, Text } from '@/components/ui';
+import { Button, Card, Glyph, LiveText, Text } from '@/components/ui';
 import { formatDistance, priceText, statusText } from '@/data/format';
 import type { Spot } from '@/data/types';
 import { t } from '@/i18n';
@@ -22,7 +22,7 @@ export function AnswerCard({ spot, onShowOnMap }: { spot: Spot; onShowOnMap: (sp
         <View style={styles.text}>
           <Text variant="ui">{spot.name}</Text>
           <View style={styles.inline}>
-            <Emoji size={11}>{ui.star}</Emoji>
+            <Glyph of={ui.star} size={11} />
             <LiveText variant="caption" tone="ink2" style={styles.shrink} placeholderWidth="70%">
               {meta}
             </LiveText>

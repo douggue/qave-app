@@ -3,13 +3,16 @@ import { StyleSheet, View } from 'react-native';
 
 import { getSpot } from '@/data/repo';
 import { useStore } from '@/state/store';
-import { report as reportEmoji, ui } from '@/theme/emoji';
+import { reportGlyph, type IconGlyph } from '@/theme/glyphs';
 
 import { EmojiRain } from './EmojiRain';
 import { RepBurst } from './RepBurst';
 
 // Plays the current celebration from the store over every screen (below the toast).
 // Everything is keyed by the celebration id and unmounts when it is cleared: nothing is left behind.
+
+/** The check-in burst: our pin in the brand gradient. */
+const CHECK_IN: IconGlyph = { icon: 'where', tone: 'brand' };
 
 export function FxHost() {
   const { state, actions } = useStore();
@@ -38,7 +41,7 @@ export function FxHost() {
       {isCheckIn && spot ? <EmojiRain key={`rain-${fx.id}`} food={spot.food} seed={fx.id} onDone={done} /> : null}
       <RepBurst
         key={`burst-${fx.id}`}
-        emoji={isCheckIn ? ui.pin : reportEmoji[fx.report ?? 'amazing']}
+        glyph={isCheckIn ? CHECK_IN : reportGlyph[fx.report ?? 'amazing']}
         amount={fx.rep}
         // A report has no rain: the burst ends the celebration, after the pin float has risen.
         holdMs={isCheckIn ? 0 : 600}

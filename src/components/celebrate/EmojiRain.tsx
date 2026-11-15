@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
+import { Animated, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
 
+import { BRAND_TINT, FoodSticker, Icon } from '@/components/ui';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
-import { food as foodEmoji, ui, type FoodKey } from '@/theme/emoji';
+import type { FoodKey } from '@/theme/emoji';
 import { native } from '@/theme/motion';
 
-// Check-in rain (02 spec 7.9): about 30 food emoji fall once, then the component calls
+// Check-in rain (02 spec 7.9): about 30 food stickers (and a few sparkles) fall once, then the component calls
 // onDone and the host unmounts it. Decorative: no touches, hidden from screen readers.
 
 type Particle = {
-  emoji: string;
+  /** A food sticker, or now and then a brand sparkle. */
+  sparkle: boolean;
   x: number;
   y: number;
   size: number;
@@ -34,7 +36,7 @@ function build(food: FoodKey, count: number, width: number, height: number, seed
   return Array.from({ length: count }, () => {
     const r = rand();
     return {
-      emoji: r < 0.85 ? foodEmoji[food] : ui.sparkles,
+      sparkle: r >= 0.85,
       x: rand() * Math.max(1, width - 30),
       y: -40 - rand() * 0.5 * height,
       size: 20 + rand() * 20,
@@ -87,21 +89,16 @@ export function EmojiRain({ food, seed, count = 30, onDone }: Props) {
     >
       {reduceMotion ? (
         <Animated.View style={[styles.center, { opacity: fade }]}>
-          <RNText allowFontScaling={false} style={styles.big}>
-            {foodEmoji[food]}
-          </RNText>
+          <FoodSticker food={food} size={72} />
         </Animated.View>
       ) : (
         particles.map((p, i) => (
-          <Animated.Text
+          <Animated.View
             key={i}
-            allowFontScaling={false}
             style={{
               position: 'absolute',
               left: p.x,
               top: p.y,
-              fontSize: p.size,
-              lineHeight: Math.round(p.size * 1.2),
               opacity: p.value.interpolate({ inputRange: [0, 0.85, 1], outputRange: [1, 1, 0] }),
               transform: [
                 { translateY: p.value.interpolate({ inputRange: [0, 1], outputRange: [0, height + 60 - p.y] }) },
@@ -110,8 +107,12 @@ export function EmojiRain({ food, seed, count = 30, onDone }: Props) {
               ],
             }}
           >
-            {p.emoji}
-          </Animated.Text>
+            {p.sparkle ? (
+              <Icon name="sparkle" size={Math.round(p.size * 0.9)} tint={BRAND_TINT} strokeWidth={2} />
+            ) : (
+              <FoodSticker food={food} size={p.size} />
+            )}
+          </Animated.View>
         ))
       )}
     </View>
@@ -120,5 +121,4 @@ export function EmojiRain({ food, seed, count = 30, onDone }: Props) {
 
 const styles = StyleSheet.create({
   center: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
-  big: { fontSize: 72, lineHeight: 86 },
 });

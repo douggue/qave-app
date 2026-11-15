@@ -1,19 +1,20 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Emoji, FoodSticker, Icon, Text, type IconName } from '@/components/ui';
+import { FoodSticker, Glyph, Text } from '@/components/ui';
 import { moodText, pinLabel } from '@/data/format';
 import type { Spot } from '@/data/types';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t } from '@/i18n';
-import { mood as moodEmoji, pinGlow, type KindKey } from '@/theme/emoji';
+import { pinGlow } from '@/theme/emoji';
+import { kindGlyph, moodGlyph } from '@/theme/glyphs';
 import { dur, ease, native, spring } from '@/theme/motion';
 import { elevation, glow } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import { useMapInverseScale } from './LokalMap';
 
-// A sticker pin (01-ui-design-system.md 6.8): the emoji itself with no circle behind it,
+// A sticker pin (01-ui-design-system.md 6.8): the food sticker with no circle behind it,
 // a soft glow at night, an anchor dot planted on (x, y), a kind chip and a live dot.
 
 const BOX_W = 60;
@@ -112,7 +113,7 @@ export const SpotPin = memo(function SpotPin({ spot, selected, label, tag, dimme
               !isNight && elevation.e1,
             ]}
           >
-            <Emoji size={12}>{moodEmoji[spot.mood.emoji]}</Emoji>
+            <Glyph of={moodGlyph[spot.mood.emoji]} size={13} />
             <Text variant="caption" numberOfLines={1} style={[styles.bubbleText, { color: c.bubbleInk }]}>
               {mood}
             </Text>
@@ -141,14 +142,9 @@ export const SpotPin = memo(function SpotPin({ spot, selected, label, tag, dimme
               <View style={[styles.halo, styles.haloInner, { backgroundColor: glowColor }, webBlur]} />
             </>
           ) : null}
-          <FoodSticker
-            food={spot.food}
-            size={40}
-            dim={!spot.open}
-            style={[styles.emoji, !isNight && Platform.OS !== 'ios' && styles.dayTextShadow]}
-          />
+          <FoodSticker food={spot.food} size={40} dim={!spot.open} />
           <View style={[styles.kind, { backgroundColor: c.pinChip, borderColor: c.pinChipBorder }]}>
-            <Icon name={KIND_ICON[spot.kind]} size={14} color={c.ink} strokeWidth={2.6} />
+            <Glyph of={kindGlyph[spot.kind]} size={12} color={c.ink} strokeWidth={2.6} />
           </View>
           <View
             style={[
@@ -174,7 +170,7 @@ export const SpotPin = memo(function SpotPin({ spot, selected, label, tag, dimme
               { backgroundColor: c.glass, borderColor: isNight ? 'rgba(255,255,255,0.14)' : c.pinChipBorder },
             ]}
           >
-            {spot.mood ? <Emoji size={10}>{moodEmoji[spot.mood.emoji]}</Emoji> : null}
+            {spot.mood ? <Glyph of={moodGlyph[spot.mood.emoji]} size={10.5} /> : null}
             <Text variant="caption" numberOfLines={1} style={[styles.tagText, { color: c.ink }]}>
               {tag}
             </Text>
@@ -184,15 +180,6 @@ export const SpotPin = memo(function SpotPin({ spot, selected, label, tag, dimme
     </Animated.View>
   );
 });
-
-/** Spot-type badge icons: drawn, because detailed 3D art does not read at 12 pt. */
-const KIND_ICON: Record<KindKey, IconName> = {
-  truck: 'truck',
-  trailer: 'trailer',
-  cart: 'cart',
-  popup: 'tent',
-  restaurant: 'store',
-};
 
 const webBlur = (Platform.OS === 'web' ? { filter: 'blur(8px)' } : {}) as object;
 
@@ -208,10 +195,8 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     backgroundColor: 'rgba(0,0,0,0.001)',
   },
-  emoji: { lineHeight: 48, height: 50 },
   closed: { opacity: 0.55 },
   dayShadow: { shadowColor: '#16172b', shadowOpacity: 0.35, shadowRadius: 6, shadowOffset: { width: 0, height: 4 } },
-  dayTextShadow: { textShadowColor: 'rgba(22,23,43,0.35)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 2 } },
   halo: { position: 'absolute', borderRadius: 999 },
   haloOuter: { width: 50, height: 50, opacity: 0.2 },
   haloInner: { width: 34, height: 34, opacity: 0.32 },

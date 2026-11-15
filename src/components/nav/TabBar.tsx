@@ -3,12 +3,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
 
-import { Emoji, Icon, Text, useToast, type IconName } from '@/components/ui';
+import { Icon, Text, useToast, type IconName } from '@/components/ui';
 import { getBusiness } from '@/data/repo';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t, type StringKey } from '@/i18n';
 import { useStore } from '@/state/store';
-import { status as statusEmoji } from '@/theme/emoji';
 import { dur, ease, native } from '@/theme/motion';
 import { glow, gradients } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -229,7 +228,11 @@ function GoLiveAction({ live, onPress }: { live: boolean; onPress: () => void })
             isNight && glow(c.mint, 18, 0.8),
           ]}
         >
-          {live ? <Emoji size={26}>{statusEmoji.live}</Emoji> : <Icon name="golive" size={28} color={c.mint} strokeWidth={2.4} />}
+          {live ? (
+            <Icon name="live" size={28} color={c.onMint} strokeWidth={2.4} />
+          ) : (
+            <Icon name="golive" size={28} color={c.mint} strokeWidth={2.4} />
+          )}
         </View>
       </View>
       <Text variant="micro" maxFontSizeMultiplier={1.4} tone={live ? 'mint' : 'ink2'} center style={styles.label}>

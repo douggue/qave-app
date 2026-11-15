@@ -16,7 +16,8 @@ import { getAppStart, useClock } from '@/hooks/use-clock';
 import { matchesFilter, useAllReports, useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { report as reportEmoji, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { reportGlyph } from '@/theme/glyphs';
 import { ease, native } from '@/theme/motion';
 import { withAlpha } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -341,7 +342,7 @@ export default function MapScreen() {
     AccessibilityInfo.announceForAccessibility(t('toast.surprise', { name: pick.name }));
   };
 
-  // A fresh report rises from its pin as a short emoji float (02 spec 7.8).
+  // A fresh report rises from its pin as a short glyph float (02 spec 7.8).
   const fx = state.fx;
   const floatSpot = fx?.kind === 'report' && fx.report ? spots.find((s) => s.id === fx.spotId) : undefined;
 
@@ -376,7 +377,7 @@ export default function MapScreen() {
           />
         ))}
         {fx && floatSpot && fx.report ? (
-          <EmojiFloat key={fx.id} x={floatSpot.x} y={floatSpot.y} emoji={reportEmoji[fx.report]} />
+          <EmojiFloat key={fx.id} x={floatSpot.x} y={floatSpot.y} glyph={reportGlyph[fx.report]} />
         ) : null}
       </LokalMap>
 

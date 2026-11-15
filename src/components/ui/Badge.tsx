@@ -4,15 +4,18 @@ import { useHydrated } from '@/hooks/use-hydrated';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-import { iconFor, Icon } from './Icon';
-import { Emoji, Text, type TextTone } from './Text';
+import type { GlyphSource } from '@/theme/glyphs';
+
+import { Glyph } from './Glyph';
+import { Text, type TextTone } from './Text';
 
 export type BadgeTone = 'grape' | 'mint' | 'neon' | 'amber' | 'hot' | 'neutral';
 
 type Props = {
   label: string;
   tone?: BadgeTone;
-  icon?: string;
+  /** An emoji key's glyph from src/theme/emoji.ts, drawn in the badge color. */
+  icon?: GlyphSource;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
   /** Clock- or locale-dependent label: a same-height placeholder until the web page hydrates. */
@@ -48,13 +51,7 @@ export function Badge({ label, tone = 'neutral', icon, accessibilityLabel, style
       accessibilityLabel={accessibilityLabel ?? label}
       style={[styles.badge, { backgroundColor: bg[tone] }, style]}
     >
-      {icon ? (
-        iconFor(icon) ? (
-          <Icon name={iconFor(icon)!} size={13} color={c[ink[tone]]} strokeWidth={2.6} />
-        ) : (
-          <Emoji size={12}>{icon}</Emoji>
-        )
-      ) : null}
+      {icon ? <Glyph of={icon} size={11.5} color={c[ink[tone]]} plain strokeWidth={2.6} /> : null}
       <Text variant="caption" tone={ink[tone]} style={styles.label}>
         {label}
       </Text>

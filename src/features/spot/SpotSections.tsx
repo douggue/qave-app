@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Badge, Card, Emoji, Text } from '@/components/ui';
+import { Badge, Card, Glyph, Text } from '@/components/ui';
 import { Skeleton as Placeholder } from '@/components/ui/Skeleton';
 import { busyWord, formatClock, formatPrice, todayIndex, weekdayShort } from '@/data/format';
 import type { Dish, Spot } from '@/data/types';
@@ -68,7 +68,7 @@ export function AiSummary({ spot }: { spot: Spot }) {
   return (
     <Card variant="ai">
       <View style={styles.titleRow}>
-        <Emoji size={18}>{ui.sparkles}</Emoji>
+        <Glyph of={ui.sparkles} size={18} tone="grape" strokeWidth={2} />
         <Text variant="heading" tone="grape" accessibilityRole="header" style={styles.shrink}>
           {t('spot.whatPeopleSay')}
         </Text>

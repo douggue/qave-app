@@ -34,7 +34,7 @@ export function Text({ variant = 'body', tone = 'ink', center, tabular, style, .
   );
 }
 
-/** A decorative emoji: hidden from screen readers, the parent label carries the meaning. */
+/** A decorative system emoji (avatars only; use <Glyph> for everything else). Hidden from screen readers. */
 export function Emoji({ children, size = 24, style, ...rest }: TextProps & { size?: number }) {
   const { c } = useTheme();
   return (

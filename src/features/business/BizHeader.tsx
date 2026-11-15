@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Pressable, StyleSheet, View, type ViewInstance } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { Badge, Emoji, Text, useToast, useToastAnchor } from '@/components/ui';
+import { Badge, Glyph, Text, useToast, useToastAnchor } from '@/components/ui';
 import { getBusiness, getSpot } from '@/data/repo';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
@@ -51,7 +51,7 @@ export function BizHeader({ caption }: { caption: string }) {
           pressed && { opacity: 0.85 },
         ]}
       >
-        <Emoji size={18}>{avatar.me}</Emoji>
+        <Glyph of={avatar.me} size={18} />
         <Text variant="label">{t('biz.toPersonal')}</Text>
       </Pressable>
     </View>

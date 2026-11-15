@@ -2,13 +2,14 @@ import { StyleSheet } from 'react-native';
 
 import { Button, Card, Placeholder, Screen } from '@/components/ui';
 import { t } from '@/i18n';
+import type { GlyphSource } from '@/theme/glyphs';
 import { space } from '@/theme/tokens';
 
 import { BizHeader } from './BizHeader';
 
 type Props = {
   caption: string;
-  emoji: string;
+  emoji: GlyphSource;
   title: string;
   body: string;
   action: { label: string; onPress: () => void; disabled?: boolean };

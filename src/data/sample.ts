@@ -190,11 +190,11 @@ export const REPORTS: Report[] = [
 ];
 
 export const TICKS: Tick[] = [
-  { by: 0, text: 'reported 🔥 Hot at Taquería La Güera' },
+  { by: 0, text: 'reported Hot at Taquería La Güera' },
   { by: 4, text: 'checked in at Kolache Corner' },
   { by: 2, text: 'added a new spot: Pleat & Steam' },
   { by: 1, text: 'says the line at Post Oak Pit is 25 min' },
-  { by: 5, text: 'earned the Night Owl badge 🦉' },
+  { by: 5, text: 'earned the Night Owl badge' },
   { by: 3, text: 'confirmed the $10 deal at Island Jerk Pit' },
 ];
 

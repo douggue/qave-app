@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FoodArt } from '@/components/cards/FoodArt';
 import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
-import { Badge, Button, Card, Emoji, Icon, iconFor, LiveText, Placeholder, Text, useToast } from '@/components/ui';
+import { Badge, Button, Card, Glyph, LiveText, Placeholder, Text, useToast } from '@/components/ui';
 import { formatDistance, friendsText, isMobile, kindLabel, priceText, statusText } from '@/data/format';
 import { directionsUrl } from '@/data/links';
 import type { Spot } from '@/data/types';
@@ -17,7 +17,8 @@ import { useHydrated } from '@/hooks/use-hydrated';
 import { useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { avatar, kind as kindEmoji, ui } from '@/theme/emoji';
+import { avatar, ui } from '@/theme/emoji';
+import { kindGlyph, type GlyphSource } from '@/theme/glyphs';
 import { minTap, screenPad, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -95,14 +96,14 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
               accessible
               accessibilityLabel={t('spot.ratingA11y', { r: spot.rating, n: spot.reviewCount })}
             >
-              <Emoji size={14}>{ui.star}</Emoji>
+              <Glyph of={ui.star} size={14} />
               <Text variant="ui">{t('spot.rating', { r: spot.rating, n: spot.reviewCount })}</Text>
             </View>
             <Text variant="ui" tone="ink2">
               {priceText(spot)}
             </Text>
             <View style={styles.inline}>
-              <Emoji size={14}>{kindEmoji[spot.kind]}</Emoji>
+              <Glyph of={kindGlyph[spot.kind]} size={14} color={c.ink2} />
               <Text variant="ui" tone="ink2">
                 {sentence(kind)}
               </Text>
@@ -116,9 +117,7 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
             <View style={styles.inline}>
               <View style={styles.faces}>
                 {friends.map((f) => (
-                  <Emoji key={f.name} size={18}>
-                    {avatar[f.avatar]}
-                  </Emoji>
+                  <Glyph key={f.name} of={avatar[f.avatar]} size={18} />
                 ))}
               </View>
               <Text variant="label" tone="ink2" style={styles.shrink}>
@@ -205,7 +204,7 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
   );
 }
 
-function GlassButton({ icon, label, onPress, big }: { icon: string; label: string; onPress: () => void; big?: boolean }) {
+function GlassButton({ icon, label, onPress, big }: { icon: GlyphSource; label: string; onPress: () => void; big?: boolean }) {
   const { c } = useTheme();
   return (
     <Pressable
@@ -214,15 +213,7 @@ function GlassButton({ icon, label, onPress, big }: { icon: string; label: strin
       accessibilityLabel={label}
       style={({ pressed }) => [styles.glass, { backgroundColor: c.glass, borderColor: c.line }, pressed && { opacity: 0.85 }]}
     >
-      {iconFor(icon) ? (
-        <Icon name={iconFor(icon)!} size={big ? 24 : 20} color={c.ink} strokeWidth={2.4} />
-      ) : big ? (
-        <Text variant="title" style={styles.backGlyph}>
-          {icon}
-        </Text>
-      ) : (
-        <Emoji size={18}>{icon}</Emoji>
-      )}
+      <Glyph of={icon} size={big ? 21 : 17.5} color={c.ink} strokeWidth={2.4} />
     </Pressable>
   );
 }
@@ -245,7 +236,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backGlyph: { lineHeight: 30, marginTop: -2 },
   content: { padding: screenPad, gap: space.md },
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.md, rowGap: 6 },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 6 },

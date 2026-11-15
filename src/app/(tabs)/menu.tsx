@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { getBusiness } from '@/data/repo';
 import { ComingNext } from '@/features/business/ComingNext';
 import { t } from '@/i18n';
-import { tab } from '@/theme/emoji';
+import { tabGlyph } from '@/theme/glyphs';
 
 // Business Menu: live menu and sold-out toggles come next. Tonight: open the public spot page.
 export default function MenuScreen() {
@@ -11,7 +11,7 @@ export default function MenuScreen() {
   return (
     <ComingNext
       caption={t('biz.caption.menu')}
-      emoji={tab.menu}
+      emoji={tabGlyph.menu}
       title={t('biz.menu.title')}
       body={t('biz.menu.body')}
       action={{

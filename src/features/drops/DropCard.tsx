@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { Button, Card, Emoji, LiveText, Text } from '@/components/ui';
+import { Button, Card, Glyph, LiveText, Text } from '@/components/ui';
 import type { DropState } from '@/data/drops';
 import { countdownWords, formatCountdown, formatDistance } from '@/data/format';
 import type { Drop, Spot } from '@/data/types';
@@ -114,7 +114,7 @@ export function DropCard({ drop, spot, state, reminded, claimed, onRemind, onCla
             pressed && { opacity: 0.8 },
           ]}
         >
-          <Emoji size={20}>{ui.pin}</Emoji>
+          <Glyph of={ui.pin} size={19} color={c.ink} />
         </Pressable>
       </View>
     </Card>

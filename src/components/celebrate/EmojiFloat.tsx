@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Animated, StyleSheet, Text as RNText, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 
 import { useMapInverseScale } from '@/components/map/LokalMap';
+import { Glyph } from '@/components/ui';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
+import type { GlyphSource } from '@/theme/glyphs';
 import { dur, ease, native } from '@/theme/motion';
 
-// Three report emoji rising from a pin (02 spec 7.8 step 2). A map marker, so it moves with
+// Three report glyphs rising from a pin (02 spec 7.8 step 2). A map marker, so it moves with
 // the map. Off under reduce motion.
 
 const DRIFT = [-26, 0, 26];
 
-export function EmojiFloat({ x, y, emoji }: { x: number; y: number; emoji: string }) {
+export function EmojiFloat({ x, y, glyph }: { x: number; y: number; glyph: GlyphSource }) {
   const reduceMotion = useReduceMotion();
   const inverse = useMapInverseScale();
   const [values] = useState(() => DRIFT.map(() => new Animated.Value(0)));
@@ -50,9 +52,7 @@ export function EmojiFloat({ x, y, emoji }: { x: number; y: number; emoji: strin
             },
           ]}
         >
-          <RNText allowFontScaling={false} style={styles.emoji}>
-            {emoji}
-          </RNText>
+          <Glyph of={glyph} size={26} />
         </Animated.View>
       ))}
     </View>
@@ -62,5 +62,4 @@ export function EmojiFloat({ x, y, emoji }: { x: number; y: number; emoji: strin
 const styles = StyleSheet.create({
   box: { position: 'absolute', width: 60, height: 60, zIndex: 3000 },
   item: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
-  emoji: { fontSize: 26, lineHeight: 32 },
 });

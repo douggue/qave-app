@@ -17,10 +17,14 @@ import { dur, ease, native } from '@/theme/motion';
 import { elevation } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-import { Emoji, Text } from './Text';
+import type { GlyphSource } from '@/theme/glyphs';
 
-type ToastItem = { id: number; message: string; emoji?: string };
-type ToastApi = { show: (message: string, options?: { emoji?: string }) => void };
+import { Glyph } from './Glyph';
+import { Text } from './Text';
+
+/** `emoji` is a key's emoji from src/theme/emoji.ts (or a glyph); it draws as our icon or sticker. */
+type ToastItem = { id: number; message: string; emoji?: GlyphSource };
+type ToastApi = { show: (message: string, options?: { emoji?: GlyphSource }) => void };
 
 const ToastContext = createContext<ToastApi | null>(null);
 
@@ -100,7 +104,7 @@ function ToastView({ item, onDone, top }: { item: ToastItem; onDone: () => void;
           { backgroundColor: c.toastBg, opacity: anim, transform: [{ translateY }] },
         ]}
       >
-        {item.emoji ? <Emoji size={18}>{item.emoji}</Emoji> : null}
+        {item.emoji ? <Glyph of={item.emoji} size={18} color={c.toastInk} palette="inverse" /> : null}
         <Text variant="ui" tone="toastInk" center style={styles.text}>
           {item.message}
         </Text>

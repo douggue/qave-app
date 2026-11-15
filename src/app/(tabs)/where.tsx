@@ -1,7 +1,7 @@
 import { ComingNext } from '@/features/business/ComingNext';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { tab } from '@/theme/emoji';
+import { tabGlyph } from '@/theme/glyphs';
 
 // Business Where: stops editor and demand map come next. Tonight: go live from a saved stop.
 export default function WhereScreen() {
@@ -10,7 +10,7 @@ export default function WhereScreen() {
   return (
     <ComingNext
       caption={t('biz.caption.where')}
-      emoji={tab.where}
+      emoji={tabGlyph.where}
       title={t('biz.where.title')}
       body={t('biz.where.body')}
       action={{

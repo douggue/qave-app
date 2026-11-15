@@ -1,5 +1,5 @@
 // English string table. Keys are grouped by area. Values never contain emoji:
-// compose emoji in JSX from src/theme/emoji.ts so strings stay translatable.
+// compose icons in JSX with <Glyph> (src/theme/emoji.ts keys) so strings stay translatable.
 
 export const en = {
   // Splash

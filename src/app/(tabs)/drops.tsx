@@ -13,7 +13,8 @@ import { useSpots } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { REP } from '@/state/rep';
 import { useStore } from '@/state/store';
-import { tab, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { tabGlyph } from '@/theme/glyphs';
 import { space } from '@/theme/tokens';
 
 // Drops: limited specials. Countdowns and the slow drain all run on the shared clock.
@@ -58,7 +59,7 @@ export default function DropsScreen() {
       </View>
 
       {drops.length === 0 ? (
-        <Placeholder emoji={tab.drops} title={t('drops.empty')} body={t('drops.emptyBody')} />
+        <Placeholder emoji={tabGlyph.drops} title={t('drops.empty')} body={t('drops.emptyBody')} />
       ) : (
         drops.map((drop) => {
           const spot = spots.find((s) => s.id === drop.spotId);

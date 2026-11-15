@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
-import { Button, Card, Emoji, Text, useToast } from '@/components/ui';
+import { Button, Card, Glyph, Text, useToast } from '@/components/ui';
 import { reportAgo } from '@/data/format';
 import { getPeople } from '@/data/repo';
 import type { Report, Spot } from '@/data/types';
@@ -11,9 +11,10 @@ import { useAllReports } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { REP } from '@/state/rep';
 import { useStore } from '@/state/store';
-import { avatar, avatarBg, report as reportEmoji, ui } from '@/theme/emoji';
+import { avatar, avatarBg, ui } from '@/theme/emoji';
+import { reportGlyph } from '@/theme/glyphs';
 import { dur, ease, native } from '@/theme/motion';
-import { hitSlop, radius, space } from '@/theme/tokens';
+import { hitSlop, palettes, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 // Live reports with "Still true" / "Not anymore" votes kept in the store (03 spec 5).
@@ -26,18 +27,6 @@ function who(report: Report, spot: Spot) {
     ? { name: person.handle, icon: avatar[person.avatar], bg: person.tint }
     : { name: '', icon: avatar.me, bg: avatarBg.me };
 }
-
-/** Tint behind the mood badge per report type. */
-const BADGE_TINT: Record<Report['type'], 'tintNeon' | 'tintMint' | 'tintAmber' | 'tintGrape'> = {
-  amazing: 'tintNeon',
-  line: 'tintAmber',
-  deal: 'tintMint',
-  soldOut: 'tintAmber',
-  photo: 'tintGrape',
-  newSpot: 'tintGrape',
-  news: 'tintGrape',
-  parked: 'tintMint',
-};
 
 /**
  * A Waze-style report card: mood badge, what was reported, when and by whom, a "Still true"
@@ -75,14 +64,14 @@ function ReportCard({ report, spot, now }: { report: Report; spot: Spot; now: nu
   return (
     <Animated.View style={[styles.card, { backgroundColor: c.card2, borderColor: c.line, opacity: fade }]}>
       <View style={styles.top} accessible accessibilityLabel={t('report.cardA11y', { text: report.text, meta })}>
-        <View style={[styles.badge, { backgroundColor: c[BADGE_TINT[report.type]], borderColor: c.line }]}>
-          <Emoji size={22}>{reportEmoji[report.type]}</Emoji>
+        <View style={[styles.badge, { backgroundColor: c.card, borderColor: c.line }]}>
+          <Glyph of={reportGlyph[report.type]} size={21} />
         </View>
         <View style={styles.body}>
           <Text variant="ui">{report.text}</Text>
           <View style={styles.metaRow}>
             <View style={[styles.avatar, { backgroundColor: person.bg }]}>
-              <Emoji size={11}>{person.icon}</Emoji>
+              <Glyph of={person.icon} size={11} color={palettes.day.ink} />
             </View>
             <Text variant="caption" tone="ink2" style={styles.shrink}>
               {meta}
@@ -105,7 +94,7 @@ function ReportCard({ report, spot, now }: { report: Report; spot: Spot; now: nu
             pressed && { opacity: 0.85 },
           ]}
         >
-          <Emoji size={15}>{confirmed ? ui.check : ui.thumbUp}</Emoji>
+          <Glyph of={confirmed ? ui.check : ui.thumbUp} size={14} color={confirmed ? c.mint : c.onMint} strokeWidth={2.5} />
           <Text variant="label" tabular tone={confirmed ? 'mint' : 'onMint'} style={styles.shrink}>
             {t(confirmed ? 'report.confirmed' : 'report.confirm', { n: count })}
           </Text>

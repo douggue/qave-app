@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Button, Emoji, Skeleton, Text, useToast } from '@/components/ui';
+import { Button, Glyph, Skeleton, Text, useToast } from '@/components/ui';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { closingLeft, closingText, freshness } from '@/data/format';
 import type { Spot } from '@/data/types';
@@ -9,11 +9,13 @@ import { useAllReports } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { REP, STILL_HERE_COOLDOWN_MS } from '@/state/rep';
 import { useStore } from '@/state/store';
-import { status as statusEmoji, ui } from '@/theme/emoji';
+import { ui } from '@/theme/emoji';
+import { statusGlyph } from '@/theme/glyphs';
+import { useTheme } from '@/theme/use-theme';
 
 /**
  * "Closes in 25 min" under the status line (idea B), only for closing-soon spots.
- * An amber caption; the hourglass is decorative. Waits for hydration on web.
+ * An amber caption; the alarm icon is decorative. Waits for hydration on web.
  */
 export function ClosingSoon({ spot }: { spot: Spot }) {
   const now = useClock(60_000);
@@ -23,7 +25,7 @@ export function ClosingSoon({ spot }: { spot: Spot }) {
   if (left === null) return null;
   return (
     <View style={styles.closing}>
-      <Emoji size={13}>{statusEmoji.closingSoon}</Emoji>
+      <Glyph of={statusGlyph.closingSoon} size={13} />
       <Text variant="caption" tone="amber" style={styles.shrink}>
         {closingText(left)}
       </Text>
@@ -53,10 +55,11 @@ function ConfirmedTonight({ spotId }: { spotId: string }) {
   const reports = useAllReports();
   let n = stillHere[spotId] ? 1 : 0;
   for (const r of reports) if (r.spotId === spotId) n += r.votes + (votes[r.id] === 1 ? 1 : 0);
+  const { c } = useTheme();
   if (!n) return null;
   return (
     <View style={styles.closing}>
-      <Emoji size={12}>{ui.check}</Emoji>
+      <Glyph of={ui.check} size={12} color={c.mint} />
       <Text variant="caption" tone="ink2" style={styles.shrink}>
         {n === 1 ? t('fresh.confirmedTonight1') : t('fresh.confirmedTonight', { n })}
       </Text>

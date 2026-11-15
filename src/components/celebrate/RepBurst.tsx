@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Animated, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-import { Emoji, Text } from '@/components/ui';
+import { Glyph, Text } from '@/components/ui';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { t } from '@/i18n';
+import type { GlyphSource } from '@/theme/glyphs';
 import { ease, native } from '@/theme/motion';
 
 // "+5 rep" burst (02 spec 7.8 step 3): pop, rise, fade. Under reduce motion, a fade in place.
 
-type Props = { emoji: string; amount: number; holdMs?: number; onDone: () => void };
+type Props = { glyph: GlyphSource; amount: number; holdMs?: number; onDone: () => void };
 
-export function RepBurst({ emoji, amount, holdMs = 0, onDone }: Props) {
+export function RepBurst({ glyph, amount, holdMs = 0, onDone }: Props) {
   const reduceMotion = useReduceMotion();
   const { height } = useWindowDimensions();
   const [pop] = useState(() => new Animated.Value(0));
@@ -55,7 +56,7 @@ export function RepBurst({ emoji, amount, holdMs = 0, onDone }: Props) {
       style={[styles.host, { top: height * 0.44 - 50 }]}
     >
       <Animated.View style={[styles.burst, { opacity, transform }]}>
-        <Emoji size={46}>{emoji}</Emoji>
+        <Glyph of={glyph} size={44} strokeWidth={2} />
         <View style={styles.pill}>
           <Text variant="ui" style={styles.text}>
             {t('rep.plus', { n: amount })}
