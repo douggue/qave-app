@@ -21,6 +21,7 @@ const STICKERS: Partial<Record<FoodKey, ImageSourcePropType>> = {
   croissant: require('../../../assets/emoji/food-croissant.png'),
   kolache: require('../../../assets/emoji/food-kolache.png'),
   coffee: require('../../../assets/emoji/food-coffee.png'),
+  fries: require('../../../assets/emoji/food-fries.png'),
 };
 
 type Props = { food: FoodKey; size: number; style?: StyleProp<TextStyle>; dim?: boolean };
