@@ -71,8 +71,8 @@ A · Pin-o (the "o" is a map pin), B · Bite pin (pin with a bite), C · Neon si
 
 Plan: [Lokal Design Refinement Plan](https://claude.ai/artifact/3UVpN6mkgaHTT1vsaVko44). Direction: refine, don't restart; the live Waze feel applied to food that moves. Patterns studied on Mobbin: Waze, corner, Too Good To Go, Beli, Zomato, Google Maps, Blackbird, Grab, Behance, Medium.
 
-- [ ] R1 · Calm and trust: max 3 big bubbles plus small pin tags, slim right rail, live activity pill, panel peek retune, Waze-style report cards with confirm counts, You empty state, Business header fixes, rename the sample burger truck.
+- [x] R1 · Calm and trust (built 15 Nov, awaiting founder review): max 3 big bubbles plus small pin tags, slim right rail, live activity pill, panel peek retune, Waze-style report cards with confirm counts, You empty state, Business header fixes, rename the sample burger truck.
 - [ ] R2 · Faster decisions: swipeable preview cards on pin tap, pickup windows on Drops (shown on the map), confirm or not-anymore on reports, Go live stop preview on a map.
 - [ ] R3 · Reasons to come back: Been and Want to try lists, tried-X-of-Y, Ask suggestion cards, grouped Inbox, Business Where schedule editor, French review.
 - [ ] R4 · Social and alerts (after the backend): friends activity, opt-in streaks, alert radius, Menu sold-out toggles, Promote creates a Drop.
-- Pending founder approval.
+- Plan approved by the founder on 15 Nov. Sample brands renamed: Ember & Bun, Post Oak Pit BBQ, Pleat & Steam.
