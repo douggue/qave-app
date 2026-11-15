@@ -3,16 +3,18 @@ import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Chip, Emoji, Text } from '@/components/ui';
+import { Chip, Emoji, Text, useToast } from '@/components/ui';
 import { getPeople, getTicks } from '@/data/repo';
-import { useClock } from '@/hooks/use-clock';
+import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useScreenReader } from '@/hooks/use-screen-reader';
-import { matchesFilter, useSpots } from '@/hooks/use-spots';
+import { reportAt } from '@/data/format';
+import type { Report, Spot } from '@/data/types';
+import { matchesFilter, useAllReports, useSpots } from '@/hooks/use-spots';
 import { t, type StringKey } from '@/i18n';
 import { useNotes, useStore, type FilterKey } from '@/state/store';
-import { avatar, avatarBg, filterIcon, ui } from '@/theme/emoji';
-import { dur, ease, native } from '@/theme/motion';
+import { avatar, avatarBg, filterIcon, ui, type AvatarKey } from '@/theme/emoji';
+import { dur, ease, native, spring } from '@/theme/motion';
 import { elevation, minTap, radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -28,11 +30,18 @@ const FILTERS: { key: FilterKey; label: StringKey }[] = [
   { key: 'cheap', label: 'filter.cheap' },
 ];
 
-/** The top of the map: Ask pill, bell, filter chips and the live ticker. */
+/** The top of the map: Ask pill, day/night toggle, bell, filter chips and the live ticker. */
 export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => void }) {
   const insets = useSafeAreaInsets();
-  const { c } = useTheme();
+  const { c, isNight } = useTheme();
+  const toast = useToast();
+  const { actions } = useStore();
   const unread = useNotes().filter((n) => n.unread).length;
+
+  const toggleTheme = () => {
+    actions.setThemeMode(isNight ? 'day' : 'night');
+    toast.show(t(isNight ? 'map.themeDay' : 'map.themeNight'), { emoji: isNight ? ui.sun : ui.moon });
+  };
 
   return (
     <View pointerEvents="box-none" onLayout={onLayout} style={[styles.top, { paddingTop: insets.top + 8 }]}>
@@ -49,6 +58,11 @@ export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => v
             {t('map.askPill')}
           </Text>
         </Pressable>
+        <IconButton
+          icon={isNight ? ui.sun : ui.moon}
+          label={t(isNight ? 'map.toDay' : 'map.toNight')}
+          onPress={toggleTheme}
+        />
         <IconButton
           icon={ui.bell}
           label={t('map.bell', { n: unread })}
@@ -197,9 +211,139 @@ export function IconButton({
   );
 }
 
+/** One glass capsule: zoom in over zoom out. Each half is a full 44 pt button. */
+export function ZoomPill({ onIn, onOut }: { onIn: () => void; onOut: () => void }) {
+  const { c } = useTheme();
+  const half = (glyph: string, label: string, onPress: () => void) => (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [styles.zoomHalf, pressed && styles.pressed]}
+    >
+      <Text
+        variant="heading"
+        accessible={false}
+        importantForAccessibility="no"
+        accessibilityElementsHidden
+        style={{ color: c.ink, fontSize: 22, lineHeight: 24 }}
+      >
+        {glyph}
+      </Text>
+    </Pressable>
+  );
+  return (
+    <View
+      accessibilityLabel={t('map.zoomA11y')}
+      style={[styles.zoom, { backgroundColor: c.glass, borderColor: c.line }, elevation.e1]}
+    >
+      {half(ui.plus, t('map.zoomIn'), onIn)}
+      <View style={[styles.zoomRule, { backgroundColor: c.line }]} />
+      {half(ui.minus, t('map.zoomOut'), onOut)}
+    </View>
+  );
+}
+
+type Face = { key: string; icon: string; bg: string };
+
+/** Who made a report, as a small avatar. */
+function faceFor(report: Report): Face {
+  if (report.by === 'you') return { key: 'you', icon: avatar.me, bg: avatarBg.me };
+  if (report.by === 'owner') return { key: `owner-${report.spotId}`, icon: ui.owner, bg: '#ffe7b0' };
+  const person = getPeople()[report.by];
+  const key: AvatarKey = person?.avatar ?? 'me';
+  return { key: person?.handle ?? String(report.by), icon: avatar[key], bg: person?.tint ?? avatarBg.me };
+}
+
+/**
+ * "34 reports near you tonight": a glass pill above the sheet peek with the three newest
+ * reporters. The count is the real number of reports (sample plus this session). Tapping it
+ * shows the spot with the newest report. It pulses once when a report is added.
+ */
+export function ActivityPill({ spots, onOpen }: { spots: Spot[]; onOpen: (spot: Spot) => void }) {
+  const { c } = useTheme();
+  const reduceMotion = useReduceMotion();
+  const reports = useAllReports();
+  const count = reports.length;
+  const appStart = getAppStart();
+  const sorted = [...reports].sort((a, b) => reportAt(b, appStart) - reportAt(a, appStart));
+  const newest = sorted.map((r) => spots.find((s) => s.id === r.spotId)).find((s): s is Spot => !!s);
+  const faces: Face[] = [];
+  for (const r of sorted) {
+    const face = faceFor(r);
+    if (!faces.some((f) => f.key === face.key)) faces.push(face);
+    if (faces.length === 3) break;
+  }
+
+  const [pulse] = useState(() => new Animated.Value(1));
+  const lastCount = useRef(count);
+  useEffect(() => {
+    const grew = count > lastCount.current;
+    lastCount.current = count;
+    if (!grew || reduceMotion) return;
+    pulse.setValue(1.12);
+    Animated.spring(pulse, { toValue: 1, ...spring.pop, useNativeDriver: native }).start();
+  }, [count, pulse, reduceMotion]);
+
+  if (!count || !newest) return null;
+  const text = count === 1 ? t('map.activity1') : t('map.activity', { n: count });
+
+  return (
+    <Animated.View style={{ transform: [{ scale: pulse }] }}>
+      <Pressable
+        onPress={() => onOpen(newest)}
+        accessibilityRole="button"
+        accessibilityLabel={t('map.activityA11y', { text, spot: newest.name })}
+        accessibilityHint={t('map.activityHint')}
+        style={({ pressed }) => [
+          styles.activity,
+          { backgroundColor: c.glass, borderColor: c.line },
+          elevation.e1,
+          pressed && styles.pressed,
+        ]}
+      >
+        <View style={styles.faces}>
+          {faces.map((f, i) => (
+            <View
+              key={f.key}
+              style={[
+                styles.face,
+                { backgroundColor: f.bg, borderColor: c.paper, marginLeft: i ? -8 : 0, zIndex: 3 - i },
+              ]}
+            >
+              <Emoji size={13}>{f.icon}</Emoji>
+            </View>
+          ))}
+        </View>
+        <View style={[styles.liveDot, { backgroundColor: c.mintFill }]} />
+        <Text variant="label" numberOfLines={2} style={styles.shrink}>
+          {text}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
+  zoom: { width: minTap, borderRadius: radius.pill, borderWidth: 1, overflow: 'hidden' },
+  zoomHalf: { width: minTap, height: minTap, alignItems: 'center', justifyContent: 'center' },
+  zoomRule: { height: 1, marginHorizontal: 10 },
+  activity: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: minTap,
+    paddingVertical: 6,
+    paddingLeft: 6,
+    paddingRight: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+  },
+  faces: { flexDirection: 'row' },
+  face: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  liveDot: { width: 7, height: 7, borderRadius: 4 },
   top: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 12, gap: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   ask: {
     flex: 1,
     minHeight: 50,

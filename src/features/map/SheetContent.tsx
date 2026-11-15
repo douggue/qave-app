@@ -2,11 +2,12 @@ import { router } from 'expo-router';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { SpotRow, TrendCard } from '@/components/cards/SpotCards';
+import { CompactSpotRow, SpotRow, TrendCard } from '@/components/cards/SpotCards';
 import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
 import { Badge, Button, Emoji, LiveText, Text, useToast } from '@/components/ui';
 import {
   closingLeft,
+  friendsText,
   formatDistance,
   kindLabel,
   milesFromMe,
@@ -27,22 +28,28 @@ import { useTheme } from '@/theme/use-theme';
 
 type ExploreProps = { spots: Spot[]; onFocus: (spot: Spot) => void };
 
-/** Sheet header: title plus the live count line. Part of the drag area. */
+/** Rows shown compact at the top of the list, so the peek shows real spots (two fit). */
+const COMPACT_ROWS = 3;
+
+/** Sheet header: a heading-size title with the open count beside it. Part of the drag area. */
 export function SheetHeader({ spots }: { spots: Spot[] }) {
   const open = spots.filter((s) => s.open).length;
   return (
     <View style={styles.header}>
-      <Text variant="title" accessibilityRole="header">
+      <Text variant="heading" accessibilityRole="header" style={styles.headerTitle}>
         {t('sheet.title')}
       </Text>
-      <Text variant="caption" tone="ink2">
-        {t('sheet.sub', { count: spots.length, open })}
+      <Text variant="label" tone="mint" style={styles.headerSub}>
+        {t('sheet.openNow', { open })}
       </Text>
     </View>
   );
 }
 
-/** Explore state: trending rail, then closest spots with closing-soon first (idea B). */
+/**
+ * Explore state. The peek shows the first two rows, closing-soon first then nearest (idea B),
+ * so the first view is useful. Then the trending rail, then the rest of the list.
+ */
 export function SheetExplore({ spots, onFocus }: ExploreProps) {
   const { filter } = useStore().state;
   const now = useClock(60_000);
@@ -61,10 +68,23 @@ export function SheetExplore({ spots, onFocus }: ExploreProps) {
       if (b.left !== null) return 1;
       return a.miles - b.miles;
     });
+  const top = rows.slice(0, COMPACT_ROWS);
+  const rest = rows.slice(COMPACT_ROWS);
 
   return (
     <>
+      {top.length ? (
+        <View>
+          {top.map(({ spot, left }) => (
+            <CompactSpotRow key={spot.id} spot={spot} closingMin={left} onPress={onFocus} />
+          ))}
+        </View>
+      ) : (
+        <Text tone="ink2">{t('sheet.noMatch')}</Text>
+      )}
       <Text variant="label" tone="ink2">
+        {t('sheet.sub', { count: spots.length, open: spots.filter((s) => s.open).length })}
+        {'\n'}
         {t('sheet.hint')}
       </Text>
       <View style={styles.sectionTitle}>
@@ -78,18 +98,18 @@ export function SheetExplore({ spots, onFocus }: ExploreProps) {
           <TrendCard key={spot.id} spot={spot} onPress={onFocus} />
         ))}
       </ScrollView>
-      <Text variant="heading" accessibilityRole="header">
-        {t('sheet.closest')}
-      </Text>
-      {rows.length ? (
-        <View>
-          {rows.map(({ spot, left }) => (
-            <SpotRow key={spot.id} spot={spot} closingMin={left} onPress={onFocus} />
-          ))}
-        </View>
-      ) : (
-        <Text tone="ink2">{t('sheet.noMatch')}</Text>
-      )}
+      {rest.length ? (
+        <>
+          <Text variant="heading" accessibilityRole="header">
+            {t('sheet.more')}
+          </Text>
+          <View>
+            {rest.map(({ spot, left }) => (
+              <SpotRow key={spot.id} spot={spot} closingMin={left} onPress={onFocus} />
+            ))}
+          </View>
+        </>
+      ) : null}
     </>
   );
 }
@@ -153,9 +173,7 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
 
       {friends.length ? (
         <Text variant="label" tone="ink2">
-          {friends.length > 1
-            ? t('spot.friendsN', { name: friends[0].name, n: friends.length - 1 })
-            : t('spot.friends1', { name: friends[0].name })}
+          {friendsText(friends.map((f) => f.name))}
         </Text>
       ) : null}
 
@@ -204,7 +222,16 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: 16, paddingBottom: 10, gap: 2 },
+  header: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'baseline',
+    columnGap: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 4,
+  },
+  headerTitle: { flexShrink: 1 },
+  headerSub: { flexShrink: 1 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   rail: { gap: 12, paddingRight: 16 },
   shrink: { flexShrink: 1 },

@@ -22,16 +22,22 @@ const ANCHOR_Y = 72;
 /** Offset from the box center to the anchor, used to scale around the anchor. */
 const PIVOT = ANCHOR_Y - BOX_H / 2;
 
+/** How much mood text a pin shows: the big bubble (at most 3 pins), a small tag, or nothing. */
+export type PinLabel = 'bubble' | 'tag' | 'none';
+
 type Props = {
   spot: Spot;
   selected: boolean;
+  label: PinLabel;
+  /** The one- or two-word tag under the pin (mood or "closing soon"). */
+  tag: string | null;
   dimmed: boolean;
   /** Shared bob loop value (0..1) from the map screen. */
   bob: Animated.Value;
   onPress: (spot: Spot) => void;
 };
 
-export const SpotPin = memo(function SpotPin({ spot, selected, dimmed, bob, onPress }: Props) {
+export const SpotPin = memo(function SpotPin({ spot, selected, label, tag, dimmed, bob, onPress }: Props) {
   const { c, isNight } = useTheme();
   const reduceMotion = useReduceMotion();
   const inverse = useMapInverseScale();
@@ -68,14 +74,14 @@ export const SpotPin = memo(function SpotPin({ spot, selected, dimmed, bob, onPr
       firstMood.current = false;
       return;
     }
-    if (!mood) return;
+    if (!mood || label !== 'bubble') return;
     if (reduceMotion) {
       pop.setValue(1);
       return;
     }
     pop.setValue(0.6);
     Animated.spring(pop, { toValue: 1, ...spring.pop, useNativeDriver: native }).start();
-  }, [mood, pop, reduceMotion]);
+  }, [mood, label, pop, reduceMotion]);
 
   const bobY = reduceMotion
     ? 0
@@ -94,7 +100,7 @@ export const SpotPin = memo(function SpotPin({ spot, selected, dimmed, bob, onPr
         { opacity: fade, transform: scaleTransform },
       ]}
     >
-      {mood && spot.mood ? (
+      {label === 'bubble' && mood && spot.mood ? (
         <Animated.View
           pointerEvents="none"
           style={[styles.moodWrap, { transform: [{ translateY: bobY }, { scale: pop }] }]}
@@ -157,6 +163,21 @@ export const SpotPin = memo(function SpotPin({ spot, selected, dimmed, bob, onPr
           ]}
         />
       </Pressable>
+      {label === 'tag' && tag ? (
+        <View pointerEvents="none" style={styles.tagWrap}>
+          <View
+            style={[
+              styles.tag,
+              { backgroundColor: c.glass, borderColor: isNight ? 'rgba(255,255,255,0.14)' : c.pinChipBorder },
+            ]}
+          >
+            {spot.mood ? <Emoji size={10}>{moodEmoji[spot.mood.emoji]}</Emoji> : null}
+            <Text variant="caption" numberOfLines={1} style={[styles.tagText, { color: c.ink }]}>
+              {tag}
+            </Text>
+          </View>
+        </View>
+      ) : null}
     </Animated.View>
   );
 });
@@ -207,4 +228,16 @@ const styles = StyleSheet.create({
     maxWidth: 180,
   },
   bubbleText: { flexShrink: 1 },
+  tagWrap: { position: 'absolute', top: BOX_H + 1, left: -50, right: -50, alignItems: 'center' },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 1,
+    borderRadius: 999,
+    borderWidth: 1,
+    maxWidth: 150,
+  },
+  tagText: { fontSize: 11.5, lineHeight: 15, flexShrink: 1 },
 });

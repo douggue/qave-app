@@ -59,7 +59,7 @@ export const en = {
   // Status lines
   'status.hereNow': 'Here now · until {until}',
   'status.open': 'Open · until {until}',
-  'status.next': 'Next: {until}',
+  'status.next': 'Closed · opens {until}',
   'status.closesIn': 'Closes in {min} min',
   'status.closingNow': 'Closing now',
   'time.dayAt': '{day} {time}',
@@ -102,6 +102,7 @@ export const en = {
   'spot.distHood': '{distance} · {hood}',
   'spot.friends1': '{name} loves this',
   'spot.friendsN': '{name} and {n} friends love this',
+  'spot.friends2': '{name} and 1 friend love this',
   'spot.rowA11y': '{name}, {status}, {distance}',
   'spot.openPage': 'See menu, busy times & reviews',
   'spot.loading': 'This spot page lands in the next build.',
@@ -436,6 +437,46 @@ export const en = {
   'notFound.title': 'This spot moved on',
   'notFound.body': "Food trucks do that. Let's get you back to the map.",
   'notFound.back': 'Back to the map',
+
+  // R1 · Calm map: short pin tags (one or two words, lowercase)
+  'tag.hot': 'hot',
+  'tag.line25': '25 min line',
+  'tag.line': 'long line',
+  'tag.new': 'new',
+  'tag.parked': 'just parked',
+  'tag.soldOut': 'sold out',
+  'tag.deal': 'deal',
+  'tag.left': '{n} left',
+  'tag.wait15': '15 min wait',
+  'tag.closingSoon': 'closing soon',
+  'tag.closed': 'closed',
+  'map.zoomA11y': 'Zoom',
+  'map.activity': '{n} reports near you tonight',
+  'map.activity1': '1 report near you tonight',
+  'map.activityA11y': '{text}. Newest at {spot}',
+  'map.activityHint': 'Shows the spot with the newest report',
+  'sheet.more': 'More near you',
+  'sheet.openNow': '{open} open now',
+
+  // R1 · Report cards
+  'report.by': '{when} · by {who}',
+  'report.confirm': 'Still true · {n}',
+  'report.confirmed': 'Confirmed · {n}',
+  'report.confirmA11y': 'Still true. {n} people confirmed it. Double tap to confirm.',
+  'report.confirmedA11y': 'You confirmed this. {n} people confirmed it.',
+  'report.notAnymore': 'Not anymore',
+  'report.notAnymoreA11y': 'Say this is not true anymore',
+  'report.markedNot': 'You said not anymore',
+  'report.cardA11y': '{text}. {meta}',
+  'toast.notAnymore': 'Thanks, noted · +{rep} rep',
+  'fresh.confirmedTonight': '{n} confirmed tonight',
+  'fresh.confirmedTonight1': '1 confirmed tonight',
+
+  // R1 · You empty state
+  'you.emptyTitle': 'Your first rep is one tap away',
+  'you.emptyBody': 'Check in at a spot or confirm a report to start.',
+  'you.emptyCta': 'Open the map',
+  'you.emptyCtaHint': 'Opens the Map tab',
 } as const;
 
 export type StringKey = keyof typeof en;

@@ -85,7 +85,75 @@ export function SpotRow({
   );
 }
 
+/** Height of a compact row, so the sheet peek can show exactly two. */
+export const COMPACT_ROW_H = 52;
+
+/**
+ * A one-line row for the sheet's first view: art, name, and one status line (closing soon
+ * in amber, else open/next) with the distance on the right.
+ */
+export function CompactSpotRow({
+  spot,
+  closingMin,
+  onPress,
+}: {
+  spot: Spot;
+  closingMin: number | null;
+  onPress: (spot: Spot) => void;
+}) {
+  const { c } = useTheme();
+  const status = statusText(spot);
+  const distance = formatDistance(spot);
+  const closing = closingMin !== null ? closingText(closingMin) : null;
+  return (
+    <Pressable
+      onPress={() => onPress(spot)}
+      accessibilityRole="button"
+      accessibilityLabel={t('spot.rowA11y', {
+        name: spot.name,
+        status: closing ? `${closing}, ${status}` : status,
+        distance,
+      })}
+      style={({ pressed }) => [styles.compact, { borderBottomColor: c.line }, pressed && { opacity: 0.85 }]}
+    >
+      <FoodArt food={spot.food} width={40} height={40} radius={12} emojiSize={24} />
+      <View style={styles.middle}>
+        <Text variant="ui" numberOfLines={2}>
+          {spot.name}
+        </Text>
+        <View style={styles.inline}>
+          {closing ? (
+            <Emoji size={11}>{statusEmoji.closingSoon}</Emoji>
+          ) : (
+            <View style={[styles.dot, { backgroundColor: spot.open ? c.mintFill : c.ink3 }]} />
+          )}
+          <LiveText
+            variant="caption"
+            tone={closing ? 'amber' : spot.open ? 'mint' : 'ink2'}
+            numberOfLines={2}
+            style={styles.shrink}
+            placeholderWidth="70%"
+          >
+            {closing ?? status}
+          </LiveText>
+        </View>
+      </View>
+      <LiveText variant="caption" tone="ink2" style={styles.distance} placeholderWidth={40}>
+        {distance}
+      </LiveText>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  compact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: COMPACT_ROW_H,
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
   trend: { width: 168, gap: 6 },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   shrink: { flexShrink: 1 },

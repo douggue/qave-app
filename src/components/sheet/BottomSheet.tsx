@@ -24,8 +24,11 @@ import { useTheme } from '@/theme/use-theme';
 export type Snap = 'peek' | 'half' | 'full';
 export const SNAPS: Snap[] = ['peek', 'half', 'full'];
 const SNAP_KEY: Record<Snap, StringKey> = { peek: 'sheet.peek', half: 'sheet.half', full: 'sheet.full' };
-/** Sheet height at the peek snap; the map uses it to center inside the visible band. */
-export const PEEK = 156;
+/**
+ * Sheet height at the peek snap; the map uses it to center inside the visible band.
+ * 30 handle + ~132 content: a heading-size title line and two compact rows, + 2 pt air.
+ */
+export const PEEK = 164;
 
 type SheetConfig = {
   snap: Snap;
@@ -186,7 +189,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -8 },
     elevation: 16,
   },
-  handleZone: { alignItems: 'center', justifyContent: 'center', minHeight: 28, paddingTop: 10, paddingBottom: 6 },
+  handleZone: { alignItems: 'center', justifyContent: 'center', minHeight: 28, paddingTop: 10, paddingBottom: 8 },
   grabber: { width: 42, height: 5, borderRadius: 3 },
   body: { paddingHorizontal: 16, gap: 14 },
 });

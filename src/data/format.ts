@@ -65,7 +65,7 @@ export function formatClock(time: ClockTime): string {
 
 export const formatUntil = (until: Until) => ('key' in until ? t(until.key) : formatClock(until));
 
-/** "Here now · until 10 PM", "Open · until 3 PM" or "Next: Sat 9 AM". The open flag is static tonight. */
+/** "Here now · until 10 PM", "Open · until 3 PM" or "Closed · opens Sat 9 AM". The open flag is static tonight. */
 export function statusText(spot: Spot): string {
   const until = formatUntil(spot.until);
   if (!spot.open) return t('status.next', { until });
@@ -109,6 +109,34 @@ export function freshness(
 
 export const moodText = (spot: Spot) => (spot.mood ? t(spot.mood.key, spot.mood.params) : null);
 
+/** The one- or two-word pin tag for each mood (calm map: only 3 pins get the full bubble). */
+const TAG_KEY: Partial<Record<StringKey, StringKey>> = {
+  'mood.hot': 'tag.hot',
+  'mood.amazing': 'tag.hot',
+  'mood.line25': 'tag.line25',
+  'mood.line': 'tag.line',
+  'mood.newPecan': 'tag.new',
+  'mood.justParked': 'tag.parked',
+  'mood.sausageOut': 'tag.soldOut',
+  'mood.soldOut': 'tag.soldOut',
+  'mood.soldOutReport': 'tag.soldOut',
+  'mood.lunchDeal': 'tag.deal',
+  'mood.deal': 'tag.deal',
+  'mood.seatsLeft': 'tag.left',
+  'mood.wait15': 'tag.wait15',
+  'mood.closing30': 'tag.closingSoon',
+  'mood.closed': 'tag.closed',
+};
+
+/** Short pin tag text: from the mood, else "closing soon" for a spot closing within the hour. */
+export function pinTagText(spot: Spot, closingMin: number | null): string | null {
+  if (spot.mood) {
+    const key = TAG_KEY[spot.mood.key];
+    return key ? t(key, spot.mood.params) : t(spot.mood.key, spot.mood.params);
+  }
+  return closingMin !== null ? t('tag.closingSoon') : null;
+}
+
 /** The pin label: "name, kind, status, distance", plus the reported mood. */
 export function pinLabel(spot: Spot): string {
   const label = t('pin.a11y', {
@@ -120,6 +148,16 @@ export function pinLabel(spot: Spot): string {
   const mood = moodText(spot);
   return mood ? t('pin.a11yMood', { label, mood }) : label;
 }
+
+/** "Maya loves this", "Hank and 1 friend love this", "Maya and 2 friends love this". */
+export function friendsText(names: string[]): string {
+  if (names.length <= 1) return t('spot.friends1', { name: names[0] ?? '' });
+  if (names.length === 2) return t('spot.friends2', { name: names[0] });
+  return t('spot.friendsN', { name: names[0], n: names.length - 1 });
+}
+
+/** When a report was made (epoch ms): its creation time, or app start minus its sample age. */
+export const reportAt = (report: Report, appStart: number) => report.createdAt ?? appStart - (report.ageMin ?? 0) * 60_000;
 
 /** Short weekday name, Monday first (0 = Monday). */
 export function weekdayShort(mondayIndex: number, style: 'short' | 'long' = 'short'): string {

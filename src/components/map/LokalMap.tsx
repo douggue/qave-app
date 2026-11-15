@@ -31,8 +31,8 @@ import { MapWorld } from './MapWorld';
 // A small MapView-like component over the illustrated world. Keep this interface
 // (region, onRegionChange, children as markers, ref.animateTo) so Mapbox can replace it.
 
-/** The three zoom levels (buttons only tonight, no pinch). */
-export const ZOOMS = [0.6, 1, 1.4] as const;
+/** The zoom levels (buttons only tonight, no pinch). The first view opens at the widest. */
+export const ZOOMS = [0.5, 0.75, 1, 1.4] as const;
 
 export type Region = { x: number; y: number; zoom: number };
 
@@ -183,7 +183,7 @@ class MapCamera {
   }
 
   animateTo = (x: number, y: number, zoom = this.zoom, offsetY = 0) => {
-    const z = ZOOMS.reduce((best, v) => (Math.abs(v - zoom) < Math.abs(best - zoom) ? v : best), ZOOMS[1]);
+    const z = ZOOMS.reduce((best, v) => (Math.abs(v - zoom) < Math.abs(best - zoom) ? v : best), ZOOMS[2]);
     const target = this.clamp(x, y + offsetY / z, z);
     this.x = target.x;
     this.y = target.y;
