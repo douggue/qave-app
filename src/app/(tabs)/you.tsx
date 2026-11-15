@@ -1,11 +1,12 @@
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Badge, Card, Chip, Emoji, Screen, Text, useToast } from '@/components/ui';
+import { Badge, Button, Card, Chip, Emoji, Screen, Text, useToast } from '@/components/ui';
 import { getBusiness } from '@/data/repo';
 import { t, type StringKey } from '@/i18n';
 import { levelFor } from '@/state/rep';
 import { totalCheckIns, useStore, type ThemeMode } from '@/state/store';
-import { avatar, avatarBg, ui } from '@/theme/emoji';
+import { avatar, avatarBg, food, ui } from '@/theme/emoji';
 import { minTap, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -31,6 +32,9 @@ export default function YouScreen() {
     { label: 'you.reports', n: reportCount },
     { label: 'you.confirmed', n: confirmed },
   ];
+  const empty = stats.every((st) => st.n === 0);
+  // The track always shows a sliver of sun, so a new eater sees where the bar fills.
+  const fillPct = Math.max(4, Math.round(progress * 100));
 
   return (
     <Screen scroll>
@@ -63,23 +67,40 @@ export default function YouScreen() {
         </View>
       </View>
 
-      <View style={styles.stats}>
-        {stats.map(({ label, n }) => (
-          <View
-            key={label}
-            accessible
-            accessibilityLabel={t('you.statA11y', { label: t(label), n })}
-            style={[styles.stat, { backgroundColor: c.card, borderColor: c.line }]}
-          >
-            <Text variant="title" tabular>
-              {n}
-            </Text>
-            <Text variant="caption" tone="ink2">
-              {t(label)}
-            </Text>
-          </View>
-        ))}
-      </View>
+      {empty ? (
+        <Card style={styles.empty}>
+          <Emoji size={56}>{food.taco}</Emoji>
+          <Text variant="heading" center accessibilityRole="header">
+            {t('you.emptyTitle')}
+          </Text>
+          <Text tone="ink2" center>
+            {t('you.emptyBody')}
+          </Text>
+          <Button
+            label={t('you.emptyCta')}
+            accessibilityHint={t('you.emptyCtaHint')}
+            onPress={() => router.navigate('/')}
+          />
+        </Card>
+      ) : (
+        <View style={styles.stats}>
+          {stats.map(({ label, n }) => (
+            <View
+              key={label}
+              accessible
+              accessibilityLabel={t('you.statA11y', { label: t(label), n })}
+              style={[styles.stat, { backgroundColor: c.card, borderColor: c.line }]}
+            >
+              <Text variant="title" tabular>
+                {n}
+              </Text>
+              <Text variant="caption" tone="ink2">
+                {t(label)}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <Card>
         <View
@@ -93,7 +114,7 @@ export default function YouScreen() {
             {next ? t('you.toNext', { n: next.min - state.rep, level: t(next.key) }) : t('you.maxLevel')}
           </Text>
           <View style={[styles.track, { backgroundColor: c.card2 }]}>
-            <View style={[styles.fill, { width: `${Math.round(progress * 100)}%`, backgroundColor: c.sun }]} />
+            <View style={[styles.fill, { width: `${fillPct}%`, backgroundColor: c.sun }]} />
           </View>
         </View>
         <Text variant="caption" tone="ink2">
@@ -161,8 +182,9 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   stat: { flexGrow: 1, flexBasis: 96, borderWidth: 1, borderRadius: radius.lg, padding: space.md, gap: 2 },
   progressWrap: { gap: space.sm },
-  track: { height: 6, borderRadius: 3, overflow: 'hidden' },
-  fill: { height: 6, borderRadius: 3 },
+  track: { height: 8, borderRadius: 4, overflow: 'hidden' },
+  fill: { height: 8, borderRadius: 4, minWidth: 8 },
+  empty: { alignItems: 'center', gap: space.md, paddingVertical: space.xl },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   row: {
     flexDirection: 'row',

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FoodArt } from '@/components/cards/FoodArt';
 import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
 import { Badge, Button, Card, Emoji, LiveText, Placeholder, Text, useToast } from '@/components/ui';
-import { formatDistance, isMobile, kindLabel, priceText, statusText } from '@/data/format';
+import { formatDistance, friendsText, isMobile, kindLabel, priceText, statusText } from '@/data/format';
 import { directionsUrl } from '@/data/links';
 import type { Spot } from '@/data/types';
 import { LiveReports } from '@/features/spot/LiveReports';
@@ -81,7 +81,7 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
           <FoodArt food={spot.food} width="100%" height={artH + insets.top} radius={0} emojiSize={110} />
           <View style={[styles.headerBar, { top: insets.top + 8 }]}>
             <GlassButton icon={ui.back} label={t('common.back')} onPress={onBack} big />
-            <GlassButton icon={ui.share} label={t('spot.share')} onPress={() => toast.show(t('common.comingNext'))} />
+            {/* No Share button until spots have public links: a dead button erodes trust. */}
           </View>
         </View>
 
@@ -122,9 +122,7 @@ function SpotPage({ spot, onBack }: { spot: Spot; onBack: () => void }) {
                 ))}
               </View>
               <Text variant="label" tone="ink2" style={styles.shrink}>
-                {friends.length > 1
-                  ? t('spot.friendsN', { name: friends[0].name, n: friends.length - 1 })
-                  : t('spot.friends1', { name: friends[0].name })}
+                {friendsText(friends.map((f) => f.name))}
               </Text>
             </View>
           ) : null}

@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useRef } from 'react';
+import { Pressable, StyleSheet, View, type ViewInstance } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { Badge, Emoji, Text, useToast } from '@/components/ui';
+import { Badge, Emoji, Text, useToast, useToastAnchor } from '@/components/ui';
 import { getBusiness, getSpot } from '@/data/repo';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
@@ -16,6 +17,8 @@ export function BizHeader({ caption }: { caption: string }) {
   const { actions } = useStore();
   const biz = getBusiness();
   const spot = getSpot(biz.spotId);
+  const headerRef = useRef<ViewInstance>(null);
+  const onHeaderLayout = useToastAnchor(headerRef);
 
   const toPersonal = () => {
     actions.setBizMode(false);
@@ -23,10 +26,10 @@ export function BizHeader({ caption }: { caption: string }) {
   };
 
   return (
-    <View style={styles.row}>
+    <View ref={headerRef} onLayout={onHeaderLayout} style={styles.row}>
       {spot ? <FoodArt food={spot.food} width={42} height={42} radius={12} /> : null}
       <View style={styles.text}>
-        <Text variant="heading" accessibilityRole="header">
+        <Text variant="heading" accessibilityRole="header" numberOfLines={2}>
           {biz.name}
         </Text>
         <View style={styles.badges}>
@@ -56,10 +59,12 @@ export function BizHeader({ caption }: { caption: string }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.md, paddingTop: space.sm },
-  text: { flex: 1, minWidth: 160, gap: 4 },
+  // One row that never wraps: the name takes the middle and wraps to at most 2 lines.
+  row: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, paddingTop: space.sm },
+  text: { flex: 1, minWidth: 0, gap: 4 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.xs },
   personal: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,

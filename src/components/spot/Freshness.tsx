@@ -44,6 +44,26 @@ export function FreshnessLabel({ spotId }: { spotId: string }) {
   );
 }
 
+/**
+ * "12 confirmed tonight": every "Still true" on the spot's reports (sample counts plus yours)
+ * and your own "Yep, still here". Hidden at 0.
+ */
+function ConfirmedTonight({ spotId }: { spotId: string }) {
+  const { votes, stillHere } = useStore().state;
+  const reports = useAllReports();
+  let n = stillHere[spotId] ? 1 : 0;
+  for (const r of reports) if (r.spotId === spotId) n += r.votes + (votes[r.id] === 1 ? 1 : 0);
+  if (!n) return null;
+  return (
+    <View style={styles.closing}>
+      <Emoji size={12}>{ui.check}</Emoji>
+      <Text variant="caption" tone="ink2" style={styles.shrink}>
+        {n === 1 ? t('fresh.confirmedTonight1') : t('fresh.confirmedTonight', { n })}
+      </Text>
+    </View>
+  );
+}
+
 /** Freshness plus the one-tap "Yep, still here" confirmation (+2 rep, then a cooldown). */
 export function StillThere({ spot }: { spot: Spot }) {
   const now = useClock(30_000);
@@ -61,6 +81,7 @@ export function StillThere({ spot }: { spot: Spot }) {
     <View style={styles.row}>
       <View style={styles.label}>
         <FreshnessLabel spotId={spot.id} />
+        <ConfirmedTonight spotId={spot.id} />
       </View>
       {spot.open ? (
         <Button
@@ -80,7 +101,7 @@ export function StillThere({ spot }: { spot: Spot }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 },
-  label: { flexGrow: 1, flexShrink: 1, flexBasis: 160 },
+  label: { flexGrow: 1, flexShrink: 1, flexBasis: 160, gap: 2 },
   closing: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   shrink: { flexShrink: 1 },
 });

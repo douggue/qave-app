@@ -125,8 +125,8 @@ function LiveState({ session }: { session: LiveSession }) {
                 pressed && { opacity: 0.85 },
               ]}
             >
-              <Emoji size={18}>{statusEmoji[s.emoji]}</Emoji>
-              <Text variant="ui" tone={selected ? 'onNeon' : 'ink'} style={styles.grow}>
+              <Emoji size={20}>{statusEmoji[s.emoji]}</Emoji>
+              <Text variant="cardTitle" tone={selected ? 'onNeon' : 'ink'} style={styles.grow}>
                 {t(s.labelKey)}
               </Text>
               {selected ? (
@@ -141,7 +141,7 @@ function LiveState({ session }: { session: LiveSession }) {
 
       <View style={styles.endGap} />
       <Button
-        variant={armed ? 'soft' : 'ghost'}
+        variant={armed ? 'dangerSolid' : 'danger'}
         label={armed ? t('biz.endServiceConfirm') : t('biz.endService')}
         onPress={end}
       />
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
+    // Big targets for a busy owner at the window: at least 48 pt (56 here), 17 pt labels.
     minHeight: 56,
     paddingHorizontal: space.md,
     paddingVertical: space.sm,

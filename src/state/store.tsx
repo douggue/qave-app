@@ -92,7 +92,7 @@ const initialState: LokalState = {
   goLiveOpen: false,
 };
 
-type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode' | 'readNotes'>;
+type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode' | 'readNotes' | 'votes' | 'voted'>;
 
 type Action =
   | { type: 'hydrate'; data: Partial<Persisted> }
@@ -157,9 +157,9 @@ function reducer(state: LokalState, action: Action): LokalState {
       return { ...state, rep: state.rep + action.rep, reports: [action.report, ...state.reports], overrides };
     }
     case 'vote': {
-      const votes = { ...state.votes };
-      if (votes[action.reportId] === action.value) delete votes[action.reportId];
-      else votes[action.reportId] = action.value;
+      // One vote per person per report: the same vote again changes nothing, the other one switches it.
+      if (state.votes[action.reportId] === action.value) return state;
+      const votes = { ...state.votes, [action.reportId]: action.value };
       // Only the first vote on a report earns rep; changing it later is free.
       const first = !state.voted[action.reportId];
       return {
@@ -233,10 +233,13 @@ function reducer(state: LokalState, action: Action): LokalState {
       // Tapping the selected status again clears it (back to "Just parked").
       const status = live.status === action.status ? null : action.status;
       const mood = status ? { emoji: STATUS_MOOD[status].emoji, key: STATUS_MOOD[status].key } : JUST_PARKED;
+      // Closed shows the next opening ("Closed · opens 5 PM"); anything else serves until the session's time.
+      const until: Until =
+        status === 'closed' ? getBusiness().nextStop.at : live.until === 'soldOut' ? { key: 'until.soldOut' } : live.until;
       return {
         ...state,
         liveSession: { ...live, status },
-        overrides: patchSpot(state, live.spotId, { mood, open: status !== 'closed', hot: status === null }),
+        overrides: patchSpot(state, live.spotId, { mood, open: status !== 'closed', hot: status === null, until }),
       };
     }
     case 'endService': {
@@ -246,7 +249,7 @@ function reducer(state: LokalState, action: Action): LokalState {
       return {
         ...state,
         liveSession: null,
-        overrides: patchSpot(state, live.spotId, { open: false, hot: false, mood: null }),
+        overrides: patchSpot(state, live.spotId, { open: false, hot: false, mood: null, until: getBusiness().nextStop.at }),
       };
     }
     case 'readNotes': {
@@ -339,15 +342,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const { hydrated, rep, checkIns, themeMode, bizMode, readNotes } = state;
+  const { hydrated, rep, checkIns, themeMode, bizMode, readNotes, votes, voted } = state;
   useEffect(() => {
     if (!hydrated) return;
-    // Read notes are kept too, so the bell stays at 0 after a visit to the inbox.
-    const data: Persisted = { rep, checkIns, themeMode, bizMode, readNotes };
+    // Read notes are kept too, so the bell stays at 0 after a visit to the inbox. Votes are
+    // kept so a report can only be confirmed once per person.
+    const data: Persisted = { rep, checkIns, themeMode, bizMode, readNotes, votes, voted };
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {
       // Not saved this time; the next change tries again.
     });
-  }, [hydrated, rep, checkIns, themeMode, bizMode, readNotes]);
+  }, [hydrated, rep, checkIns, themeMode, bizMode, readNotes, votes, voted]);
 
   const value = useMemo(() => ({ state, actions }), [state, actions]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

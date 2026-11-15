@@ -5,7 +5,8 @@ export const REP = {
   report: 5,
   checkIn: 10,
   stillHere: 2,
-  vote: 2,
+  /** Confirming a report ("Still true") or saying "Not anymore", once per report. */
+  vote: 1,
   claimDrop: 0,
 } as const;
 

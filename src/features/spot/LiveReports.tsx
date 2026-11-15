@@ -27,88 +27,102 @@ function who(report: Report, spot: Spot) {
     : { name: '', icon: avatar.me, bg: avatarBg.me };
 }
 
-function VotePill({
-  icon,
-  count,
-  selected,
-  label,
-  onPress,
-}: {
-  icon: string;
-  count?: number;
-  selected: boolean;
-  label: string;
-  onPress: () => void;
-}) {
-  const { c } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      hitSlop={hitSlop}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected }}
-      style={({ pressed }) => [
-        styles.vote,
-        { backgroundColor: selected ? c.neon : c.card2, borderColor: c.line },
-        pressed && { opacity: 0.85 },
-      ]}
-    >
-      <Emoji size={16}>{icon}</Emoji>
-      {count !== undefined ? (
-        <Text variant="label" tabular style={{ color: selected ? c.onNeon : c.ink }}>
-          {count}
-        </Text>
-      ) : null}
-    </Pressable>
-  );
-}
+/** Tint behind the mood badge per report type. */
+const BADGE_TINT: Record<Report['type'], 'tintNeon' | 'tintMint' | 'tintAmber' | 'tintGrape'> = {
+  amazing: 'tintNeon',
+  line: 'tintAmber',
+  deal: 'tintMint',
+  soldOut: 'tintAmber',
+  photo: 'tintGrape',
+  newSpot: 'tintGrape',
+  news: 'tintGrape',
+  parked: 'tintMint',
+};
 
-function ReportRow({ report, spot, now }: { report: Report; spot: Spot; now: number }) {
+/**
+ * A Waze-style report card: mood badge, what was reported, when and by whom, a "Still true"
+ * confirm with its count, and a small "Not anymore" link. One vote per person per report.
+ */
+function ReportCard({ report, spot, now }: { report: Report; spot: Spot; now: number }) {
+  const { c } = useTheme();
   const { state, actions } = useStore();
   const toast = useToast();
   const reduceMotion = useReduceMotion();
   const mine = state.votes[report.id];
-  const up = report.votes + (mine === 1 ? 1 : 0);
+  const count = report.votes + (mine === 1 ? 1 : 0);
   const person = who(report, spot);
   const fresh = report.by === 'you' && !!report.createdAt && now - report.createdAt < 60_000;
   const [fade] = useState(() => new Animated.Value(fresh && !reduceMotion ? 0 : 1));
+  const meta = t('report.by', { when: reportAgo(report, now, getAppStart()), who: person.name });
 
   useEffect(() => {
     Animated.timing(fade, { toValue: 1, duration: dur.base, easing: ease.out, useNativeDriver: native }).start();
   }, [fade]);
 
   const vote = (value: 1 | -1) => {
+    if (mine === value) return;
     const first = !state.voted[report.id];
     actions.vote(report.id, value, REP.vote);
-    if (first) toast.show(t('toast.voteThanks', { rep: REP.vote }), { emoji: ui.check });
+    // Only the first vote on a report earns rep; switching it later just says thanks.
+    if (!first) toast.show(t('fresh.thanks'), { emoji: ui.check });
+    else if (value === 1) toast.show(t('toast.voteThanks', { rep: REP.vote }), { emoji: ui.check });
+    else toast.show(t('toast.notAnymore', { rep: REP.vote }), { emoji: ui.check });
   };
 
+  const confirmed = mine === 1;
+  const denied = mine === -1;
+
   return (
-    <Animated.View style={[styles.row, { opacity: fade }]}>
-      <View style={[styles.avatar, { backgroundColor: person.bg }]}>
-        <Emoji size={20}>{person.icon}</Emoji>
-      </View>
-      <View style={styles.body}>
-        <View style={styles.line}>
-          <Emoji size={14}>{reportEmoji[report.type]}</Emoji>
-          <Text variant="ui" style={styles.shrink}>
-            {report.text}
-          </Text>
+    <Animated.View style={[styles.card, { backgroundColor: c.card2, borderColor: c.line, opacity: fade }]}>
+      <View style={styles.top} accessible accessibilityLabel={t('report.cardA11y', { text: report.text, meta })}>
+        <View style={[styles.badge, { backgroundColor: c[BADGE_TINT[report.type]], borderColor: c.line }]}>
+          <Emoji size={22}>{reportEmoji[report.type]}</Emoji>
         </View>
-        <Text variant="caption" tone="ink2">
-          {t('spot.reportBy', { who: person.name, when: reportAgo(report, now, getAppStart()) })}
-        </Text>
+        <View style={styles.body}>
+          <Text variant="ui">{report.text}</Text>
+          <View style={styles.metaRow}>
+            <View style={[styles.avatar, { backgroundColor: person.bg }]}>
+              <Emoji size={11}>{person.icon}</Emoji>
+            </View>
+            <Text variant="caption" tone="ink2" style={styles.shrink}>
+              {meta}
+            </Text>
+          </View>
+        </View>
       </View>
-      <View style={styles.votes}>
-        <VotePill
-          icon={ui.thumbUp}
-          count={up}
-          selected={mine === 1}
-          label={t('vote.upA11y', { n: up })}
+      <View style={styles.actions}>
+        <Pressable
           onPress={() => vote(1)}
-        />
-        <VotePill icon={ui.thumbDown} selected={mine === -1} label={t('vote.down')} onPress={() => vote(-1)} />
+          disabled={confirmed}
+          accessibilityRole="button"
+          accessibilityLabel={t(confirmed ? 'report.confirmedA11y' : 'report.confirmA11y', { n: count })}
+          accessibilityState={{ selected: confirmed, disabled: confirmed }}
+          style={({ pressed }) => [
+            styles.confirm,
+            confirmed
+              ? { backgroundColor: c.tintMint, borderColor: c.mint }
+              : { backgroundColor: c.mintFill, borderColor: 'transparent' },
+            pressed && { opacity: 0.85 },
+          ]}
+        >
+          <Emoji size={15}>{confirmed ? ui.check : ui.thumbUp}</Emoji>
+          <Text variant="label" tabular tone={confirmed ? 'mint' : 'onMint'} style={styles.shrink}>
+            {t(confirmed ? 'report.confirmed' : 'report.confirm', { n: count })}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => vote(-1)}
+          disabled={denied}
+          hitSlop={hitSlop}
+          accessibilityRole="button"
+          accessibilityLabel={denied ? t('report.markedNot') : t('report.notAnymoreA11y')}
+          accessibilityState={{ selected: denied, disabled: denied }}
+          style={({ pressed }) => [styles.not, pressed && { opacity: 0.7 }]}
+        >
+          <Text variant="label" tone="ink2" style={[styles.shrink, !denied && styles.underline]}>
+            {denied ? t('report.markedNot') : t('report.notAnymore')}
+          </Text>
+        </Pressable>
       </View>
     </Animated.View>
   );
@@ -123,7 +137,7 @@ export function LiveReports({ spot, onReport }: { spot: Spot; onReport: () => vo
         {t('spot.reports')}
       </Text>
       {reports.length ? (
-        reports.map((r) => <ReportRow key={r.id} report={r} spot={spot} now={now} />)
+        reports.map((r) => <ReportCard key={r.id} report={r} spot={spot} now={now} />)
       ) : (
         <View style={styles.empty}>
           <Text variant="caption" tone="ink2">
@@ -145,21 +159,30 @@ export function LiveReports({ spot, onReport }: { spot: Spot; onReport: () => vo
 
 const styles = StyleSheet.create({
   shrink: { flexShrink: 1 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.md, paddingVertical: 4 },
-  avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  body: { flexGrow: 1, flexShrink: 1, flexBasis: 140, gap: 2 },
-  line: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  votes: { flexDirection: 'row', gap: 6, marginLeft: 'auto' },
-  vote: {
-    minHeight: 44,
-    minWidth: 44,
-    paddingHorizontal: 10,
-    borderRadius: radius.sm + 2,
+  underline: { textDecorationLine: 'underline' },
+  card: { borderWidth: 1, borderRadius: radius.md, padding: space.md, gap: space.md },
+  top: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
+  badge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
   },
+  body: { flex: 1, minWidth: 0, gap: 4 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  avatar: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.md, rowGap: space.xs },
+  confirm: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+  },
+  not: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
   empty: { gap: space.sm, alignItems: 'flex-start' },
 });

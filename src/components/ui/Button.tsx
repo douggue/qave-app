@@ -2,12 +2,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
-import { glow, gradients, minTap, radius } from '@/theme/tokens';
+import { glow, gradients, minTap, radius, withAlpha } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import { Emoji, Text, type TextTone } from './Text';
 
-type Variant = 'primary' | 'mint' | 'ghost' | 'soft';
+/** `danger` is an outlined chili button for destructive actions; `dangerSolid` confirms one. */
+type Variant = 'primary' | 'mint' | 'ghost' | 'soft' | 'danger' | 'dangerSolid';
 
 type Props = {
   label: string;
@@ -25,7 +26,14 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
-const labelTone: Record<Variant, TextTone> = { primary: 'onHot', mint: 'onMint', ghost: 'ink', soft: 'ink' };
+const labelTone: Record<Variant, TextTone> = {
+  primary: 'onHot',
+  mint: 'onMint',
+  ghost: 'ink',
+  soft: 'ink',
+  danger: 'hot',
+  dangerSolid: 'onHot',
+};
 
 /** Buttons grow taller when a label wraps (French), never clip. Minimum 44 pt. */
 export function Button({
@@ -94,6 +102,9 @@ export function Button({
             variant === 'mint' && isNight && glow(c.mint, 12, 0.45),
             variant === 'ghost' && { borderWidth: 1.5, borderColor: c.line },
             variant === 'soft' && { backgroundColor: c.card2, borderWidth: 1, borderColor: c.line },
+            variant === 'danger' && { backgroundColor: withAlpha(c.hotFill, 0.12), borderWidth: 1.5, borderColor: c.hot },
+            variant === 'dangerSolid' && { backgroundColor: c.hotFill },
+            variant === 'dangerSolid' && isNight && glow(c.hotFill, 12, 0.45),
           ]}
         >
           {content}
