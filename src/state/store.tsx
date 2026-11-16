@@ -95,7 +95,8 @@ const initialState: LokalState = {
   goLiveOpen: false,
 };
 
-type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'nights' | 'themeMode' | 'bizMode' | 'readNotes' | 'votes' | 'voted'>;
+// Business mode is not kept: the app always opens on the eater map, owners switch in on purpose.
+type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'nights' | 'themeMode' | 'readNotes' | 'votes' | 'voted'>;
 
 /** The evening a time belongs to: after midnight still counts as the night before. Null in the day. */
 export function nightOf(at: number): string | null {
@@ -163,7 +164,8 @@ function patchSpot(state: LokalState, spotId: string, patch: SpotOverride): Loka
 function reducer(state: LokalState, action: Action): LokalState {
   switch (action.type) {
     case 'hydrate':
-      return { ...state, ...action.data, hydrated: true };
+      // Older saves may still carry bizMode; ignore it so the app opens on the map.
+      return { ...state, ...action.data, bizMode: false, hydrated: true };
     case 'addRep':
       return { ...state, rep: state.rep + action.amount };
     case 'checkIn': {
@@ -373,16 +375,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const { hydrated, rep, checkIns, nights, themeMode, bizMode, readNotes, votes, voted } = state;
+  const { hydrated, rep, checkIns, nights, themeMode, readNotes, votes, voted } = state;
   useEffect(() => {
     if (!hydrated) return;
     // Read notes are kept too, so the bell stays at 0 after a visit to the inbox. Votes are
     // kept so a report can only be confirmed once per person.
-    const data: Persisted = { rep, checkIns, nights, themeMode, bizMode, readNotes, votes, voted };
+    const data: Persisted = { rep, checkIns, nights, themeMode, readNotes, votes, voted };
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {
       // Not saved this time; the next change tries again.
     });
-  }, [hydrated, rep, checkIns, nights, themeMode, bizMode, readNotes, votes, voted]);
+  }, [hydrated, rep, checkIns, nights, themeMode, readNotes, votes, voted]);
 
   const value = useMemo(() => ({ state, actions }), [state, actions]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -4,6 +4,8 @@ import { en, type StringTable } from './en';
 // until a native speaker translates them. Layouts are tested with 30% longer strings.
 export const frCA: StringTable = {
   ...en,
+  'biz.toPersonal': 'Retour à la carte',
+  'biz.toPersonalA11y': 'Quitter le mode Commerce et revenir à la carte',
   'dist.miLong': 'à {d} milles',
   'dist.kmLong': 'à {d} kilomètres',
   'dist.mLong': 'à {n} mètres',
