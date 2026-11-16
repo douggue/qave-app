@@ -1,25 +1,23 @@
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Chip, Glyph, Icon, Text, useToast } from '@/components/ui';
-import { getPeople, getTicks } from '@/data/repo';
+import { Eyebrow, Icon, Sticker, Text, type IconName } from '@/components/ui';
+import { rankTonight } from '@/data/rank';
+import { getArea } from '@/data/repo';
+import type { Spot } from '@/data/types';
 import { getAppStart, useClock } from '@/hooks/use-clock';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useScreenReader } from '@/hooks/use-screen-reader';
-import { reportAt } from '@/data/format';
-import type { Report, Spot } from '@/data/types';
 import { useAllReports } from '@/hooks/use-spots';
 import { t, type StringKey } from '@/i18n';
 import { useNotes, useStore } from '@/state/store';
-import { avatar, avatarBg, filterIcon, ui, type AvatarKey } from '@/theme/emoji';
-import type { GlyphSource } from '@/theme/glyphs';
-import { dur, ease, native, spring } from '@/theme/motion';
-import { elevation, minTap, palettes, radius } from '@/theme/tokens';
+import type { FoodKey } from '@/theme/emoji';
+import { dur, ease, native } from '@/theme/motion';
+import { minTap } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
-
-import { FILTERS, usePickFilter } from './filters';
 
 /** Playful lines the Ask pill cycles through, every ASK_STEP ms. */
 const ASK_LINES: StringKey[] = [
@@ -34,47 +32,90 @@ const ASK_LINES: StringKey[] = [
 ];
 const ASK_STEP = 3500;
 
-/** The top of the map: Ask pill, day/night toggle, bell, filter chips and the live ticker. */
-export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => void }) {
-  const insets = useSafeAreaInsets();
-  const { c, isNight } = useTheme();
-  const toast = useToast();
-  const { actions } = useStore();
-  const unread = useNotes().filter((n) => n.unread).length;
+/** The time-of-day word for the eyebrow, from the clock. */
+export function dayPartKey(hour: number): StringKey {
+  if (hour >= 5 && hour < 11) return 'daypart.morning';
+  if (hour >= 11 && hour < 14) return 'daypart.lunch';
+  if (hour >= 14 && hour < 17) return 'daypart.afternoon';
+  if (hour >= 17 && hour < 22) return 'daypart.tonight';
+  return 'daypart.late';
+}
 
-  const toggleTheme = () => {
-    actions.setThemeMode(isNight ? 'day' : 'night');
-    toast.show(t(isNight ? 'map.themeDay' : 'map.themeNight'), { emoji: isNight ? ui.sun : ui.moon });
-  };
+/** One headline per food: what the top-ranked open spot serves ("Tacos are out."). */
+const HEADLINE: Record<FoodKey, StringKey> = {
+  taco: 'headline.taco',
+  bbq: 'headline.bbq',
+  croissant: 'headline.croissant',
+  pho: 'headline.pho',
+  burger: 'headline.burger',
+  kolache: 'headline.kolache',
+  jerk: 'headline.jerk',
+  paleta: 'headline.paleta',
+  supper: 'headline.supper',
+  curry: 'headline.curry',
+  dumpling: 'headline.dumpling',
+  coffee: 'headline.coffee',
+  rings: 'headline.rings',
+  fries: 'headline.fries',
+  shake: 'headline.shake',
+};
+
+/** The map's headline: built from the best open spot right now, or a quiet line when none is open. */
+function useHeadline(spots: Spot[]): string {
+  const { checkIns, votes, stillHere } = useStore().state;
+  const reports = useAllReports();
+  const now = useClock(60_000);
+  return useMemo(() => {
+    const [top] = rankTonight(spots, { reports, checkIns, votes, stillHere, now, appStart: getAppStart() }, 1);
+    return t(top ? HEADLINE[top.food] : 'headline.none');
+  }, [spots, reports, checkIns, votes, stillHere, now]);
+}
+
+/**
+ * The top of the map (Mix): an eyebrow ("EAST AUSTIN · TONIGHT"), a big headline that says
+ * what is live, then one row: the talking Ask pill and the bell. Nothing else over the map.
+ */
+export function MapHeader({ spots, onLayout }: { spots: Spot[]; onLayout?: (e: LayoutChangeEvent) => void }) {
+  const insets = useSafeAreaInsets();
+  const { c } = useTheme();
+  const unread = useNotes().filter((n) => n.unread).length;
+  const now = useClock(60_000);
+  const hydrated = useHydrated();
+  const headline = useHeadline(spots);
+  const part = t(dayPartKey(new Date(now).getHours()));
 
   return (
-    <View pointerEvents="box-none" onLayout={onLayout} style={[styles.top, { paddingTop: insets.top + 8 }]}>
+    <View pointerEvents="box-none" onLayout={onLayout} style={[styles.top, { paddingTop: insets.top + 10 }]}>
+      <View accessible accessibilityRole="header" accessibilityLabel={`${getArea()}, ${part}. ${headline}`}>
+        <Eyebrow style={[styles.eyebrow, !hydrated && styles.hidden]}>{`${getArea()} · ${part}`}</Eyebrow>
+        <Text variant="hero" style={!hydrated && styles.hidden}>
+          {headline}
+        </Text>
+      </View>
       <View style={styles.row} pointerEvents="box-none">
         <Pressable
           onPress={() => router.navigate('/ask')}
           accessibilityRole="button"
           accessibilityLabel={t('map.askA11y')}
           accessibilityHint={t('map.askHint')}
-          style={({ pressed }) => [styles.ask, { backgroundColor: c.glass, borderColor: c.line }, pressed && styles.pressed]}
+          style={styles.askPress}
         >
-          <Glyph of={ui.sparkles} size={17} tone="brand" strokeWidth={2} />
-          <AskLine />
+          {({ pressed }) => (
+            <Sticker radius={16} bg={c.glass} drop={4} pressed={pressed} faceStyle={styles.ask}>
+              <Icon name="search" size={20} color={c.ink2} strokeWidth={2.3} />
+              <AskLine />
+            </Sticker>
+          )}
         </Pressable>
-        <IconButton
-          icon={isNight ? ui.sun : ui.moon}
-          label={t(isNight ? 'map.toDay' : 'map.toNight')}
-          onPress={toggleTheme}
-        />
-        <IconButton
-          icon={ui.bell}
+        <MapButton
+          icon="bell"
           label={t('map.bell', { n: unread })}
           hint={t('map.bellHint')}
           onPress={() => router.push('/inbox')}
-          badge={unread}
+          dot={unread > 0}
+          size={48}
         />
       </View>
-      <FilterChips />
-      <Ticker />
     </View>
   );
 }
@@ -104,298 +145,70 @@ function AskLine() {
   }, [index, fade, reduceMotion]);
 
   return (
-    <Animated.View style={[styles.askLine, { opacity: fade }]} aria-hidden importantForAccessibility="no-hide-descendants">
-      <Text variant="ui" tone="ink2" numberOfLines={2}>
+    <Animated.View
+      style={[styles.askLine, { opacity: fade }]}
+      aria-hidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      <Text variant="label" tone="ink2" numberOfLines={2} style={styles.askText}>
         {t(ASK_LINES[index])}
       </Text>
     </Animated.View>
   );
 }
 
-function FilterChips() {
-  const { state } = useStore();
-  const pick = usePickFilter();
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.chips}
-      contentContainerStyle={styles.chipsContent}
-      accessibilityLabel={t('map.filters')}
-    >
-      {FILTERS.map((f) => (
-        <Chip
-          key={f.key}
-          tone="glass"
-          compact
-          label={t(f.label)}
-          icon={filterIcon[f.key]}
-          selected={state.filter === f.key}
-          onPress={() => pick(f.key)}
-        />
-      ))}
-    </ScrollView>
-  );
-}
-
-/** One line of what other eaters just did. Rotates every 4 s on the shared clock. */
-function Ticker() {
-  const { c } = useTheme();
-  const reduceMotion = useReduceMotion();
-  const screenReader = useScreenReader();
-  // Nearly hold still while a screen reader is on, so it does not interrupt.
-  const step = screenReader ? 3_600_000 : 4000;
-  const now = useClock(step);
-  const ticks = getTicks();
-  const people = getPeople();
-  const index = Math.floor(now / step) % ticks.length;
-  const tick = ticks[index];
-  const person = people[tick.by];
-
-  const [fade] = useState(() => new Animated.Value(1));
-  const first = useRef(true);
-  useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    if (reduceMotion) return;
-    fade.setValue(0);
-    Animated.timing(fade, { toValue: 1, duration: dur.base, easing: ease.out, useNativeDriver: native }).start();
-  }, [index, fade, reduceMotion]);
-
-  return (
-    <Animated.View
-      accessibilityLiveRegion="none"
-      style={[
-        styles.ticker,
-        { backgroundColor: c.glass, borderColor: c.line },
-        { opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }] },
-      ]}
-    >
-      <View style={[styles.avatar, { backgroundColor: avatarBg[person.avatar] }]}>
-        <Glyph of={avatar[person.avatar]} size={14} />
-      </View>
-      <Text variant="caption" numberOfLines={2} style={styles.shrink}>
-        {t('map.ticker', { handle: person.handle, text: tick.text })}
-      </Text>
-    </Animated.View>
-  );
-}
-
-
-/** A 44 pt glass icon button used over the map. */
-export function IconButton({
+/** A square sticker button over the map (bell, recenter): 44 pt or larger. */
+export function MapButton({
   icon,
   label,
   onPress,
-  badge,
   hint,
+  dot,
+  size = minTap,
 }: {
-  icon: GlyphSource;
+  icon: IconName;
   label: string;
   onPress: () => void;
-  badge?: number;
   hint?: string;
+  dot?: boolean;
+  size?: number;
 }) {
   const { c } = useTheme();
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityHint={hint}
-      style={({ pressed }) => [
-        styles.icon,
-        { backgroundColor: c.glass, borderColor: c.line },
-        elevation.e1,
-        pressed && styles.pressed,
-      ]}
-    >
-      <Glyph of={icon} size={19} color={c.ink} strokeWidth={2.3} />
-      {badge ? (
-        <View style={[styles.badge, { backgroundColor: c.hotFill }]}>
-          <Text variant="micro" style={styles.badgeText}>
-            {String(badge)}
-          </Text>
-        </View>
-      ) : null}
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} accessibilityHint={hint}>
+      {({ pressed }) => (
+        <Sticker
+          radius={size >= 48 ? 16 : 14}
+          bg={c.glass}
+          drop={4}
+          pressed={pressed}
+          style={{ width: size }}
+          faceStyle={[styles.iconFace, { height: size }]}
+        >
+          <Icon name={icon} size={21} color={c.ink} strokeWidth={2.2} />
+          {dot ? <View style={[styles.dot, { backgroundColor: c.accent, borderColor: c.glass }]} /> : null}
+        </Sticker>
+      )}
     </Pressable>
-  );
-}
-
-/** One glass capsule: zoom in over zoom out. Each half is a full 44 pt button. */
-export function ZoomPill({ onIn, onOut }: { onIn: () => void; onOut: () => void }) {
-  const { c } = useTheme();
-  const half = (glyph: string, label: string, onPress: () => void) => (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({ pressed }) => [styles.zoomHalf, pressed && styles.pressed]}
-    >
-      <Icon name={glyph === ui.plus ? 'plus' : 'minus'} size={22} color={c.ink} />
-    </Pressable>
-  );
-  return (
-    <View
-      accessibilityLabel={t('map.zoomA11y')}
-      style={[styles.zoom, { backgroundColor: c.glass, borderColor: c.line }, elevation.e1]}
-    >
-      {half(ui.plus, t('map.zoomIn'), onIn)}
-      <View style={[styles.zoomRule, { backgroundColor: c.line }]} />
-      {half(ui.minus, t('map.zoomOut'), onOut)}
-    </View>
-  );
-}
-
-type Face = { key: string; icon: GlyphSource; bg: string };
-
-/** Who made a report, as a small avatar. */
-function faceFor(report: Report): Face {
-  if (report.by === 'you') return { key: 'you', icon: avatar.me, bg: avatarBg.me };
-  if (report.by === 'owner') return { key: `owner-${report.spotId}`, icon: ui.owner, bg: '#ffe7b0' };
-  const person = getPeople()[report.by];
-  const key: AvatarKey = person?.avatar ?? 'me';
-  return { key: person?.handle ?? String(report.by), icon: avatar[key], bg: person?.tint ?? avatarBg.me };
-}
-
-/**
- * "34 reports near you tonight": a glass pill above the sheet peek with the three newest
- * reporters. The count is the real number of reports (sample plus this session). Tapping it
- * shows the spot with the newest report. It pulses once when a report is added.
- */
-export function ActivityPill({ spots, onOpen }: { spots: Spot[]; onOpen: (spot: Spot) => void }) {
-  const { c } = useTheme();
-  const reduceMotion = useReduceMotion();
-  const reports = useAllReports();
-  const count = reports.length;
-  const appStart = getAppStart();
-  const sorted = [...reports].sort((a, b) => reportAt(b, appStart) - reportAt(a, appStart));
-  const newest = sorted.map((r) => spots.find((s) => s.id === r.spotId)).find((s): s is Spot => !!s);
-  const faces: Face[] = [];
-  for (const r of sorted) {
-    const face = faceFor(r);
-    if (!faces.some((f) => f.key === face.key)) faces.push(face);
-    if (faces.length === 3) break;
-  }
-
-  const [pulse] = useState(() => new Animated.Value(1));
-  const lastCount = useRef(count);
-  useEffect(() => {
-    const grew = count > lastCount.current;
-    lastCount.current = count;
-    if (!grew || reduceMotion) return;
-    pulse.setValue(1.12);
-    Animated.spring(pulse, { toValue: 1, ...spring.pop, useNativeDriver: native }).start();
-  }, [count, pulse, reduceMotion]);
-
-  if (!count || !newest) return null;
-  const text = count === 1 ? t('map.activity1') : t('map.activity', { n: count });
-
-  return (
-    <Animated.View style={{ transform: [{ scale: pulse }] }}>
-      <Pressable
-        onPress={() => onOpen(newest)}
-        accessibilityRole="button"
-        accessibilityLabel={t('map.activityA11y', { text, spot: newest.name })}
-        accessibilityHint={t('map.activityHint')}
-        style={({ pressed }) => [
-          styles.activity,
-          { backgroundColor: c.glass, borderColor: c.line },
-          elevation.e1,
-          pressed && styles.pressed,
-        ]}
-      >
-        <View style={styles.faces}>
-          {faces.map((f, i) => (
-            <View
-              key={f.key}
-              style={[
-                styles.face,
-                { backgroundColor: f.bg, borderColor: c.paper, marginLeft: i ? -8 : 0, zIndex: 3 - i },
-              ]}
-            >
-              <Glyph of={f.icon} size={13} color={palettes.day.ink} />
-            </View>
-          ))}
-        </View>
-        <View style={[styles.liveDot, { backgroundColor: c.mintFill }]} />
-        <Text variant="label" numberOfLines={2} style={styles.shrink}>
-          {text}
-        </Text>
-      </Pressable>
-    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  zoom: { width: minTap, borderRadius: radius.pill, borderWidth: 1, overflow: 'hidden' },
-  zoomHalf: { width: minTap, height: minTap, alignItems: 'center', justifyContent: 'center' },
-  zoomRule: { height: 1, marginHorizontal: 10 },
-  activity: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minHeight: minTap,
-    paddingVertical: 6,
-    paddingLeft: 6,
-    paddingRight: 14,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-  },
-  faces: { flexDirection: 'row' },
-  face: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  liveDot: { width: 7, height: 7, borderRadius: 4 },
-  top: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 12, gap: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  top: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 20, gap: 14 },
+  eyebrow: { marginBottom: 6 },
+  hidden: { opacity: 0 },
+  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  askPress: { flex: 1 },
   ask: {
-    flex: 1,
-    minHeight: 50,
+    minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     paddingHorizontal: 14,
-    borderRadius: 17,
-    borderWidth: 1,
-    ...elevation.e2,
+    paddingVertical: 6,
   },
-  shrink: { flexShrink: 1 },
   askLine: { flex: 1, minWidth: 0 },
-  pressed: { opacity: 0.85 },
-  chips: { marginHorizontal: -12, flexGrow: 0 },
-  chipsContent: { paddingHorizontal: 12, gap: 8 },
-  ticker: {
-    alignSelf: 'flex-start',
-    maxWidth: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderRadius: radius.pill,
-    paddingVertical: 5,
-    paddingLeft: 5,
-    paddingRight: 12,
-  },
-  avatar: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  icon: {
-    width: minTap,
-    height: minTap,
-    borderRadius: 15,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    paddingHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: { color: '#ffffff', letterSpacing: 0 },
+  askText: { fontSize: 14.5, lineHeight: 19 },
+  iconFace: { alignItems: 'center', justifyContent: 'center' },
+  dot: { position: 'absolute', top: 9, right: 10, width: 10, height: 10, borderRadius: 5, borderWidth: 1.5 },
 });

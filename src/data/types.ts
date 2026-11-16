@@ -77,6 +77,8 @@ export type Spot = {
   /** Weekly stops for mobile spots, Monday first; null means off. */
   schedule?: (ScheduleStop | null)[];
   friends?: Friend[];
+  /** People checked in here tonight (sample count; yours is added on top). */
+  hereTonight?: number;
 };
 
 export type ReportType = ReportEmojiKey;

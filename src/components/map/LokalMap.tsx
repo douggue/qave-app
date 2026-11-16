@@ -62,7 +62,7 @@ export type HitTarget = { id: string; x: number; y: number };
 /** A tap within this many world units of a pin's sticker or anchor counts as a pin tap. */
 const HIT_RADIUS = 30;
 /** The sticker sits above the anchor point, so hit-test its center too. */
-const STICKER_LIFT = 38;
+const STICKER_LIFT = 28;
 
 /** 1 / zoom, so markers can keep their screen size at every zoom level. */
 const MapScaleContext = createContext<Animated.AnimatedDivision | null>(null);

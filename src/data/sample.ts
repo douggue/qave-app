@@ -8,6 +8,8 @@ import type { Business, Drop, LiveStatus, MapLabel, Note, Person, Report, Schedu
 /** The world is 1400x1800 units. "You" stand at ME. */
 export const WORLD = { width: 1400, height: 1800 } as const;
 export const ME = { x: 820, y: 700 } as const;
+/** The neighborhood "you" are in: the map headline's eyebrow and your You tab. */
+export const HOME_AREA = 'East Austin';
 
 /** Place names drawn on the illustrated map (proper nouns, not UI copy). */
 export const MAP_LABELS: MapLabel[] = [
@@ -57,6 +59,7 @@ export const SPOTS: Spot[] = [
     busy: [1, 1, 2, 3, 5, 4, 3, 3, 4, 6, 8, 9, 7, 5, 3, 2],
     schedule: [E6TH, E6TH, null, E6TH, E6TH, RAINEY, RAINEY],
     friends: [{ name: 'Maya', avatar: 'unicorn' }, { name: 'Ellie', avatar: 'octopus' }, { name: 'Brad', avatar: 'cowboy' }],
+    hereTonight: 23,
   },
   {
     id: 'smoke', name: 'Post Oak Pit BBQ', kind: 'trailer', food: 'bbq', category: 'bbq',
@@ -68,6 +71,7 @@ export const SPOTS: Spot[] = [
     busy: [0, 0, 3, 6, 9, 10, 8, 5, 3, 2, 1, 0, 0, 0, 0, 0],
     schedule: [null, null, CESAR, CESAR, CESAR, CESAR, CESAR],
     friends: [{ name: 'Brad', avatar: 'cowboy' }],
+    hereTonight: 9,
   },
   {
     id: 'dough', name: 'Little Dough Bakery', kind: 'restaurant', food: 'croissant', category: 'sweets',

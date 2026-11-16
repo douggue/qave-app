@@ -109,15 +109,8 @@ export const MapWorld = memo(function MapWorld({ palette: p, night }: Props) {
       <Path d={RIVER} stroke={p.bank} strokeWidth={122} fill="none" strokeLinecap="round" />
       <Path d={RIVER} stroke={p.water} strokeWidth={92} fill="none" strokeLinecap="round" />
       <G fill="none" strokeLinecap="round">
-        {night ? (
-          <>
-            <Path d={AVENUES} stroke={p.ave} strokeOpacity={0.1} strokeWidth={44} />
-            <Path d={AVENUES} stroke={p.ave} strokeOpacity={0.18} strokeWidth={30} />
-          </>
-        ) : null}
         <Path d={AVENUES} stroke={p.aveO} strokeWidth={20} />
         <Path d={AVENUES} stroke={p.ave} strokeWidth={13} />
-        {night ? <Path d={I35} stroke={p.hwy} strokeOpacity={0.18} strokeWidth={40} /> : null}
         <Path d={I35} stroke={p.hwyO} strokeWidth={30} />
         <Path d={I35} stroke={p.hwy} strokeWidth={20} />
       </G>

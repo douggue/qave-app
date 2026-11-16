@@ -3,7 +3,6 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Glyph, Text } from '@/components/ui';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
-import { glow } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import { FILTER_LABEL, TILES, usePickFilter } from './filters';
@@ -11,11 +10,11 @@ import { FILTER_LABEL, TILES, usePickFilter } from './filters';
 const TILE = 64;
 
 /**
- * A horizontal row of sticker category tiles (Baemin style). Each sets the same store filter
- * as the chips over the map, so both always show the same selection.
+ * A horizontal row of sticker category tiles: the map's only filter control (Mix). The
+ * selected tile gets the yellow ring (ink by day); pins that do not match fade.
  */
 export function CategoryTiles() {
-  const { c, isNight } = useTheme();
+  const { c } = useTheme();
   const { filter } = useStore().state;
   const pick = usePickFilter();
   return (
@@ -40,15 +39,12 @@ export function CategoryTiles() {
             <View
               style={[
                 styles.square,
-                // Day paper is near card2, so day tiles sit on white with a hairline.
-                { backgroundColor: isNight ? c.card2 : c.card, borderColor: isNight ? 'transparent' : c.line },
-                selected && { backgroundColor: c.tintNeon, borderColor: c.neon },
-                selected && isNight && glow(c.neon, 10, 0.55),
+                { backgroundColor: selected ? c.tileOn : c.tile, borderColor: selected ? c.tileRing : 'transparent' },
               ]}
             >
-              <Glyph of={tile.glyph} size={'food' in tile.glyph ? 40 : 30} />
+              <Glyph of={tile.glyph} size={'food' in tile.glyph ? 41 : 28} />
             </View>
-            <Text variant="caption" tone={selected ? 'ink' : 'ink2'} center>
+            <Text variant="caption" tone={selected ? 'ink' : 'ink2'} center style={styles.label}>
               {t(tile.short)}
             </Text>
           </Pressable>
@@ -59,13 +55,14 @@ export function CategoryTiles() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { marginHorizontal: -16, flexGrow: 0 },
-  row: { paddingHorizontal: 16, paddingVertical: 4, gap: 8 },
-  tile: { width: 72, minHeight: 88, alignItems: 'center', gap: 6 },
+  scroll: { marginHorizontal: -20, flexGrow: 0 },
+  row: { paddingHorizontal: 20, gap: 10 },
+  tile: { width: 68, minHeight: 88, alignItems: 'center', gap: 6 },
+  label: { fontSize: 11.5, lineHeight: 15 },
   square: {
     width: TILE,
     height: TILE,
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',

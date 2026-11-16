@@ -1,7 +1,7 @@
 // The only data entry point for screens. Tonight it reads the fictional sample;
 // later each function becomes a Supabase query with the same return shape.
 
-import { B, DROPS, MAP_LABELS, ME, NOTES, PEOPLE, REPORTS, SPOTS, STATUSES, TICKS, WORLD } from './sample';
+import { B, DROPS, HOME_AREA, MAP_LABELS, ME, NOTES, PEOPLE, REPORTS, SPOTS, STATUSES, TICKS, WORLD } from './sample';
 import type { Business, Drop, LiveStatus, MapLabel, Note, Person, Report, Spot, Tick } from './types';
 
 export { ME, WORLD };
@@ -17,3 +17,4 @@ export const getTicks = (): Tick[] => TICKS;
 export const getBusiness = (): Business => B;
 export const getStatuses = (): LiveStatus[] => STATUSES;
 export const getMapLabels = (): MapLabel[] => MAP_LABELS;
+export const getArea = (): string => HOME_AREA;

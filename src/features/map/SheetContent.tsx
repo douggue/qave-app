@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { CompactSpotRow, SpotCard, SpotRow, TrendCard } from '@/components/cards/SpotCards';
+import { SpotCard, SpotRow } from '@/components/cards/SpotCards';
 import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
 import { Badge, Button, Glyph, LiveText, Text, useToast } from '@/components/ui';
 import {
@@ -22,10 +22,10 @@ import type { Spot } from '@/data/types';
 import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useCheckIn } from '@/hooks/use-check-in';
 import { matchesFilter, useAllReports } from '@/hooks/use-spots';
-import { t } from '@/i18n';
+import { t, type StringKey } from '@/i18n';
 import { useStore } from '@/state/store';
 import { ui } from '@/theme/emoji';
-import { moodGlyph, reportGlyph, uiGlyph } from '@/theme/glyphs';
+import { moodGlyph } from '@/theme/glyphs';
 import { minTap, radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -41,24 +41,6 @@ type ExploreProps = {
   onModeChange: (mode: ExploreMode) => void;
 };
 
-/** Rows shown compact at the top of the list, so the peek shows real spots (two fit). */
-const COMPACT_ROWS = 3;
-
-/** Sheet header: a heading-size title with the open count beside it. Part of the drag area. */
-export function SheetHeader({ spots }: { spots: Spot[] }) {
-  const open = spots.filter((s) => s.open).length;
-  return (
-    <View style={styles.header}>
-      <Text variant="heading" accessibilityRole="header" style={styles.headerTitle}>
-        {t('sheet.title')}
-      </Text>
-      <Text variant="label" tone="mint" style={styles.headerSub}>
-        {t('sheet.openNow', { open })}
-      </Text>
-    </View>
-  );
-}
-
 /** Open spots ranked for tonight (src/data/rank.ts), from live reports and your activity. */
 function useTonightRank(spots: Spot[]): Spot[] {
   const { checkIns, votes, stillHere } = useStore().state;
@@ -70,16 +52,57 @@ function useTonightRank(spots: Spot[]): Spot[] {
   );
 }
 
+/** "Top 10 tonight" after 5 PM (and late), "Top 10 today" in the day. */
+function useTopTitle(): StringKey {
+  const now = useClock(60_000);
+  const h = new Date(now).getHours();
+  return h >= 17 || h < 5 ? 'top.tonight' : 'top.today';
+}
+
+/** A section heading in the panel: Unbounded 18, with an optional "See all" on the right. */
+function SectionHead({
+  title,
+  action,
+}: {
+  title: string;
+  action?: { label: string; a11y: string; onPress: () => void };
+}) {
+  const { c } = useTheme();
+  return (
+    <View style={styles.titleRow}>
+      <Text variant="heading" accessibilityRole="header" style={styles.titleText}>
+        {title}
+      </Text>
+      {action ? (
+        <Pressable
+          onPress={action.onPress}
+          accessibilityRole="button"
+          accessibilityLabel={action.a11y}
+          hitSlop={4}
+          style={({ pressed }) => [styles.seeAll, pressed && styles.pressed]}
+        >
+          <Text variant="label" tone="ink2" style={styles.seeAllText}>
+            {action.label}
+          </Text>
+          <Glyph of={ui.chevron} size={10} color={c.ink2} strokeWidth={2.8} />
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
 /**
- * Explore state. The peek shows the first two rows, closing-soon first then nearest (idea B),
- * so the first view is useful. Then the category tiles, the Top 10 rail, trending and the rest.
+ * Explore state (Mix). The peek shows the category tiles (the map's only filter) and the
+ * "Top 10 tonight" heading with the top of the first cards. Half and full add the Top 10 rail,
+ * then Closing soon and More near you. Everything follows the selected tile.
  * In 'top' mode it shows the whole Top 10 as a ranked list.
  */
 export function SheetExplore({ spots, onFocus, mode, onModeChange }: ExploreProps) {
   const { c } = useTheme();
   const { filter } = useStore().state;
   const now = useClock(60_000);
-  const ranked = useTonightRank(spots);
+  const ranked = useTonightRank(spots).filter((s) => matchesFilter(s, filter));
+  const topTitle = t(useTopTitle());
 
   if (mode === 'top') {
     return (
@@ -95,17 +118,14 @@ export function SheetExplore({ spots, onFocus, mode, onModeChange }: ExploreProp
             <Text variant="label">{t('top.back')}</Text>
           </Pressable>
         </View>
-        <View style={styles.sectionTitle}>
-          <Glyph of={uiGlyph.star} size={18} />
-          <Text variant="heading" accessibilityRole="header" style={styles.shrink}>
-            {t('top.title')}
-          </Text>
-        </View>
+        <Text variant="title" accessibilityRole="header">
+          {topTitle}
+        </Text>
         <Text variant="label" tone="ink2">
           {t('top.sub')}
         </Text>
         {ranked.length ? (
-          <View>
+          <View style={styles.list}>
             {ranked.map((spot, i) => (
               <SpotRow key={spot.id} spot={spot} rank={i + 1} onPress={onFocus} />
             ))}
@@ -117,88 +137,58 @@ export function SheetExplore({ spots, onFocus, mode, onModeChange }: ExploreProp
     );
   }
 
-  const trending = spots
-    .filter((s) => s.open && (s.hot || s.mood))
-    .sort((a, b) => Number(b.hot) - Number(a.hot) || b.rating - a.rating)
-    .slice(0, 6);
-
+  const appStart = getAppStart();
   const matching = spots.filter((s) => matchesFilter(s, filter));
-  const rows = matching
-    .map((spot) => ({ spot, left: closingLeft(spot, now, getAppStart()), miles: milesFromMe(spot) }))
-    .sort((a, b) => {
-      if (a.left !== null && b.left !== null) return a.left - b.left;
-      if (a.left !== null) return -1;
-      if (b.left !== null) return 1;
-      return a.miles - b.miles;
-    });
-  const top = rows.slice(0, COMPACT_ROWS);
-  const rest = rows.slice(COMPACT_ROWS);
+  const closing = matching
+    .map((spot) => ({ spot, left: closingLeft(spot, now, appStart) }))
+    .filter((r): r is { spot: Spot; left: number } => r.left !== null)
+    .sort((a, b) => a.left - b.left)
+    .map((r) => r.spot);
+  const more = matching
+    .filter((s) => !closing.includes(s))
+    .sort((a, b) => Number(b.open) - Number(a.open) || milesFromMe(a) - milesFromMe(b));
 
   return (
     <>
-      {top.length ? (
-        <View>
-          {top.map(({ spot }) => (
-            <CompactSpotRow key={spot.id} spot={spot} onPress={onFocus} />
-          ))}
-        </View>
-      ) : (
-        <Text tone="ink2">{t('sheet.noMatch')}</Text>
-      )}
       <CategoryTiles />
+      <SectionHead
+        title={topTitle}
+        action={
+          ranked.length > 1
+            ? { label: t('top.seeAll'), a11y: t('top.seeAllA11y'), onPress: () => onModeChange('top') }
+            : undefined
+        }
+      />
       {ranked.length ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.railScroll}
+          contentContainerStyle={styles.rail}
+        >
+          {ranked.map((spot, i) => (
+            <SpotCard key={spot.id} spot={spot} rank={i + 1} onPress={onFocus} />
+          ))}
+        </ScrollView>
+      ) : (
+        <Text tone="ink2">{matching.length ? t('top.empty') : t('sheet.noMatch')}</Text>
+      )}
+      {closing.length ? (
         <>
-          <View style={styles.titleRow}>
-            <View style={[styles.sectionTitle, styles.titleText]}>
-              <Glyph of={uiGlyph.star} size={18} />
-              <Text variant="heading" accessibilityRole="header" style={styles.shrink}>
-                {t('top.title')}
-              </Text>
-            </View>
-            <Pressable
-              onPress={() => onModeChange('top')}
-              accessibilityRole="button"
-              accessibilityLabel={t('top.seeAllA11y')}
-              hitSlop={4}
-              style={({ pressed }) => [styles.seeAll, pressed && styles.pressed]}
-            >
-              <Text variant="label" tone="ink2">
-                {t('top.seeAll')}
-              </Text>
-              <Glyph of={ui.chevron} size={11} color={c.ink2} strokeWidth={2.8} />
-            </Pressable>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.railScroll} contentContainerStyle={styles.rail}>
-            {ranked.map((spot, i) => (
-              <SpotCard key={spot.id} spot={spot} rank={i + 1} onPress={onFocus} />
+          <SectionHead title={t('sheet.closingSoon')} />
+          <View style={styles.list}>
+            {closing.map((spot) => (
+              <SpotRow key={spot.id} spot={spot} onPress={onFocus} />
             ))}
-          </ScrollView>
+          </View>
         </>
       ) : null}
-      <View style={styles.sectionTitle}>
-        <Glyph of={reportGlyph.amazing} size={18} />
-        <Text variant="heading" accessibilityRole="header" style={styles.shrink}>
-          {t('sheet.trending')}
-        </Text>
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.railScroll} contentContainerStyle={styles.rail}>
-        {trending.map((spot) => (
-          <TrendCard key={spot.id} spot={spot} onPress={onFocus} />
-        ))}
-      </ScrollView>
-      <Text variant="label" tone="ink2">
-        {t('sheet.sub', { count: spots.length, open: spots.filter((s) => s.open).length })}
-        {'\n'}
-        {t('sheet.hint')}
-      </Text>
-      {rest.length ? (
+      {more.length ? (
         <>
-          <Text variant="heading" accessibilityRole="header">
-            {t('sheet.more')}
-          </Text>
-          <View>
-            {rest.map(({ spot }) => (
-              <SpotRow key={spot.id} spot={spot} onPress={onFocus} />
+          <SectionHead title={t('sheet.more')} />
+          <View style={styles.list}>
+            {more.map((spot) => (
+              <SpotRow key={spot.id} spot={spot} dimmed={!spot.open} onPress={onFocus} />
             ))}
           </View>
         </>
@@ -219,7 +209,7 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
   return (
     <View style={styles.preview}>
       <View style={styles.top}>
-        <FoodArt food={spot.food} width={72} height={72} />
+        <FoodArt food={spot.food} width={76} height={76} radius={20} />
         <View style={styles.titleCol}>
           <Text variant="title" accessibilityRole="header">
             {spot.name}
@@ -232,7 +222,12 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
               style={styles.shrink}
               accessibilityLabel={t('spot.ratingA11y', { r: spot.rating, n: spot.reviewCount })}
             >
-              {t('spot.metaFull', { r: spot.rating, n: spot.reviewCount, price: priceText(spot), kind: kindLabel(spot) })}
+              {t('spot.metaFull', {
+                r: spot.rating,
+                n: spot.reviewCount,
+                price: priceText(spot),
+                kind: kindLabel(spot),
+              })}
             </Text>
           </View>
           <View style={styles.inline}>
@@ -247,7 +242,7 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
           onPress={onClose}
           accessibilityRole="button"
           accessibilityLabel={t('sheet.close')}
-          style={[styles.close, { backgroundColor: c.card2 }]}
+          style={({ pressed }) => [styles.close, { backgroundColor: c.card2 }, pressed && styles.pressed]}
         >
           <Glyph of={ui.close} size={14} color={c.ink2} strokeWidth={2.6} />
         </Pressable>
@@ -292,7 +287,7 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
         <View style={styles.action}>
           <Button
             size="sm"
-            variant="ghost"
+            variant="soft"
             icon={ui.go}
             label={t('act.go')}
             accessibilityLabel={t('act.goA11y', { name: spot.name })}
@@ -313,22 +308,13 @@ export function SheetPreview({ spot, onClose }: { spot: Spot; onClose: () => voi
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'baseline',
-    columnGap: 10,
-    paddingHorizontal: 16,
-    paddingBottom: 4,
-  },
-  headerTitle: { flexShrink: 1 },
-  headerSub: { flexShrink: 1 },
-  sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  rail: { gap: 12, paddingHorizontal: 16, alignItems: 'flex-start' },
-  railScroll: { marginHorizontal: -16, flexGrow: 0 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  rail: { gap: 12, paddingHorizontal: 20, paddingBottom: 4, alignItems: 'flex-start' },
+  railScroll: { marginHorizontal: -20, flexGrow: 0 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   titleText: { flex: 1, minWidth: 0 },
   seeAll: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: minTap, paddingLeft: 8 },
+  seeAllText: { fontFamily: 'Figtree_700Bold' },
+  list: { gap: 10 },
   topHead: { flexDirection: 'row' },
   back: {
     flexDirection: 'row',

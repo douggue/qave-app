@@ -26,9 +26,9 @@ export const SNAPS: Snap[] = ['peek', 'half', 'full'];
 const SNAP_KEY: Record<Snap, StringKey> = { peek: 'sheet.peek', half: 'sheet.half', full: 'sheet.full' };
 /**
  * Sheet height at the peek snap; the map uses it to center inside the visible band.
- * 30 handle + ~132 content: a heading-size title line and two compact rows, + 2 pt air.
+ * 29 handle + 96 category tiles + 50 "Top 10" heading + the top of the first cards.
  */
-export const PEEK = 164;
+export const PEEK = 236;
 
 type SheetConfig = {
   snap: Snap;
@@ -141,7 +141,7 @@ export function BottomSheet({ snap, onSnapChange, header, children, contentKey, 
         <Animated.View
           style={[
             styles.sheet,
-            { height: full, backgroundColor: c.paper, borderColor: c.line, transform: [{ translateY: sheet.y }] },
+            { height: full, backgroundColor: c.sheet, borderColor: c.line, shadowOpacity: isNight ? 0.5 : 0.15, transform: [{ translateY: sheet.y }] },
           ]}
         >
           <View {...sheet.pan.panHandlers} style={Platform.OS === 'web' ? webNoScroll : undefined}>
@@ -156,7 +156,7 @@ export function BottomSheet({ snap, onSnapChange, header, children, contentKey, 
               hitSlop={{ top: 8, bottom: 8 }}
               style={styles.handleZone}
             >
-              <View style={[styles.grabber, { backgroundColor: isNight ? 'rgba(255,255,255,0.18)' : 'rgba(22,23,43,0.18)' }]} />
+              <View style={[styles.grabber, { backgroundColor: c.line2 }]} />
             </Pressable>
             {header}
           </View>
@@ -186,12 +186,11 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radius.xl,
     borderTopWidth: 1,
     shadowColor: '#000',
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: -8 },
+    shadowRadius: 40,
+    shadowOffset: { width: 0, height: -12 },
     elevation: 16,
   },
-  handleZone: { alignItems: 'center', justifyContent: 'center', minHeight: 28, paddingTop: 10, paddingBottom: 8 },
-  grabber: { width: 42, height: 5, borderRadius: 3 },
-  body: { paddingHorizontal: 16, gap: 14 },
+  handleZone: { alignItems: 'center', justifyContent: 'center', minHeight: 29, paddingTop: 10, paddingBottom: 12 },
+  grabber: { width: 38, height: 5, borderRadius: 3 },
+  body: { paddingHorizontal: 20, gap: 14 },
 });

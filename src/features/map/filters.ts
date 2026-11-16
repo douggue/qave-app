@@ -6,10 +6,9 @@ import { t, type StringKey } from '@/i18n';
 import { useStore, type FilterKey } from '@/state/store';
 import type { Glyph } from '@/theme/glyphs';
 
-// The map filters, shared by the chips over the map and the category tiles in the panel.
-// Both set the same store filter, so they always agree.
+// The map filters. The category tiles in the panel are the only filter control (Mix).
 
-/** Chip order over the map, with the full label (also what the tiles read aloud). */
+/** Every filter with its full label (what the tiles read aloud). */
 export const FILTERS: { key: FilterKey; label: StringKey }[] = [
   { key: 'all', label: 'filter.all' },
   { key: 'open', label: 'filter.open' },
@@ -26,12 +25,12 @@ export const FILTER_LABEL = Object.fromEntries(FILTERS.map((f) => [f.key, f.labe
 
 /** Category tiles in the panel: food sticker for food filters, a drawn icon for the rest. */
 export const TILES: { key: FilterKey; short: StringKey; glyph: Glyph }[] = [
-  { key: 'all', short: 'tile.all', glyph: { icon: 'sparkle', tone: 'brand' } },
-  { key: 'open', short: 'tile.open', glyph: { icon: 'live', tone: 'mint' } },
+  { key: 'all', short: 'tile.all', glyph: { icon: 'sparkle', tone: 'ink' } },
   { key: 'tacos', short: 'tile.tacos', glyph: { food: 'taco' } },
   { key: 'bbq', short: 'tile.bbq', glyph: { food: 'bbq' } },
-  { key: 'sweets', short: 'tile.sweets', glyph: { food: 'croissant' } },
   { key: 'asian', short: 'tile.asian', glyph: { food: 'pho' } },
+  { key: 'sweets', short: 'tile.sweets', glyph: { food: 'croissant' } },
+  { key: 'open', short: 'tile.open', glyph: { icon: 'live', tone: 'mint' } },
   { key: 'mobile', short: 'tile.mobile', glyph: { icon: 'truck', tone: 'sky' } },
   { key: 'popup', short: 'tile.popup', glyph: { icon: 'tent', tone: 'grape' } },
   { key: 'cheap', short: 'tile.cheap', glyph: { icon: 'cash', tone: 'mint' } },
