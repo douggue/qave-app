@@ -1,11 +1,12 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { glow, hitSlop, radius, tapComfort } from '@/theme/tokens';
+import { hitSlop, radius, tapComfort } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import type { GlyphSource } from '@/theme/glyphs';
 
 import { Glyph } from './Glyph';
+import { Sticker } from './Sticker';
 import { Text } from './Text';
 
 type Props = {
@@ -38,7 +39,7 @@ export function Chip({
   role = 'button',
   compact,
 }: Props) {
-  const { c, isNight } = useTheme();
+  const { c } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -47,35 +48,37 @@ export function Chip({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={role === 'radio' ? { checked: !!selected } : { selected: !!selected }}
-      style={({ pressed }) => [
-        styles.chip,
-        compact && styles.compact,
-        { backgroundColor: tone === 'glass' ? c.glass : c.card, borderColor: c.line },
-        selected && { backgroundColor: c.neon, borderColor: 'transparent' },
-        selected && isNight && glow(c.neon, 12, 0.7),
-        pressed && { opacity: 0.85 },
-      ]}
     >
-      <View style={styles.row}>
-        {icon ? <Glyph of={icon} size={14} color={selected ? c.onNeon : c.ink} plain /> : null}
-        <Text variant="label" tone={selected ? 'onNeon' : 'ink'} style={styles.label}>
-          {label}
-        </Text>
-      </View>
+      {({ pressed }) => (
+        <Sticker
+          radius={radius.pill}
+          bg={selected ? c.neon : tone === 'glass' ? c.glass : c.card}
+          line={selected ? c.ctaLine : undefined}
+          dropColor={selected ? c.ctaDrop : undefined}
+          drop={3}
+          pressed={pressed}
+          faceStyle={[styles.chip, compact && styles.compact]}
+        >
+          <View style={styles.row}>
+            {icon ? <Glyph of={icon} size={14} color={selected ? c.onNeon : c.ink} plain /> : null}
+            <Text variant="label" tone={selected ? 'onNeon' : 'ink'} style={styles.label}>
+              {label}
+            </Text>
+          </View>
+        </Sticker>
+      )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   chip: {
-    minHeight: tapComfort,
+    minHeight: tapComfort - 3,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: radius.pill,
-    borderWidth: 1,
+    paddingVertical: 9,
     justifyContent: 'center',
   },
   compact: { minHeight: 40, paddingVertical: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
-  label: { flexShrink: 1 },
+  label: { flexShrink: 1, fontFamily: 'Figtree_700Bold' },
 });

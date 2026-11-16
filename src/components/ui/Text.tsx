@@ -21,7 +21,7 @@ export function Text({ variant = 'body', tone = 'ink', center, tabular, style, .
   const { c } = useTheme();
   return (
     <RNText
-      maxFontSizeMultiplier={variant === 'display' || variant === 'title' ? 1.6 : 2.0}
+      maxFontSizeMultiplier={variant === 'hero' || variant === 'name' || variant === 'display' || variant === 'title' ? 1.5 : 2.0}
       {...rest}
       style={[
         typeScale[variant],

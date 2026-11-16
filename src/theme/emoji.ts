@@ -105,6 +105,7 @@ export const avatar = {
   octopus: '🐙',
   alien: '👽',
   robot: '🤖',
+  owl: '🦉',
 } as const;
 export type AvatarKey = keyof typeof avatar;
 
@@ -118,6 +119,7 @@ export const avatarBg: Record<AvatarKey, string> = {
   octopus: '#d8f6ea',
   alien: '#d6ecff',
   robot: '#f0f0f0',
+  owl: '#e7e4ff',
 };
 
 export const tab = {

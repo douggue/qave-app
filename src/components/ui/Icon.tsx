@@ -131,6 +131,7 @@ const DEFS = {
     detail: ['M8.4 12.4h7.2', 'M4 20.2h16'],
   },
   plus: { detail: ['M12 5v14', 'M5 12h14'] },
+  search: { detail: ['M11 4.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13z', 'M16 16l4.5 4.5'] },
   minus: { detail: ['M5 12h14'] },
   check: { detail: ['M5 12.5l4.5 4.5L19 7.5'] },
   close: { detail: ['M6.5 6.5l11 11', 'M17.5 6.5l-11 11'] },

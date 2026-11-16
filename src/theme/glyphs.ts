@@ -28,7 +28,7 @@ import type { Palette } from './tokens';
 // (people's faces) still render as emoji. <Glyph> in src/components/ui/Glyph.tsx draws these.
 
 /** Semantic colors for drawn glyphs. `brand` is the sun-to-chili gradient. */
-export type GlyphTone = 'brand' | 'hot' | 'amber' | 'mint' | 'sky' | 'grape' | 'ink3';
+export type GlyphTone = 'brand' | 'hot' | 'amber' | 'mint' | 'sky' | 'grape' | 'ink3' | 'ink';
 
 export type IconGlyph = { icon: IconName; tone?: GlyphTone };
 export type Glyph = IconGlyph | { food: FoodKey } | { avatar: AvatarKey };
@@ -162,5 +162,6 @@ export function resolveGlyph(source: GlyphSource | undefined): Glyph | undefined
 
 /** A glyph tone in the given palette; the brand gradient comes back as 'brand' (Icon's BRAND_TINT). */
 export function toneColor(tone: GlyphTone, c: Palette): string {
-  return tone === 'brand' ? 'brand' : c[tone];
+  // Mix: the brand gradient lives only on the Report button, so 'brand' icons draw in solid hot.
+  return tone === 'brand' ? c.hot : c[tone];
 }

@@ -1,16 +1,19 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { useReduceMotion } from '@/hooks/use-reduce-motion';
-import { glow, gradients, minTap, radius, withAlpha } from '@/theme/tokens';
+import { minTap } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import type { GlyphSource } from '@/theme/glyphs';
 
 import { Glyph } from './Glyph';
+import { Sticker } from './Sticker';
 import { Text, type TextTone } from './Text';
 
-/** `danger` is an outlined chili button for destructive actions; `dangerSolid` confirms one. */
+/**
+ * `primary` is the sun-yellow main action (both modes); `soft` the secondary (card face, outline);
+ * `ghost` a quiet outlined button with no drop. `danger` is an outlined chili button for
+ * destructive actions; `dangerSolid` confirms one. `mint` is the business Go live color.
+ */
 type Variant = 'primary' | 'mint' | 'ghost' | 'soft' | 'danger' | 'dangerSolid';
 
 type Props = {
@@ -31,12 +34,12 @@ type Props = {
 };
 
 const labelTone: Record<Variant, TextTone> = {
-  primary: 'onHot',
+  primary: 'onNeon',
   mint: 'onMint',
   ghost: 'ink',
   soft: 'ink',
   danger: 'hot',
-  dangerSolid: 'onHot',
+  dangerSolid: 'onNeon',
 };
 
 /** Buttons grow taller when a label wraps (French), never clip. Minimum 44 pt. */
@@ -54,20 +57,22 @@ export function Button({
   checked,
   style,
 }: Props) {
-  const { c, isNight } = useTheme();
-  const reduceMotion = useReduceMotion();
+  const { c } = useTheme();
   const md = size === 'md';
-  const shape = {
-    minHeight: md ? 50 : minTap,
-    paddingHorizontal: md ? 20 : 14,
-    paddingVertical: md ? 12 : 10,
-    borderRadius: md ? radius.md : 14,
+  const face: Record<Variant, { bg: string; line?: string; drop?: number; dropColor?: string }> = {
+    primary: { bg: c.neon, line: c.ctaLine, dropColor: c.ctaDrop },
+    mint: { bg: c.mintFill, line: c.ctaLine, dropColor: c.ctaDrop },
+    soft: { bg: c.card },
+    ghost: { bg: 'transparent', line: c.line2, drop: 0 },
+    danger: { bg: c.card, line: c.hot },
+    dangerSolid: { bg: c.hotFill, line: c.ctaLine, dropColor: c.ctaDrop },
   };
+  const f = face[variant];
 
   const content = (
     <View style={[styles.row, { gap: md ? 8 : 6 }]}>
-      {icon ? <Glyph of={icon} size={md ? 16.5 : 15} color={c[labelTone[variant]]} plain strokeWidth={2.4} /> : null}
-      <Text variant={md ? 'ui' : 'label'} tone={labelTone[variant]} center style={styles.label}>
+      {icon ? <Glyph of={icon} size={md ? 16.5 : 15} color={c[labelTone[variant]]} plain strokeWidth={2.6} /> : null}
+      <Text variant="ui" tone={labelTone[variant]} center style={[styles.label, md ? styles.labelMd : styles.labelSm]}>
         {label}
       </Text>
     </View>
@@ -81,38 +86,23 @@ export function Button({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={role === 'switch' ? { disabled: !!disabled, checked: !!checked } : { disabled: !!disabled }}
-      style={({ pressed }) => [
-        fullWidth ? styles.full : styles.auto,
-        disabled && { opacity: 0.4 },
-        pressed && { opacity: 0.9, transform: reduceMotion ? [] : [{ scale: 0.97 }] },
-        style,
-      ]}
+      style={[fullWidth ? styles.full : styles.auto, disabled && styles.disabled, style]}
     >
-      {variant === 'primary' ? (
-        <LinearGradient
-          colors={gradients.hotBtn}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.body, shape, isNight && glow('#ff3c50', 12, 0.45)]}
-        >
-          {content}
-        </LinearGradient>
-      ) : (
-        <View
-          style={[
+      {({ pressed }) => (
+        <Sticker
+          radius={md ? 18 : 14}
+          bg={f.bg}
+          line={f.line}
+          drop={f.drop ?? (md ? 5 : 4)}
+          dropColor={f.dropColor}
+          pressed={pressed && !disabled}
+          faceStyle={[
             styles.body,
-            shape,
-            variant === 'mint' && { backgroundColor: c.mintFill },
-            variant === 'mint' && isNight && glow(c.mint, 12, 0.45),
-            variant === 'ghost' && { borderWidth: 1.5, borderColor: c.line },
-            variant === 'soft' && { backgroundColor: c.card2, borderWidth: 1, borderColor: c.line },
-            variant === 'danger' && { backgroundColor: withAlpha(c.hotFill, 0.12), borderWidth: 1.5, borderColor: c.hot },
-            variant === 'dangerSolid' && { backgroundColor: c.hotFill },
-            variant === 'dangerSolid' && isNight && glow(c.hotFill, 12, 0.45),
+            { minHeight: md ? 52 : minTap, paddingHorizontal: md ? 20 : 14, paddingVertical: md ? 12 : 9 },
           ]}
         >
           {content}
-        </View>
+        </Sticker>
       )}
     </Pressable>
   );
@@ -121,7 +111,10 @@ export function Button({
 const styles = StyleSheet.create({
   full: { alignSelf: 'stretch' },
   auto: { alignSelf: 'flex-start' },
-  body: { alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
+  disabled: { opacity: 0.45 },
+  body: { alignItems: 'center', justifyContent: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexShrink: 1 },
   label: { flexShrink: 1 },
+  labelMd: { fontSize: 16, lineHeight: 21 },
+  labelSm: { fontSize: 14, lineHeight: 19 },
 });

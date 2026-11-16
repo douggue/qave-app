@@ -14,12 +14,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { dur, ease, native } from '@/theme/motion';
-import { elevation } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import type { GlyphSource } from '@/theme/glyphs';
 
 import { Glyph } from './Glyph';
+import { Sticker } from './Sticker';
 import { Text } from './Text';
 
 /** `emoji` is a key's emoji from src/theme/emoji.ts (or a glyph); it draws as our icon or sticker. */
@@ -98,16 +98,14 @@ function ToastView({ item, onDone, top }: { item: ToastItem; onDone: () => void;
     <View pointerEvents="none" style={[styles.host, { top: top ?? insets.top + 64 }]}>
       <Animated.View
         accessibilityLiveRegion={Platform.OS === 'android' ? 'polite' : undefined}
-        style={[
-          styles.toast,
-          elevation.e2,
-          { backgroundColor: c.toastBg, opacity: anim, transform: [{ translateY }] },
-        ]}
+        style={[styles.wrap, { opacity: anim, transform: [{ translateY }] }]}
       >
-        {item.emoji ? <Glyph of={item.emoji} size={18} color={c.toastInk} palette="inverse" /> : null}
-        <Text variant="ui" tone="toastInk" center style={styles.text}>
-          {item.message}
-        </Text>
+        <Sticker radius={16} bg={c.toastBg} line={c.ctaLine} dropColor={c.ctaDrop} drop={4} faceStyle={styles.toast}>
+          {item.emoji ? <Glyph of={item.emoji} size={18} color={c.toastInk} palette="inverse" /> : null}
+          <Text variant="ui" tone="toastInk" center style={styles.text}>
+            {item.message}
+          </Text>
+        </Sticker>
       </Animated.View>
     </View>
   );
@@ -136,14 +134,13 @@ export function useToast(): ToastApi {
 
 const styles = StyleSheet.create({
   host: { position: 'absolute', left: 0, right: 0, alignItems: 'center', zIndex: 50 },
+  wrap: { maxWidth: '88%' },
   toast: {
-    maxWidth: '88%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 14,
+    paddingVertical: 11,
   },
   text: { flexShrink: 1 },
 });

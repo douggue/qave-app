@@ -16,7 +16,7 @@ export function Placeholder({ emoji, title, body, badge, emojiSize = 48 }: Props
     <View style={styles.wrap}>
       <Glyph of={emoji} size={emojiSize} tone="grape" strokeWidth={2} />
       {badge ? <Badge label={badge} tone="grape" style={styles.badge} /> : null}
-      <Text variant="heading" center>
+      <Text variant="title" center>
         {title}
       </Text>
       <Text tone="ink2" center style={styles.body}>

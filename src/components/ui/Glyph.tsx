@@ -10,7 +10,7 @@ import { FoodSticker } from './FoodSticker';
 import { BRAND_TINT, Icon } from './Icon';
 import { Emoji } from './Text';
 
-// Approved avatar stickers (design/emoji/approved). Owl, chef and cat are ready for new keys.
+// Approved avatar stickers (design/emoji/approved). The owl is the Night Owl badge; chef and cat are ready for new keys.
 const AVATARS: Record<AvatarKey, ImageSourcePropType> = {
   me: require('../../../assets/emoji/avatar-me.png'),
   cowboy: require('../../../assets/emoji/avatar-cowboy.png'),
@@ -21,6 +21,7 @@ const AVATARS: Record<AvatarKey, ImageSourcePropType> = {
   octopus: require('../../../assets/emoji/avatar-octopus.png'),
   alien: require('../../../assets/emoji/avatar-alien.png'),
   robot: require('../../../assets/emoji/avatar-robot.png'),
+  owl: require('../../../assets/emoji/avatar-owl.png'),
 };
 
 type Props = {

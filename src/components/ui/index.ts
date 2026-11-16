@@ -9,4 +9,7 @@ export { Screen } from './Screen';
 export { Text, type TextTone } from './Text';
 export { ToastProvider, useToast, useToastAnchor } from './Toast';
 export { Placeholder } from './Placeholder';
+export { Sticker } from './Sticker';
+export { Eyebrow, ScreenTitle } from './ScreenTitle';
+export { RankNumber } from './RankNumber';
 export { LiveText, Skeleton } from './Skeleton';

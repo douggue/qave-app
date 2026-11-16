@@ -29,5 +29,5 @@ export function Screen({ children, scroll, style }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   fill: { flex: 1 },
-  content: { padding: space.lg, gap: space.lg, paddingBottom: space.xxl },
+  content: { paddingHorizontal: 20, paddingTop: space.md, gap: space.lg, paddingBottom: space.xxl },
 });

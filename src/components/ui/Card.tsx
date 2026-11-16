@@ -1,60 +1,53 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 
-import { glow, gradients, radius } from '@/theme/tokens';
+import { gradients, radius as radii } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
+
+import { splitStickerStyle, Sticker } from './Sticker';
 
 type Props = {
   children: ReactNode;
+  /** `live` outlines the card in mint (serving now), `hot` in chili, `ai` tints it grape. */
   variant?: 'default' | 'ai' | 'live' | 'hot';
+  /** Face color instead of the card color. */
+  bg?: string;
+  radius?: number;
   style?: StyleProp<ViewStyle>;
 };
 
-/** A themed surface. Content stacks in a column with a 10 pt gap. */
-export function Card({ children, variant = 'default', style }: Props) {
-  const { c, isNight } = useTheme();
-  const base = [styles.card, { backgroundColor: c.card, borderColor: c.line }];
-
-  if (variant === 'ai') {
-    return (
-      <LinearGradient
-        colors={gradients.aiCard}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.card, styles.ai, style]}
-      >
-        {children}
-      </LinearGradient>
-    );
-  }
-
+/**
+ * A themed surface in the sticker anatomy (outline plus hard drop). Content stacks in a column
+ * with a 10 pt gap. Layout styles (margins, flex, width) go on the whole sticker, the rest on its face.
+ */
+export function Card({ children, variant = 'default', bg, radius = radii.lg, style }: Props) {
+  const { c } = useTheme();
+  const { outer, face } = splitStickerStyle(style);
+  const line = variant === 'live' ? c.mint : variant === 'hot' ? c.hotFill : undefined;
   return (
-    <View
-      style={[
-        base,
-        variant === 'live' && { borderColor: 'rgba(52,224,161,0.45)' },
-        variant === 'live' && isNight && glow(c.mint, 18, 0.35),
-        variant === 'hot' && { borderColor: 'rgba(255,90,60,0.50)' },
-        variant === 'hot' && isNight && glow(c.hot, 16, 0.35),
-        style,
-      ]}
+    <Sticker
+      radius={radius}
+      bg={bg ?? c.card}
+      line={line}
+      style={outer}
+      faceStyle={[styles.face, face]}
+      clip={variant === 'ai'}
     >
-      {variant === 'live' ? (
+      {variant === 'ai' ? (
         <LinearGradient
-          colors={gradients.liveOn}
-          start={{ x: 1, y: 0 }}
-          end={{ x: 0.4, y: 0.6 }}
-          style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
+          colors={gradients.aiCard}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
       ) : null}
       {children}
-    </View>
+    </Sticker>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderRadius: radius.lg, padding: 14, gap: 10 },
-  ai: { borderColor: 'rgba(165,133,255,0.30)', borderRadius: 20, paddingVertical: 12 },
+  face: { padding: 16, gap: 10 },
 });
