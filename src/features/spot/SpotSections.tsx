@@ -15,16 +15,29 @@ import { useTheme } from '@/theme/use-theme';
  * 7-day stop strip for mobile spots, Monday first, today highlighted (after hydration on web,
  * since "today" depends on the clock and time zone). Short names wrap to two lines, never clip.
  */
-export function ScheduleStrip({ spot, now, ready = true }: { spot: Spot; now: number; ready?: boolean }) {
+export function ScheduleStrip({
+  spot,
+  now,
+  ready = true,
+  compact,
+}: {
+  spot: Spot;
+  now: number;
+  ready?: boolean;
+  /** Just the strip (inside the spot page's "Seen" card): no heading or note. */
+  compact?: boolean;
+}) {
   const { c } = useTheme();
   const today = ready ? todayIndex(now) : -1;
   const days = spot.schedule ?? [];
   return (
     <View style={styles.gapSm}>
-      <Text variant="label" tone="ink2" accessibilityRole="header">
-        {t('spot.schedule')}
-      </Text>
-      <View style={styles.strip}>
+      {compact ? null : (
+        <Text variant="label" tone="ink2" accessibilityRole="header">
+          {t('spot.schedule')}
+        </Text>
+      )}
+      <View style={styles.strip} accessibilityLabel={t('spot.where')}>
         {days.map((stop, i) => {
           const isToday = i === today;
           const day = weekdayShort(i);
@@ -37,9 +50,9 @@ export function ScheduleStrip({ spot, now, ready = true }: { spot: Spot; now: nu
                 day: weekdayShort(i, 'long'),
                 place: where,
               })}
-              style={[styles.day, { backgroundColor: isToday ? c.neon : c.card2 }]}
+              style={[styles.day, { backgroundColor: isToday ? c.dayOn : c.card2 }]}
             >
-              <Text variant="micro" center style={{ color: isToday ? c.onNeon : c.ink2 }}>
+              <Text variant="micro" center style={[styles.dayName, { color: isToday ? c.dayOnInk : c.ink2 }]}>
                 {day}
               </Text>
               <Text
@@ -48,7 +61,7 @@ export function ScheduleStrip({ spot, now, ready = true }: { spot: Spot; now: nu
                 numberOfLines={2}
                 ellipsizeMode="clip"
                 textBreakStrategy="simple"
-                style={[styles.place, { color: isToday ? c.onNeon : stop ? c.ink : c.ink3 }]}
+                style={[styles.place, { color: isToday ? c.dayOnInk : c.ink2 }]}
               >
                 {stop ? stop.short : t('spot.off')}
               </Text>
@@ -56,9 +69,11 @@ export function ScheduleStrip({ spot, now, ready = true }: { spot: Spot; now: nu
           );
         })}
       </View>
-      <Text variant="caption" tone="ink2">
-        {spot.owner ? t('spot.scheduleNote', { own: spot.owner }) : t('spot.scheduleNoteAnon')}
-      </Text>
+      {compact ? null : (
+        <Text variant="caption" tone="ink2">
+          {spot.owner ? t('spot.scheduleNote', { own: spot.owner }) : t('spot.scheduleNoteAnon')}
+        </Text>
+      )}
     </View>
   );
 }
@@ -69,7 +84,7 @@ export function AiSummary({ spot }: { spot: Spot }) {
     <Card variant="ai">
       <View style={styles.titleRow}>
         <Glyph of={ui.sparkles} size={18} tone="grape" strokeWidth={2} />
-        <Text variant="heading" tone="grape" accessibilityRole="header" style={styles.shrink}>
+        <Text variant="cardTitle" accessibilityRole="header" style={styles.shrink}>
           {t('spot.whatPeopleSay')}
         </Text>
         <Badge label={t('spot.aiBadge')} tone="grape" />
@@ -122,7 +137,7 @@ export function BusyBars({ spot, now, ready = true }: { spot: Spot; now: number;
               styles.bar,
               {
                 height: Math.max(4, v * 8.8),
-                backgroundColor: ready && i === slot ? c.chili : isNight ? 'rgba(165,133,255,0.45)' : '#c9c0f5',
+                backgroundColor: ready && i === slot ? c.accent : isNight ? 'rgba(255,255,255,0.16)' : 'rgba(23,19,26,0.16)',
               },
             ]}
           />
@@ -179,12 +194,12 @@ export function VibeChips({ spot }: { spot: Spot }) {
   if (!spot.vibe.length) return null;
   return (
     <View style={styles.gapSm}>
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="cardTitle" accessibilityRole="header">
         {t('spot.vibe')}
       </Text>
       <View style={styles.wrap}>
         {spot.vibe.map((v) => (
-          <Badge key={v} label={v} style={styles.vibe} />
+          <Badge key={v} label={v} tone="outline" style={styles.vibe} />
         ))}
       </View>
     </View>
@@ -199,9 +214,10 @@ const styles = StyleSheet.create({
   gapSm: { gap: space.sm },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   titleRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm },
-  strip: { flexDirection: 'row', gap: 5 },
-  day: { flex: 1, minWidth: 0, minHeight: 64, borderRadius: 11, paddingVertical: 6, paddingHorizontal: 2, gap: 2 },
-  place: { fontSize: 10.5, lineHeight: 13 },
+  strip: { flexDirection: 'row', gap: 6 },
+  day: { flex: 1, minWidth: 0, minHeight: 50, borderRadius: 11, paddingVertical: 7, paddingHorizontal: 2, gap: 2 },
+  dayName: { fontFamily: 'Figtree_700Bold' },
+  place: { fontSize: 9.5, lineHeight: 12 },
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 88 },
   bar: { flex: 1, borderTopLeftRadius: 4, borderTopRightRadius: 4 },
   dim: { opacity: 0.4 },
