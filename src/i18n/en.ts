@@ -220,7 +220,6 @@ export const en = {
   'ask.a.cheap': 'Big flavor, small price. All of these have mains under $12.',
   'ask.a.fallback': "Hmm, I don't know that one yet. Try tacos, late night or rainy day.",
   'ask.a.noneOpen': 'Nothing like that is open right now. Here is what opens next.',
-  'ask.cardMeta': '{r} · {price} · {distance}',
 
   // You
   'you.title': 'You',
@@ -477,6 +476,49 @@ export const en = {
   'you.emptyBody': 'Check in at a spot or confirm a report to start.',
   'you.emptyCta': 'Open the map',
   'you.emptyCtaHint': 'Opens the Map tab',
+
+  // Category tiles in the spot panel (short labels; the full filter label is read aloud)
+  'tiles.a11y': 'Categories',
+  'tile.all': 'All',
+  'tile.open': 'Open',
+  'tile.mobile': 'Trucks',
+  'tile.tacos': 'Tacos',
+  'tile.bbq': 'BBQ',
+  'tile.sweets': 'Sweets',
+  'tile.asian': 'Asian',
+  'tile.popup': 'Pop-ups',
+  'tile.cheap': 'Cheap',
+
+  // Top 10 near you tonight
+  'top.title': 'Top 10 near you tonight',
+  'top.seeAll': 'See all',
+  'top.seeAllA11y': 'See all of the top 10 near you tonight',
+  'top.back': 'Back',
+  'top.backA11y': 'Back to all spots',
+  'top.sub': 'Ranked by live reports, confirmations, check-ins, hot spots, ratings and who is open now.',
+  'top.empty': 'Nothing is open nearby right now.',
+  'top.rankA11y': 'Number {n}',
+
+  // Spot card anatomy: one ribbon, one meta line, up to 3 tags
+  'card.meta': '{r} · {distance} · {when}',
+  'card.until': 'until {until}',
+  'card.opens': 'opens {until}',
+  'card.metaA11y': 'Rated {r}, {distance}, {when}',
+  'ribbon.left': '{n} left',
+  'ribbon.closing': 'Closing soon',
+  'ribbon.parked': 'Just parked',
+  'spotTag.cashOnly': 'Cash only',
+  'spotTag.picnic': 'Picnic tables',
+  'spotTag.vegan': 'Vegan options',
+  'spotTag.lateNight': 'Late night',
+  'spotTag.dogFriendly': 'Dog friendly',
+  'spotTag.kidFriendly': 'Kid friendly',
+  'spotTag.shade': 'Shaded seating',
+  'spotTag.byob': 'BYOB',
+  'spotTag.quick': 'Quick service',
+  'spotTag.earlyBird': 'Early bird',
+  'spotTag.bigPortions': 'Big portions',
+  'spotTag.bookAhead': 'Book ahead',
 } as const;
 
 export type StringKey = keyof typeof en;

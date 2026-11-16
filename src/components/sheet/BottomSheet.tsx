@@ -93,9 +93,11 @@ type Props = {
   children: ReactNode;
   /** Changes whenever the content swaps, to scroll back to the top. */
   contentKey?: string;
+  /** Height of the bar over the top of the screen: the full snap stops just below it. */
+  topInset?: number;
 };
 
-export function BottomSheet({ snap, onSnapChange, header, children, contentKey }: Props) {
+export function BottomSheet({ snap, onSnapChange, header, children, contentKey, topInset = 0 }: Props) {
   const { c, isNight } = useTheme();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReduceMotion();
@@ -103,7 +105,7 @@ export function BottomSheet({ snap, onSnapChange, header, children, contentKey }
   const [sheet] = useState(() => new SheetGesture());
   const scrollRef = useRef<ScrollViewInstance>(null);
 
-  const full = Math.max(PEEK + 40, areaH - insets.top - 56);
+  const full = Math.max(PEEK + 40, areaH - Math.max(insets.top + 56, topInset));
   const offsets = useMemo<Record<Snap, number>>(
     () => ({
       full: 0,

@@ -23,7 +23,7 @@ import { withAlpha } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityPill, IconButton, MapTopBar, ZoomPill } from '@/features/map/MapOverlay';
-import { SheetExplore, SheetHeader, SheetPreview } from '@/features/map/SheetContent';
+import { SheetExplore, SheetHeader, SheetPreview, type ExploreMode } from '@/features/map/SheetContent';
 
 /** At most this many pins show the big mood bubble at once (calm map). */
 const MAX_BUBBLES = 3;
@@ -226,7 +226,20 @@ export default function MapScreen() {
   const spots = useSpots();
   const bobs = useBobLoops();
   const window = useWindowDimensions();
-  const [snap, setSnap] = useState<Snap>('peek');
+  const [snap, setSnapState] = useState<Snap>('peek');
+  // 'top' shows the full Top 10 list in the sheet; it goes back to explore when the sheet collapses.
+  const [listMode, setListMode] = useState<ExploreMode>('explore');
+  const setSnap = useCallback((value: Snap) => {
+    setSnapState(value);
+    if (value === 'peek') setListMode('explore');
+  }, []);
+  const changeListMode = useCallback(
+    (mode: ExploreMode) => {
+      setListMode(mode);
+      if (mode === 'top') setSnap('full');
+    },
+    [setSnap],
+  );
   const [size, setSize] = useState({ w: 0, h: 0 });
   const height = size.h;
   // The top bar's measured height, so the camera centers inside the visible band.
@@ -245,7 +258,7 @@ export default function MapScreen() {
   const focus = useCallback(
     (spot: Spot) => {
       actions.selectSpot(spot.id);
-      setSnap((s) => (s === 'peek' ? 'half' : s));
+      setSnapState((s) => (s === 'peek' ? 'half' : s));
       mapRef.current?.animateTo(spot.x, spot.y, undefined, focusOffset);
     },
     [actions, focusOffset],
@@ -263,14 +276,14 @@ export default function MapScreen() {
     if (!height || !selected || lastFocused.current === selected.id) return;
     lastFocused.current = selected.id;
     mapRef.current?.animateTo(selected.x, selected.y, undefined, focusOffset);
-    setSnap((s) => (s === 'peek' ? 'half' : s));
+    setSnapState((s) => (s === 'peek' ? 'half' : s));
   }, [selected, height, focusOffset, focusSeq]);
 
   const close = useCallback(() => {
     lastFocused.current = null;
     actions.selectSpot(null);
     setSnap('peek');
-  }, [actions]);
+  }, [actions, setSnap]);
 
   const onPin = useCallback(
     (spot: Spot) => {
@@ -411,10 +424,13 @@ export default function MapScreen() {
       <BottomSheet
         snap={snap}
         onSnapChange={setSnap}
-        contentKey={selected?.id ?? 'explore'}
+        contentKey={selected?.id ?? listMode}
+        topInset={topEstimate + 8}
         header={selected ? null : <SheetHeader spots={spots} />}
       >
-        {selected ? <SheetPreview spot={selected} onClose={close} /> : <SheetExplore spots={spots} onFocus={onPin} />}
+        {selected ? <SheetPreview spot={selected} onClose={close} /> : (
+          <SheetExplore spots={spots} onFocus={onPin} mode={listMode} onModeChange={changeListMode} />
+        )}
       </BottomSheet>
     </View>
   );

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { Animated, Pressable, ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Chip, Glyph, Icon, Text, useToast } from '@/components/ui';
@@ -10,26 +10,17 @@ import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useScreenReader } from '@/hooks/use-screen-reader';
 import { reportAt } from '@/data/format';
 import type { Report, Spot } from '@/data/types';
-import { matchesFilter, useAllReports, useSpots } from '@/hooks/use-spots';
-import { t, type StringKey } from '@/i18n';
-import { useNotes, useStore, type FilterKey } from '@/state/store';
+import { useAllReports } from '@/hooks/use-spots';
+import { t } from '@/i18n';
+import { useNotes, useStore } from '@/state/store';
 import { avatar, avatarBg, filterIcon, ui, type AvatarKey } from '@/theme/emoji';
 import type { GlyphSource } from '@/theme/glyphs';
 import { dur, ease, native, spring } from '@/theme/motion';
 import { elevation, minTap, palettes, radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-const FILTERS: { key: FilterKey; label: StringKey }[] = [
-  { key: 'all', label: 'filter.all' },
-  { key: 'open', label: 'filter.open' },
-  { key: 'mobile', label: 'filter.mobile' },
-  { key: 'tacos', label: 'filter.tacos' },
-  { key: 'bbq', label: 'filter.bbq' },
-  { key: 'sweets', label: 'filter.sweets' },
-  { key: 'asian', label: 'filter.asian' },
-  { key: 'popup', label: 'filter.popup' },
-  { key: 'cheap', label: 'filter.cheap' },
-];
+import { FILTERS, usePickFilter } from './filters';
+
 
 /** The top of the map: Ask pill, day/night toggle, bell, filter chips and the live ticker. */
 export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => void }) {
@@ -79,13 +70,8 @@ export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => v
 }
 
 function FilterChips() {
-  const { state, actions } = useStore();
-  const spots = useSpots();
-  const pick = (key: FilterKey, label: string) => {
-    actions.setFilter(key);
-    const n = spots.filter((s) => matchesFilter(s, key)).length;
-    AccessibilityInfo.announceForAccessibility(t('filter.announce', { n, filter: label }));
-  };
+  const { state } = useStore();
+  const pick = usePickFilter();
   return (
     <ScrollView
       horizontal
@@ -94,20 +80,17 @@ function FilterChips() {
       contentContainerStyle={styles.chipsContent}
       accessibilityLabel={t('map.filters')}
     >
-      {FILTERS.map((f) => {
-        const label = t(f.label);
-        return (
-          <Chip
-            key={f.key}
-            tone="glass"
-            compact
-            label={label}
-            icon={filterIcon[f.key]}
-            selected={state.filter === f.key}
-            onPress={() => pick(f.key, label)}
-          />
-        );
-      })}
+      {FILTERS.map((f) => (
+        <Chip
+          key={f.key}
+          tone="glass"
+          compact
+          label={t(f.label)}
+          icon={filterIcon[f.key]}
+          selected={state.filter === f.key}
+          onPress={() => pick(f.key)}
+        />
+      ))}
     </ScrollView>
   );
 }

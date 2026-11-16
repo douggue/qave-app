@@ -13,6 +13,21 @@ import type {
 // data module can be swapped for real queries without touching screens.
 
 export type SpotKind = KindKey;
+/** Small facts shown as grey tags on spot cards; each has a `spotTag.<key>` string in i18n. */
+export type SpotTag =
+  | 'cashOnly'
+  | 'picnic'
+  | 'vegan'
+  | 'lateNight'
+  | 'dogFriendly'
+  | 'kidFriendly'
+  | 'shade'
+  | 'byob'
+  | 'quick'
+  | 'earlyBird'
+  | 'bigPortions'
+  | 'bookAhead';
+
 export type SpotCategory = 'tacos' | 'bbq' | 'sweets' | 'asian' | 'burgers' | 'caribbean' | 'popup';
 
 /** A local clock time. `day` (0 = Sunday) is set for a time on another day. */
@@ -53,6 +68,8 @@ export type Spot = {
   badges: string[];
   owner?: string;
   vibe: string[];
+  /** Up to 3 are shown on cards, in this order. */
+  tags: SpotTag[];
   aiSummary: string;
   dishes: Dish[];
   /** Relative busyness for 16 hourly slots from 8am to 11pm, 0 to 10. */

@@ -12,10 +12,12 @@ type Props = {
   radius?: number;
   emojiSize?: number;
   style?: StyleProp<ViewStyle>;
+  /** Style for the gradient that holds the sticker, e.g. padding to move the sticker off center. */
+  fillStyle?: StyleProp<ViewStyle>;
 };
 
 /** Gradient food art: the spot's glow pair with its food emoji. Decorative. */
-export function FoodArt({ food: key, width, height, radius = 18, emojiSize, style }: Props) {
+export function FoodArt({ food: key, width, height, radius = 18, emojiSize, style, fillStyle }: Props) {
   const [light, strong] = foodGlow[key] ?? glowFallback;
   const size = emojiSize ?? Math.round(Math.min(typeof width === 'number' ? width : height, height) * 0.55);
   return (
@@ -24,7 +26,7 @@ export function FoodArt({ food: key, width, height, radius = 18, emojiSize, styl
       importantForAccessibility="no-hide-descendants"
       style={[{ width, height, borderRadius: radius, overflow: 'hidden' }, style]}
     >
-      <LinearGradient colors={[light, strong]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fill}>
+      <LinearGradient colors={[light, strong]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.fill, fillStyle]}>
         <FoodSticker food={key} size={size} />
       </LinearGradient>
       <LinearGradient

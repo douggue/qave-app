@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { CompactSpotRow, SpotRow, TrendCard } from '@/components/cards/SpotCards';
+import { CompactSpotRow, SpotCard, SpotRow, TrendCard } from '@/components/cards/SpotCards';
 import { ClosingSoon, StillThere } from '@/components/spot/Freshness';
 import { Badge, Button, Glyph, LiveText, Text, useToast } from '@/components/ui';
 import {
@@ -16,18 +17,29 @@ import {
   statusText,
 } from '@/data/format';
 import { directionsUrl } from '@/data/links';
+import { rankTonight } from '@/data/rank';
 import type { Spot } from '@/data/types';
 import { getAppStart, useClock } from '@/hooks/use-clock';
 import { useCheckIn } from '@/hooks/use-check-in';
-import { matchesFilter } from '@/hooks/use-spots';
+import { matchesFilter, useAllReports } from '@/hooks/use-spots';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
 import { ui } from '@/theme/emoji';
-import { moodGlyph, reportGlyph } from '@/theme/glyphs';
-import { minTap } from '@/theme/tokens';
+import { moodGlyph, reportGlyph, uiGlyph } from '@/theme/glyphs';
+import { minTap, radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-type ExploreProps = { spots: Spot[]; onFocus: (spot: Spot) => void };
+import { CategoryTiles } from './CategoryTiles';
+
+export type ExploreMode = 'explore' | 'top';
+
+type ExploreProps = {
+  spots: Spot[];
+  onFocus: (spot: Spot) => void;
+  /** 'top' shows the full Top 10 list instead of the explore content. */
+  mode: ExploreMode;
+  onModeChange: (mode: ExploreMode) => void;
+};
 
 /** Rows shown compact at the top of the list, so the peek shows real spots (two fit). */
 const COMPACT_ROWS = 3;
@@ -47,13 +59,63 @@ export function SheetHeader({ spots }: { spots: Spot[] }) {
   );
 }
 
+/** Open spots ranked for tonight (src/data/rank.ts), from live reports and your activity. */
+function useTonightRank(spots: Spot[]): Spot[] {
+  const { checkIns, votes, stillHere } = useStore().state;
+  const reports = useAllReports();
+  const now = useClock(60_000);
+  return useMemo(
+    () => rankTonight(spots, { reports, checkIns, votes, stillHere, now, appStart: getAppStart() }),
+    [spots, reports, checkIns, votes, stillHere, now],
+  );
+}
+
 /**
  * Explore state. The peek shows the first two rows, closing-soon first then nearest (idea B),
- * so the first view is useful. Then the trending rail, then the rest of the list.
+ * so the first view is useful. Then the category tiles, the Top 10 rail, trending and the rest.
+ * In 'top' mode it shows the whole Top 10 as a ranked list.
  */
-export function SheetExplore({ spots, onFocus }: ExploreProps) {
+export function SheetExplore({ spots, onFocus, mode, onModeChange }: ExploreProps) {
+  const { c } = useTheme();
   const { filter } = useStore().state;
   const now = useClock(60_000);
+  const ranked = useTonightRank(spots);
+
+  if (mode === 'top') {
+    return (
+      <>
+        <View style={styles.topHead}>
+          <Pressable
+            onPress={() => onModeChange('explore')}
+            accessibilityRole="button"
+            accessibilityLabel={t('top.backA11y')}
+            style={({ pressed }) => [styles.back, { backgroundColor: c.card2 }, pressed && styles.pressed]}
+          >
+            <Glyph of={ui.back} size={14} color={c.ink} strokeWidth={2.6} />
+            <Text variant="label">{t('top.back')}</Text>
+          </Pressable>
+        </View>
+        <View style={styles.sectionTitle}>
+          <Glyph of={uiGlyph.star} size={18} />
+          <Text variant="heading" accessibilityRole="header" style={styles.shrink}>
+            {t('top.title')}
+          </Text>
+        </View>
+        <Text variant="label" tone="ink2">
+          {t('top.sub')}
+        </Text>
+        {ranked.length ? (
+          <View>
+            {ranked.map((spot, i) => (
+              <SpotRow key={spot.id} spot={spot} rank={i + 1} onPress={onFocus} />
+            ))}
+          </View>
+        ) : (
+          <Text tone="ink2">{t('top.empty')}</Text>
+        )}
+      </>
+    );
+  }
 
   const trending = spots
     .filter((s) => s.open && (s.hot || s.mood))
@@ -76,37 +138,67 @@ export function SheetExplore({ spots, onFocus }: ExploreProps) {
     <>
       {top.length ? (
         <View>
-          {top.map(({ spot, left }) => (
-            <CompactSpotRow key={spot.id} spot={spot} closingMin={left} onPress={onFocus} />
+          {top.map(({ spot }) => (
+            <CompactSpotRow key={spot.id} spot={spot} onPress={onFocus} />
           ))}
         </View>
       ) : (
         <Text tone="ink2">{t('sheet.noMatch')}</Text>
       )}
-      <Text variant="label" tone="ink2">
-        {t('sheet.sub', { count: spots.length, open: spots.filter((s) => s.open).length })}
-        {'\n'}
-        {t('sheet.hint')}
-      </Text>
+      <CategoryTiles />
+      {ranked.length ? (
+        <>
+          <View style={styles.titleRow}>
+            <View style={[styles.sectionTitle, styles.titleText]}>
+              <Glyph of={uiGlyph.star} size={18} />
+              <Text variant="heading" accessibilityRole="header" style={styles.shrink}>
+                {t('top.title')}
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => onModeChange('top')}
+              accessibilityRole="button"
+              accessibilityLabel={t('top.seeAllA11y')}
+              hitSlop={4}
+              style={({ pressed }) => [styles.seeAll, pressed && styles.pressed]}
+            >
+              <Text variant="label" tone="ink2">
+                {t('top.seeAll')}
+              </Text>
+              <Glyph of={ui.chevron} size={11} color={c.ink2} strokeWidth={2.8} />
+            </Pressable>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.railScroll} contentContainerStyle={styles.rail}>
+            {ranked.map((spot, i) => (
+              <SpotCard key={spot.id} spot={spot} rank={i + 1} onPress={onFocus} />
+            ))}
+          </ScrollView>
+        </>
+      ) : null}
       <View style={styles.sectionTitle}>
         <Glyph of={reportGlyph.amazing} size={18} />
         <Text variant="heading" accessibilityRole="header" style={styles.shrink}>
           {t('sheet.trending')}
         </Text>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.railScroll} contentContainerStyle={styles.rail}>
         {trending.map((spot) => (
           <TrendCard key={spot.id} spot={spot} onPress={onFocus} />
         ))}
       </ScrollView>
+      <Text variant="label" tone="ink2">
+        {t('sheet.sub', { count: spots.length, open: spots.filter((s) => s.open).length })}
+        {'\n'}
+        {t('sheet.hint')}
+      </Text>
       {rest.length ? (
         <>
           <Text variant="heading" accessibilityRole="header">
             {t('sheet.more')}
           </Text>
           <View>
-            {rest.map(({ spot, left }) => (
-              <SpotRow key={spot.id} spot={spot} closingMin={left} onPress={onFocus} />
+            {rest.map(({ spot }) => (
+              <SpotRow key={spot.id} spot={spot} onPress={onFocus} />
             ))}
           </View>
         </>
@@ -232,7 +324,21 @@ const styles = StyleSheet.create({
   headerTitle: { flexShrink: 1 },
   headerSub: { flexShrink: 1 },
   sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  rail: { gap: 12, paddingRight: 16 },
+  rail: { gap: 12, paddingHorizontal: 16, alignItems: 'flex-start' },
+  railScroll: { marginHorizontal: -16, flexGrow: 0 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  titleText: { flex: 1, minWidth: 0 },
+  seeAll: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: minTap, paddingLeft: 8 },
+  topHead: { flexDirection: 'row' },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: minTap,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+  },
+  pressed: { opacity: 0.85 },
   shrink: { flexShrink: 1 },
   preview: { gap: 12 },
   top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },

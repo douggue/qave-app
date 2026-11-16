@@ -1,7 +1,7 @@
 import { getLocale, t, type StringKey } from '@/i18n';
 
 import { ME } from './repo';
-import type { ClockTime, Report, Spot, Until } from './types';
+import type { ClockTime, Report, Spot, SpotTag, Until } from './types';
 
 // Display helpers shared by the map, sheet and spot page (03-ux-eater-flows.md 1.2).
 
@@ -231,3 +231,37 @@ export function countdownWords(ms: number): string {
   if (h > 0) return m > 0 ? t('time.words2', { a: hours, b: mins }) : hours;
   return mins;
 }
+
+/** The rating with one decimal in the device locale: "4.8", or "4,8" in French. */
+export function ratingText(spot: Pick<Spot, 'rating'>): string {
+  try {
+    return spot.rating.toLocaleString(getLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  } catch {
+    return spot.rating.toFixed(1);
+  }
+}
+
+/** When the spot serves next: "until 10 PM" while open, else "opens Sat 9 AM". */
+export const whenText = (spot: Spot) => t(spot.open ? 'card.until' : 'card.opens', { until: formatUntil(spot.until) });
+
+/** The one meta line every spot card shares: "4.8 · 0.4 mi · until 10 PM" (the star is drawn beside it). */
+export const cardMeta = (spot: Spot) =>
+  t('card.meta', { r: ratingText(spot), distance: formatDistance(spot), when: whenText(spot) });
+
+const TAG_KEYS: Record<SpotTag, StringKey> = {
+  cashOnly: 'spotTag.cashOnly',
+  picnic: 'spotTag.picnic',
+  vegan: 'spotTag.vegan',
+  lateNight: 'spotTag.lateNight',
+  dogFriendly: 'spotTag.dogFriendly',
+  kidFriendly: 'spotTag.kidFriendly',
+  shade: 'spotTag.shade',
+  byob: 'spotTag.byob',
+  quick: 'spotTag.quick',
+  earlyBird: 'spotTag.earlyBird',
+  bigPortions: 'spotTag.bigPortions',
+  bookAhead: 'spotTag.bookAhead',
+};
+
+/** Up to three translated tags for a card. */
+export const tagTexts = (spot: Spot, max = 3) => spot.tags.slice(0, max).map((tag) => t(TAG_KEYS[tag]));
