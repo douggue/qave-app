@@ -310,7 +310,8 @@ export default function MapScreen() {
             onPress={onPin}
           />
         ))}
-        {crowds.map(({ spot, here, faces }) =>
+        {/* One pill only: the biggest crowd. Smaller crowds keep just their glow. */}
+        {[...crowds].sort((x, y) => y.here - x.here).slice(0, 1).map(({ spot, here, faces }) =>
           matchesFilter(spot, state.filter) ? (
             <CrowdPill
               key={`pill-${spot.id}`}

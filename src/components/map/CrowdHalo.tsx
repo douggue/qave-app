@@ -1,5 +1,5 @@
 import { memo, useId } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 import { Glyph, Text } from '@/components/ui';
@@ -77,7 +77,7 @@ export const CrowdPill = memo(function CrowdPill({
   const hour = new Date(useClock(60_000)).getHours();
   const label = t(hour >= 17 || hour < 5 ? 'crowd.here' : 'crowd.hereToday', { n: here });
   return (
-    <View
+    <Animated.View
       pointerEvents="none"
       style={[
         styles.pillBox,
@@ -106,17 +106,17 @@ export const CrowdPill = memo(function CrowdPill({
             <Glyph key={f} of={avatar[f]} size={19} style={i ? styles.overlap : undefined} />
           ))}
         </View>
-        <Text variant="caption" style={[styles.pillText, { color: c.crowdInk }]}>
+        <Text variant="caption" numberOfLines={1} style={[styles.pillText, { color: c.crowdInk }]}>
           {label}
         </Text>
       </View>
-    </View>
+    </Animated.View>
   );
 });
 
 /** Where the pill sits relative to the anchor (right of and a little below the sticker). */
 const PILL_X = 28;
-const PILL_W = PILL_X + 140;
+const PILL_W = PILL_X + 200;
 const PILL_H = 74;
 
 const styles = StyleSheet.create({
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     paddingRight: 11,
     borderRadius: 999,
-    maxWidth: 140,
+    maxWidth: 200,
     shadowColor: '#000000',
     shadowOpacity: 0.25,
     shadowRadius: 7,

@@ -329,7 +329,11 @@ function StatCard({
         style={styles.statText}
       >
         {value ? (
-          <Text style={[styles.statValue, value.length > 7 && styles.statValueLong, { color: col.ink }]}>{value}</Text>
+          <Text
+            style={[styles.statValue, value.length > 7 && styles.statValueLong, { color: col.ink }]}
+          >
+            {value}
+          </Text>
         ) : null}
         <Text variant="label" style={[styles.statLabel, { color: col.ink }]}>
           {label}
@@ -362,7 +366,7 @@ const styles = StyleSheet.create({
   statFace: { minHeight: 118, padding: 16 },
   statArt: { position: 'absolute', right: -6, bottom: -8, transform: [{ rotate: '12deg' }] },
   statText: { gap: 6 },
-  statValue: { fontFamily: 'Unbounded_800ExtraBold', fontSize: 30, lineHeight: 36, letterSpacing: -1 },
+  statValue: { fontFamily: 'Unbounded_800ExtraBold', fontSize: 26, lineHeight: 32, letterSpacing: -1 },
   statValueLong: { fontSize: 20, lineHeight: 26, letterSpacing: -0.5 },
   statLabel: { fontFamily: 'Figtree_700Bold', opacity: 0.9 },
   statEmpty: { opacity: 0.85, paddingRight: 34 },
