@@ -36,7 +36,6 @@ export const en = {
   'map.summary': '{count} local spots near you. {open} open now. 0 chains.',
   'map.you': 'You are here',
   'map.a11y': 'Map of local food spots. Drag to move around.',
-  'map.askPill': 'Ask Lokal: "tacos open now under $10"',
   'map.askA11y': 'Ask Lokal',
   'map.askHint': 'Opens the Ask tab',
   'map.bell': 'Notifications, {n} unread',
@@ -476,6 +475,15 @@ export const en = {
   'you.emptyBody': 'Check in at a spot or confirm a report to start.',
   'you.emptyCta': 'Open the map',
   'you.emptyCtaHint': 'Opens the Map tab',
+  // Talking Ask bar: playful placeholder lines that rotate in the Ask pill
+  'map.askLine1': 'Birria, where you at?',
+  'map.askLine2': 'Tacos, show yourself!',
+  'map.askLine3': "Brisket, I'm coming for you",
+  'map.askLine4': "Kolache, don't hide from me",
+  'map.askLine5': 'Paleta, appear!',
+  'map.askLine6': 'Late-night pho, you up?',
+  'map.askLine7': "Smash burger, where'd you park?",
+  'map.askLine8': 'Dumplings, come out and play',
 
   // Category tiles in the spot panel (short labels; the full filter label is read aloud)
   'tiles.a11y': 'Categories',

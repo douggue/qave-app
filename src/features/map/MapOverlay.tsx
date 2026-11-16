@@ -11,7 +11,7 @@ import { useScreenReader } from '@/hooks/use-screen-reader';
 import { reportAt } from '@/data/format';
 import type { Report, Spot } from '@/data/types';
 import { useAllReports } from '@/hooks/use-spots';
-import { t } from '@/i18n';
+import { t, type StringKey } from '@/i18n';
 import { useNotes, useStore } from '@/state/store';
 import { avatar, avatarBg, filterIcon, ui, type AvatarKey } from '@/theme/emoji';
 import type { GlyphSource } from '@/theme/glyphs';
@@ -21,6 +21,18 @@ import { useTheme } from '@/theme/use-theme';
 
 import { FILTERS, usePickFilter } from './filters';
 
+/** Playful lines the Ask pill cycles through, every ASK_STEP ms. */
+const ASK_LINES: StringKey[] = [
+  'map.askLine1',
+  'map.askLine2',
+  'map.askLine3',
+  'map.askLine4',
+  'map.askLine5',
+  'map.askLine6',
+  'map.askLine7',
+  'map.askLine8',
+];
+const ASK_STEP = 3500;
 
 /** The top of the map: Ask pill, day/night toggle, bell, filter chips and the live ticker. */
 export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => void }) {
@@ -46,9 +58,7 @@ export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => v
           style={({ pressed }) => [styles.ask, { backgroundColor: c.glass, borderColor: c.line }, pressed && styles.pressed]}
         >
           <Glyph of={ui.sparkles} size={17} tone="brand" strokeWidth={2} />
-          <Text variant="ui" tone="ink2" numberOfLines={1} style={styles.shrink}>
-            {t('map.askPill')}
-          </Text>
+          <AskLine />
         </Pressable>
         <IconButton
           icon={isNight ? ui.sun : ui.moon}
@@ -66,6 +76,39 @@ export function MapTopBar({ onLayout }: { onLayout?: (e: LayoutChangeEvent) => v
       <FilterChips />
       <Ticker />
     </View>
+  );
+}
+
+/**
+ * The Ask pill's placeholder: a playful food line that changes every 3.5 s on the shared clock
+ * with a soft fade. No fade under reduce motion; it holds still while a screen reader is on.
+ * Decorative: the pill's label stays "Ask Lokal".
+ */
+function AskLine() {
+  const reduceMotion = useReduceMotion();
+  const screenReader = useScreenReader();
+  const step = screenReader ? 3_600_000 : ASK_STEP;
+  const now = useClock(step);
+  const index = Math.floor(now / step) % ASK_LINES.length;
+
+  const [fade] = useState(() => new Animated.Value(1));
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    if (reduceMotion) return;
+    fade.setValue(0);
+    Animated.timing(fade, { toValue: 1, duration: dur.slow, easing: ease.out, useNativeDriver: native }).start();
+  }, [index, fade, reduceMotion]);
+
+  return (
+    <Animated.View style={[styles.askLine, { opacity: fade }]} aria-hidden importantForAccessibility="no-hide-descendants">
+      <Text variant="ui" tone="ink2" numberOfLines={2}>
+        {t(ASK_LINES[index])}
+      </Text>
+    </Animated.View>
   );
 }
 
@@ -318,6 +361,7 @@ const styles = StyleSheet.create({
     ...elevation.e2,
   },
   shrink: { flexShrink: 1 },
+  askLine: { flex: 1, minWidth: 0 },
   pressed: { opacity: 0.85 },
   chips: { marginHorizontal: -12, flexGrow: 0 },
   chipsContent: { paddingHorizontal: 12, gap: 8 },
