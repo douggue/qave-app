@@ -11,15 +11,15 @@ import {
   type ScrollViewInstance,
 } from 'react-native';
 
-import { Badge, Chip, Glyph, Screen, Text } from '@/components/ui';
+import { Badge, Chip, Glyph, Screen, ScreenTitle, Sticker } from '@/components/ui';
 import { answer } from '@/data/ask';
 import { AnswerCard } from '@/features/ask/AnswerCard';
 import { ChatBubble, TypingDots } from '@/features/ask/ChatBubble';
 import { useShowOnMap } from '@/hooks/use-show-on-map';
 import { useSpots } from '@/hooks/use-spots';
 import { t, type StringKey } from '@/i18n';
-import { tab, ui } from '@/theme/emoji';
-import { radius, space, type as typeScale } from '@/theme/tokens';
+import { ui } from '@/theme/emoji';
+import { space, type as typeScale } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 type Message = { id: number; from: 'me' | 'bot'; text: string; spotIds: string[] };
@@ -70,16 +70,11 @@ export default function AskScreen() {
     <Screen>
       <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
-          <View style={styles.titleRow}>
-            <Glyph of={tab.ask} size={20} tone="brand" strokeWidth={2} />
-            <Text variant="title" accessibilityRole="header" style={styles.title}>
-              {t('ask.title')}
-            </Text>
-            <Badge label={t('common.demo').toUpperCase()} accessibilityLabel={t('common.demo')} tone="grape" />
-          </View>
-          <Text variant="caption" tone="ink2">
-            {t('ask.demoNote')}
-          </Text>
+          <ScreenTitle
+            title={t('ask.title')}
+            sub={t('ask.demoNote')}
+            right={<Badge label={t('common.demo').toUpperCase()} accessibilityLabel={t('common.demo')} tone="grape" />}
+          />
         </View>
 
         <ScrollView
@@ -103,41 +98,51 @@ export default function AskScreen() {
 
         <View style={styles.bottom}>
           <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              accessibilityLabel={t('ask.suggest')}
-              contentContainerStyle={styles.chips}
-            >
-              {CHIPS.map((key) => (
-                <Chip key={key} label={t(key)} onPress={() => send(t(key))} />
-              ))}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            accessibilityLabel={t('ask.suggest')}
+            contentContainerStyle={styles.chips}
+          >
+            {CHIPS.map((key) => (
+              <Chip key={key} label={t(key)} onPress={() => send(t(key))} />
+            ))}
           </ScrollView>
           <View style={styles.composer}>
-            <TextInput
-              value={draft}
-              onChangeText={setDraft}
-              onSubmitEditing={() => send(draft)}
-              placeholder={t('ask.placeholder')}
-              placeholderTextColor={c.ink3}
-              accessibilityLabel={t('ask.inputA11y')}
-              returnKeyType="send"
-              style={[styles.input, typeScale.body, { backgroundColor: c.card, borderColor: c.line, color: c.ink }]}
-            />
+            <Sticker radius={16} drop={4} style={styles.inputWrap}>
+              <TextInput
+                value={draft}
+                onChangeText={setDraft}
+                onSubmitEditing={() => send(draft)}
+                placeholder={t('ask.placeholder')}
+                placeholderTextColor={c.ink2}
+                accessibilityLabel={t('ask.inputA11y')}
+                returnKeyType="send"
+                style={[styles.input, typeScale.body, { color: c.ink }]}
+              />
+            </Sticker>
             <Pressable
               onPress={() => send(draft)}
               disabled={!canSend}
               accessibilityRole="button"
               accessibilityLabel={t('ask.send')}
               accessibilityState={{ disabled: !canSend }}
-              style={({ pressed }) => [
-                styles.send,
-                { backgroundColor: c.grape },
-                !canSend && { opacity: 0.4 },
-                pressed && { opacity: 0.85 },
-              ]}
+              style={!canSend && styles.disabled}
             >
-              <Glyph of={ui.send} size={19} color={c.onGrape} strokeWidth={2.6} />
+              {({ pressed }) => (
+                <Sticker
+                  radius={16}
+                  drop={4}
+                  bg={c.neon}
+                  line={c.ctaLine}
+                  dropColor={c.ctaDrop}
+                  pressed={pressed && canSend}
+                  style={styles.send}
+                  faceStyle={styles.sendFace}
+                >
+                  <Glyph of={ui.send} size={19} color={c.onNeon} strokeWidth={2.6} />
+                </Sticker>
+              )}
             </Pressable>
           </View>
         </View>
@@ -148,14 +153,15 @@ export default function AskScreen() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
-  header: { gap: space.xs, paddingTop: space.sm, paddingHorizontal: space.lg, paddingBottom: space.sm },
-  titleRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm },
-  title: { flexShrink: 1 },
-  messages: { padding: space.lg, gap: space.md },
+  header: { paddingTop: space.sm, paddingHorizontal: 20, paddingBottom: space.sm },
+  messages: { paddingHorizontal: 20, paddingVertical: space.lg, gap: space.md },
   message: { gap: space.sm },
   bottom: { gap: space.sm, paddingBottom: space.sm },
-  chips: { gap: space.sm, paddingHorizontal: space.lg },
-  composer: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
-  input: { flex: 1, minHeight: 48, borderRadius: radius.md, borderWidth: 1, paddingHorizontal: space.md, paddingVertical: 10 },
-  send: { width: 48, height: 48, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  chips: { gap: space.sm, paddingHorizontal: 20, paddingBottom: 3 },
+  composer: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: 20 },
+  inputWrap: { flex: 1 },
+  input: { minHeight: 48, borderRadius: 16, paddingHorizontal: space.md, paddingVertical: 10 },
+  send: { width: 52 },
+  sendFace: { height: 48, alignItems: 'center', justifyContent: 'center' },
+  disabled: { opacity: 0.45 },
 });

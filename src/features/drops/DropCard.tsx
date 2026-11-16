@@ -1,9 +1,8 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { Button, Card, Glyph, LiveText, Text } from '@/components/ui';
+import { Button, Card, Glyph, LiveText, Sticker, Text } from '@/components/ui';
 import type { DropState } from '@/data/drops';
 import { countdownWords, formatCountdown, formatDistance } from '@/data/format';
 import type { Drop, Spot } from '@/data/types';
@@ -108,13 +107,12 @@ export function DropCard({ drop, spot, state, reminded, claimed, onRemind, onCla
           hitSlop={hitSlop}
           accessibilityRole="button"
           accessibilityLabel={t('common.showOnMapA11y', { name: spot.name })}
-          style={({ pressed }) => [
-            styles.mapBtn,
-            { backgroundColor: c.card2, borderColor: c.line },
-            pressed && { opacity: 0.8 },
-          ]}
         >
-          <Glyph of={ui.pin} size={19} color={c.ink} />
+          {({ pressed }) => (
+            <Sticker radius={18} pressed={pressed} style={styles.mapBtn} faceStyle={styles.mapFace}>
+              <Glyph of={ui.pin} size={19} color={c.ink} />
+            </Sticker>
+          )}
         </Pressable>
       </View>
     </Card>
@@ -142,9 +140,9 @@ function LivePill() {
     return () => loop.stop();
   }, [blink, reduceMotion]);
   return (
-    <View style={[styles.livePill, { backgroundColor: c.chili }]}>
+    <View style={[styles.livePill, { backgroundColor: c.hotFill }]}>
       <Animated.View style={[styles.liveDot, { opacity: blink }]} />
-      <Text variant="micro" tone="onHot">
+      <Text variant="micro" tone="onNeon" style={styles.liveText}>
         {t('drops.liveNow').toUpperCase()}
       </Text>
     </View>
@@ -175,10 +173,11 @@ function PortionsBar({ left, of }: { left: number; of: number }) {
       style={[styles.track, { backgroundColor: c.card2 }]}
     >
       <Animated.View
-        style={[styles.fill, { width: width.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }]}
-      >
-        <LinearGradient colors={[c.grill, c.sun]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
-      </Animated.View>
+        style={[
+          styles.fill,
+          { backgroundColor: c.neon, width: width.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) },
+        ]}
+      />
     </View>
   );
 }
@@ -196,7 +195,7 @@ const styles = StyleSheet.create({
     rowGap: space.xs,
   },
   inline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', columnGap: space.sm },
-  timer: { fontFamily: 'Unbounded_800ExtraBold', fontSize: 20, lineHeight: 26 },
+  timer: { fontFamily: 'Unbounded_800ExtraBold', fontSize: 22, lineHeight: 28 },
   livePill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -205,17 +204,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.pill,
   },
-  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#ffffff' },
+  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#17131a' },
+  liveText: { fontFamily: 'Figtree_800ExtraBold', letterSpacing: 0.6 },
   track: { height: 8, borderRadius: 4, overflow: 'hidden' },
   fill: { height: 8, borderRadius: 4, overflow: 'hidden' },
   actions: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   main: { flex: 1 },
-  mapBtn: {
-    width: minTap + 6,
-    height: minTap + 6,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  mapBtn: { width: minTap + 8 },
+  mapFace: { height: minTap + 8, alignItems: 'center', justifyContent: 'center' },
 });

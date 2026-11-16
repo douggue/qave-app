@@ -25,7 +25,7 @@ export function GoLiveSheet() {
 const stopCaption = (stop: Stop) => (stop.current ? t('biz.currentLocation') : t('biz.savedStop', { hood: stop.hood }));
 
 function Sheet() {
-  const { c } = useTheme();
+  const { c, st } = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const reduceMotion = useReduceMotion();
@@ -35,9 +35,7 @@ function Sheet() {
   const [untilIndex, setUntilIndex] = useState(() =>
     Math.max(
       0,
-      biz.untilOptions.findIndex(
-        (u) => u !== 'soldOut' && u.h === biz.defaultUntil.h && u.m === biz.defaultUntil.m,
-      ),
+      biz.untilOptions.findIndex((u) => u !== 'soldOut' && u.h === biz.defaultUntil.h && u.m === biz.defaultUntil.m),
     ),
   );
   const [show] = useState(() => new Animated.Value(0));
@@ -79,7 +77,7 @@ function Sheet() {
           accessibilityViewIsModal
           style={[
             styles.sheet,
-            { backgroundColor: c.card, borderColor: c.line, transform: [{ translateY }] },
+            { backgroundColor: c.sheet, borderColor: c.stickerLine, borderWidth: st.line, transform: [{ translateY }] },
           ]}
         >
           <ScrollView contentContainerStyle={styles.content} bounces={false}>
@@ -114,7 +112,7 @@ function Sheet() {
                     accessibilityLabel={t('biz.stopA11y', { name: s.name, caption })}
                     style={({ pressed }) => [
                       styles.stop,
-                      { backgroundColor: c.card2, borderColor: checked ? c.mint : c.line },
+                      { backgroundColor: checked ? c.tintMint : c.card, borderColor: checked ? c.mint : c.stickerLine },
                       pressed && { opacity: 0.85 },
                     ]}
                   >
@@ -125,9 +123,7 @@ function Sheet() {
                         {caption}
                       </Text>
                     </View>
-                    {checked ? (
-                      <Glyph of={ui.check} size={18} color={c.mint} strokeWidth={2.6} />
-                    ) : null}
+                    {checked ? <Glyph of={ui.check} size={18} color={c.mint} strokeWidth={2.6} /> : null}
                   </Pressable>
                 );
               })}

@@ -10,7 +10,7 @@ import { t } from '@/i18n';
 import { useStore } from '@/state/store';
 import { ui } from '@/theme/emoji';
 import { statusGlyph } from '@/theme/glyphs';
-import { glow, radius, space } from '@/theme/tokens';
+import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 import { liveDuration, liveUntilText } from './format';
@@ -51,7 +51,7 @@ function OfflineState() {
 const ARM_MS = 4000;
 
 function LiveState({ session }: { session: LiveSession }) {
-  const { c, isNight } = useTheme();
+  const { c, st } = useTheme();
   const toast = useToast();
   const { actions } = useStore();
   const now = useClock(1000);
@@ -83,9 +83,9 @@ function LiveState({ session }: { session: LiveSession }) {
   };
 
   return (
-    <Card variant="live" style={[styles.liveCard, { borderColor: c.mint }]}>
+    <Card variant="live">
       <View style={styles.statusRow}>
-        <View style={[styles.dot, { backgroundColor: c.mint }, isNight && glow(c.mint, 8, 0.9)]} />
+        <View style={[styles.dot, { backgroundColor: c.mint }]} />
         <Text variant="title" tone="mint" accessibilityRole="header" style={styles.grow}>
           {t('biz.live')}
         </Text>
@@ -122,7 +122,11 @@ function LiveState({ session }: { session: LiveSession }) {
               accessibilityState={{ selected }}
               style={({ pressed }) => [
                 styles.status,
-                { backgroundColor: selected ? c.neon : c.card2, borderColor: selected ? 'transparent' : c.line },
+                {
+                  backgroundColor: selected ? c.neon : c.card2,
+                  borderColor: selected ? c.ctaLine : c.line,
+                  borderWidth: st.line,
+                },
                 pressed && { opacity: 0.85 },
               ]}
             >
@@ -130,9 +134,7 @@ function LiveState({ session }: { session: LiveSession }) {
               <Text variant="cardTitle" tone={selected ? 'onNeon' : 'ink'} style={styles.grow}>
                 {t(s.labelKey)}
               </Text>
-              {selected ? (
-                <Glyph of={ui.check} size={16} color={c.onNeon} strokeWidth={2.6} />
-              ) : null}
+              {selected ? <Glyph of={ui.check} size={16} color={c.onNeon} strokeWidth={2.6} /> : null}
             </Pressable>
           );
         })}
@@ -149,7 +151,6 @@ function LiveState({ session }: { session: LiveSession }) {
 }
 
 const styles = StyleSheet.create({
-  liveCard: { borderWidth: 2 },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexWrap: 'wrap' },
   dot: { width: 10, height: 10, borderRadius: 5 },
   grow: { flex: 1 },
@@ -166,7 +167,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: space.sm,
     borderRadius: radius.md,
-    borderWidth: 1,
   },
   endGap: { height: space.sm },
 });

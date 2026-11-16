@@ -1,16 +1,14 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Card, Text } from '@/components/ui';
+import { Card, Sticker, Text } from '@/components/ui';
 import { getBusiness } from '@/data/repo';
 import { getLocale, t, type StringKey } from '@/i18n';
-import { radius, space } from '@/theme/tokens';
-import { useTheme } from '@/theme/use-theme';
+import { space } from '@/theme/tokens';
 
 const num = (n: number) => n.toLocaleString(getLocale());
 
 /** This week's numbers and the demand nudge. Shown live or offline (owners check numbers before service). */
 export function StatsRow() {
-  const { c } = useTheme();
   const { stats, nudge } = getBusiness();
   const cards: { label: StringKey; value: string; delta?: number }[] = [
     { label: 'biz.stat.views', value: num(stats.views), delta: stats.viewsDelta },
@@ -26,28 +24,29 @@ export function StatsRow() {
       </Text>
       <View style={styles.grid}>
         {cards.map(({ label, value, delta }) => (
-          <View
-            key={label}
-            accessible
-            accessibilityLabel={
-              delta !== undefined
-                ? t('biz.statA11y', { value, label: t(label), delta })
-                : t('biz.statA11yPlain', { value, label: t(label) })
-            }
-            style={[styles.stat, { backgroundColor: c.card, borderColor: c.line }]}
-          >
-            <Text variant="title" tabular>
-              {value}
-            </Text>
-            <Text variant="micro" tone="ink2">
-              {t(label)}
-            </Text>
-            {delta !== undefined ? (
-              <Text variant="caption" tone="mint">
-                {t('biz.statDelta', { n: delta })}
+          <Sticker key={label} radius={20} style={styles.statWrap} faceStyle={styles.stat}>
+            <View
+              accessible
+              accessibilityLabel={
+                delta !== undefined
+                  ? t('biz.statA11y', { value, label: t(label), delta })
+                  : t('biz.statA11yPlain', { value, label: t(label) })
+              }
+              style={styles.statInner}
+            >
+              <Text variant="title" tabular>
+                {value}
               </Text>
-            ) : null}
-          </View>
+              <Text variant="micro" tone="ink2">
+                {t(label)}
+              </Text>
+              {delta !== undefined ? (
+                <Text variant="caption" tone="mint">
+                  {t('biz.statDelta', { n: delta })}
+                </Text>
+              ) : null}
+            </View>
+          </Sticker>
         ))}
       </View>
       <Card>
@@ -63,5 +62,7 @@ export function StatsRow() {
 const styles = StyleSheet.create({
   wrap: { gap: space.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  stat: { flexGrow: 1, flexBasis: '45%', borderWidth: 1, borderRadius: radius.lg, padding: space.md, gap: 2 },
+  statWrap: { flexGrow: 1, flexBasis: '45%' },
+  stat: { padding: space.md },
+  statInner: { gap: 2 },
 });

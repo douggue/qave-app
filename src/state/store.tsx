@@ -25,6 +25,8 @@ export type LokalState = {
   rep: number;
   /** Check-in count per spot id. */
   checkIns: Record<string, number>;
+  /** Nights (local YYYY-MM-DD of the evening) with at least one check-in after 7 PM, for the night streak. */
+  nights: string[];
   reports: Report[];
   /** Your vote per report id. */
   votes: Record<string, 1 | -1>;
@@ -71,6 +73,7 @@ const initialState: LokalState = {
   hydrated: false,
   rep: 0,
   checkIns: {},
+  nights: [],
   reports: [],
   votes: {},
   reminders: {},
@@ -92,7 +95,32 @@ const initialState: LokalState = {
   goLiveOpen: false,
 };
 
-type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'themeMode' | 'bizMode' | 'readNotes' | 'votes' | 'voted'>;
+type Persisted = Pick<LokalState, 'rep' | 'checkIns' | 'nights' | 'themeMode' | 'bizMode' | 'readNotes' | 'votes' | 'voted'>;
+
+/** The evening a time belongs to: after midnight still counts as the night before. Null in the day. */
+export function nightOf(at: number): string | null {
+  const d = new Date(at);
+  const h = d.getHours();
+  if (h >= 7 && h < 19) return null;
+  if (h < 7) d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Nights in a row with a check-in, ending tonight or last night. */
+export function nightStreak(nights: string[], now: number): number {
+  const set = new Set(nights);
+  const d = new Date(now);
+  if (d.getHours() < 7) d.setDate(d.getDate() - 1);
+  const key = () => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // Tonight may not have a check-in yet: the streak still counts from last night.
+  if (!set.has(key())) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (set.has(key())) {
+    n++;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
+}
 
 type Action =
   | { type: 'hydrate'; data: Partial<Persisted> }
@@ -138,13 +166,16 @@ function reducer(state: LokalState, action: Action): LokalState {
       return { ...state, ...action.data, hydrated: true };
     case 'addRep':
       return { ...state, rep: state.rep + action.amount };
-    case 'checkIn':
+    case 'checkIn': {
+      const night = nightOf(action.at);
       return {
         ...state,
+        nights: night && !state.nights.includes(night) ? [...state.nights, night].slice(-60) : state.nights,
         rep: state.rep + action.rep,
         checkIns: { ...state.checkIns, [action.spotId]: (state.checkIns[action.spotId] ?? 0) + 1 },
         hereAt: { ...state.hereAt, [action.spotId]: action.at },
       };
+    }
     case 'celebrate':
       return { ...state, fx: { ...action.fx, id: (state.fx?.id ?? 0) + 1 } };
     case 'clearFx':
@@ -342,16 +373,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const { hydrated, rep, checkIns, themeMode, bizMode, readNotes, votes, voted } = state;
+  const { hydrated, rep, checkIns, nights, themeMode, bizMode, readNotes, votes, voted } = state;
   useEffect(() => {
     if (!hydrated) return;
     // Read notes are kept too, so the bell stays at 0 after a visit to the inbox. Votes are
     // kept so a report can only be confirmed once per person.
-    const data: Persisted = { rep, checkIns, themeMode, bizMode, readNotes, votes, voted };
+    const data: Persisted = { rep, checkIns, nights, themeMode, bizMode, readNotes, votes, voted };
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {
       // Not saved this time; the next change tries again.
     });
-  }, [hydrated, rep, checkIns, themeMode, bizMode, readNotes, votes, voted]);
+  }, [hydrated, rep, checkIns, nights, themeMode, bizMode, readNotes, votes, voted]);
 
   const value = useMemo(() => ({ state, actions }), [state, actions]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

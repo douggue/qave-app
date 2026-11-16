@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { AccessibilityInfo, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo } from 'react-native';
 
-import { Badge, Placeholder, Screen, Text, useToast } from '@/components/ui';
+import { Placeholder, Screen, ScreenTitle, useToast } from '@/components/ui';
 import { claimCode, dropState } from '@/data/drops';
 import { getDrops } from '@/data/repo';
 import type { Drop } from '@/data/types';
@@ -15,7 +15,6 @@ import { REP } from '@/state/rep';
 import { useStore } from '@/state/store';
 import { ui } from '@/theme/emoji';
 import { tabGlyph } from '@/theme/glyphs';
-import { space } from '@/theme/tokens';
 
 // Drops: limited specials. Countdowns and the slow drain all run on the shared clock.
 export default function DropsScreen() {
@@ -48,15 +47,7 @@ export default function DropsScreen() {
 
   return (
     <Screen scroll>
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <Text variant="title" accessibilityRole="header" style={styles.title}>
-            {t('drops.title')}
-          </Text>
-          <Badge label={t('drops.pill')} tone="neon" icon={ui.timer} />
-        </View>
-        <Text tone="ink2">{t('drops.subtitle')}</Text>
-      </View>
+      <ScreenTitle eyebrow={t('drops.pill')} title={t('drops.title')} sub={t('drops.subtitle')} />
 
       {drops.length === 0 ? (
         <Placeholder emoji={tabGlyph.drops} title={t('drops.empty')} body={t('drops.emptyBody')} />
@@ -87,9 +78,3 @@ export default function DropsScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  header: { gap: space.xs, paddingTop: space.sm },
-  titleRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm },
-  title: { flexShrink: 1 },
-});

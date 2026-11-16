@@ -18,7 +18,7 @@ const SPARKS = 8;
 
 /** "Saved one for you": a food burst, then the code to show at the truck (02 spec 7.11, 7.12). */
 export function ClaimModal({ code, spot, onClose }: Props) {
-  const { c } = useTheme();
+  const { c, isNight, st } = useTheme();
   const toast = useToast();
   const reduceMotion = useReduceMotion();
   const [show] = useState(() => new Animated.Value(0));
@@ -47,7 +47,9 @@ export function ClaimModal({ code, spot, onClose }: Props) {
   };
 
   const spelled = code.replace(/-/g, '').split('').join(' ');
-  const boxTransform = reduceMotion ? [] : [{ scale: show.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1] }) }];
+  const boxTransform = reduceMotion
+    ? []
+    : [{ scale: show.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1] }) }];
 
   return (
     <Modal transparent visible animationType="none" onRequestClose={onClose} statusBarTranslucent>
@@ -60,7 +62,16 @@ export function ClaimModal({ code, spot, onClose }: Props) {
         />
         <Animated.View
           accessibilityViewIsModal
-          style={[styles.box, { backgroundColor: c.card, borderColor: c.line, opacity: show, transform: boxTransform }]}
+          style={[
+            styles.box,
+            {
+              backgroundColor: c.sheet,
+              borderColor: c.stickerLine,
+              borderWidth: st.line,
+              opacity: show,
+              transform: boxTransform,
+            },
+          ]}
         >
           <View style={styles.hero}>
             {reduceMotion
@@ -95,7 +106,11 @@ export function ClaimModal({ code, spot, onClose }: Props) {
               style={
                 reduceMotion
                   ? null
-                  : { transform: [{ scale: burst.interpolate({ inputRange: [0, 0.35, 1], outputRange: [0.5, 1.15, 1] }) }] }
+                  : {
+                      transform: [
+                        { scale: burst.interpolate({ inputRange: [0, 0.35, 1], outputRange: [0.5, 1.15, 1] }) },
+                      ],
+                    }
               }
             >
               <FoodSticker food={spot.food} size={56} />
@@ -113,7 +128,7 @@ export function ClaimModal({ code, spot, onClose }: Props) {
             accessibilityLabel={t('drops.codeA11y', { spelled })}
             style={[styles.codeBox, { backgroundColor: c.card2, borderColor: c.line }]}
           >
-            <Text tone="neon" center style={styles.code}>
+            <Text tone={isNight ? 'neon' : 'ink'} center style={styles.code}>
               {code}
             </Text>
           </View>

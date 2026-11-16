@@ -2,17 +2,15 @@ import { useRef } from 'react';
 import { Pressable, StyleSheet, View, type ViewInstance } from 'react-native';
 
 import { FoodArt } from '@/components/cards/FoodArt';
-import { Badge, Glyph, Text, useToast, useToastAnchor } from '@/components/ui';
+import { Badge, Glyph, Sticker, Text, useToast, useToastAnchor } from '@/components/ui';
 import { getBusiness, getSpot } from '@/data/repo';
 import { t } from '@/i18n';
 import { useStore } from '@/state/store';
 import { avatar, ui } from '@/theme/emoji';
-import { radius, space } from '@/theme/tokens';
-import { useTheme } from '@/theme/use-theme';
+import { space } from '@/theme/tokens';
 
 /** Business screens' header: who you are, the screen caption, and a one-tap way back to Personal. */
 export function BizHeader({ caption }: { caption: string }) {
-  const { c } = useTheme();
   const toast = useToast();
   const { actions } = useStore();
   const biz = getBusiness();
@@ -27,9 +25,9 @@ export function BizHeader({ caption }: { caption: string }) {
 
   return (
     <View ref={headerRef} onLayout={onHeaderLayout} style={styles.row}>
-      {spot ? <FoodArt food={spot.food} width={42} height={42} radius={12} /> : null}
+      {spot ? <FoodArt food={spot.food} width={48} height={48} radius={14} /> : null}
       <View style={styles.text}>
-        <Text variant="heading" accessibilityRole="header" numberOfLines={2}>
+        <Text variant="title" accessibilityRole="header" numberOfLines={2}>
           {biz.name}
         </Text>
         <View style={styles.badges}>
@@ -45,14 +43,16 @@ export function BizHeader({ caption }: { caption: string }) {
         accessibilityRole="button"
         accessibilityLabel={t('biz.toPersonalA11y')}
         accessibilityHint={t('biz.toPersonalHint')}
-        style={({ pressed }) => [
-          styles.personal,
-          { backgroundColor: c.card, borderColor: c.line },
-          pressed && { opacity: 0.85 },
-        ]}
+        style={styles.personalWrap}
       >
-        <Glyph of={avatar.me} size={18} />
-        <Text variant="label">{t('biz.toPersonal')}</Text>
+        {({ pressed }) => (
+          <Sticker radius={999} drop={3} pressed={pressed} faceStyle={styles.personal}>
+            <Glyph of={avatar.me} size={18} />
+            <Text variant="label" style={styles.personalText}>
+              {t('biz.toPersonal')}
+            </Text>
+          </Sticker>
+        )}
       </Pressable>
     </View>
   );
@@ -63,14 +63,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, paddingTop: space.sm },
   text: { flex: 1, minWidth: 0, gap: 4 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.xs },
-  personal: {
-    flexShrink: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minHeight: 48,
-    paddingHorizontal: 14,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-  },
+  personalWrap: { flexShrink: 0 },
+  personal: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 45, paddingHorizontal: 14 },
+  personalText: { fontFamily: 'Figtree_700Bold' },
 });
