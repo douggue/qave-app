@@ -97,3 +97,19 @@ Plan: [Lokal Design Refinement Plan](https://claude.ai/artifact/3UVpN6mkgaHTT1vs
 
 - [x] Every icon in the app is our own art. Controls, moods, reports and statuses use the drawn icon set, tinted by meaning (hot = brand gradient, line/wait/closing = amber, deal/live = mint, sold out = red, photo/parked = sky, new/seats = grape, closed = grey); see `src/theme/glyphs.ts`. Foods use the 15 custom stickers; avatars use the 9 custom avatar stickers. Celebrations rain stickers and drawn sparkles.
 - [x] Approved spares ready for later: donut, ribs, hot dog, pizza, ramen, and the owl (Night Owl badge), chef (owner accounts) and cat avatars.
+
+## 2026-11-16 · Identity: "Mix" (approved by the founder)
+
+One identity, two moods, switching at sunset (manual override in You). Mockups: `design/identity/mix-night.png`, `mix-day.png` (HTML sources alongside, with exact values).
+
+| Rule | Decision |
+|---|---|
+| Structure | One question per screen. Map home = headline + search + stickers + one panel. No ticker, chip row, side rail, activity pill or bubble clutter. |
+| Cards and buttons | Sticker-book anatomy: rounded 22–24, outline + hard offset drop (day: 2 px ink + 5 px ink drop; night: 1.5 px white 14% + 5 px black drop). |
+| Main action | Sun-yellow `#ffcc33` with ink `#17131a` text, both modes. |
+| Report button | Brand gradient (sun → grill → chili) with the three-tooth bite cut out of its corner: the signature. Only place the gradient appears. |
+| Type | Unbounded 800 display headlines (30 pt home, 31 pt spot name), Figtree everything else; eyebrow labels 11 pt caps tracked 1.8. |
+| Night palette | bg `#0f0c14`, sheet `#17131f`, card `#1f1928`, ink `#f7f2ff` / `#a9a1bb` / `#6e6782`. |
+| Day palette | paper `#f7f1e6`, sheet `#fffaf1`, card `#ffffff`, ink `#17131a` / `#5f5664` / `#9a8f9c`. |
+| Rank numbers | Unbounded 54, sun-yellow fill with a dark stroke. |
+| Glow | Only the selected pin and the Report button. |

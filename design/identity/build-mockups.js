@@ -75,7 +75,7 @@ function css(t) {
   .pin .sel{position:absolute;left:50%;top:55%;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;opacity:.9;z-index:1}
   .tabbar{position:absolute;left:0;right:0;bottom:0;height:88px;padding:8px 10px 26px;display:flex;justify-content:space-around;align-items:flex-end;background:${t.bar};border-top:1px solid ${t.line};z-index:8}
   .tab{display:flex;flex-direction:column;align-items:center;gap:4px;width:64px;font:600 11px Figtree;color:${t.ink3}}.tab.on{color:${t.ink}}
-  .report{width:58px;height:58px;border-radius:29px;margin-top:-30px;background:${t.cta};display:flex;align-items:center;justify-content:center;box-shadow:${t.ctaShadow};${biteMask(8)}}
+  .report{width:58px;height:58px;border-radius:29px;margin-top:-30px;background:${t.reportBg||t.cta};display:flex;align-items:center;justify-content:center;box-shadow:${t.ctaShadow};${biteMask(8)}}
   .h-display{font:800 ${t.displaySize}px/1.02 Unbounded;letter-spacing:-.8px;color:${t.ink}}
   .eyebrow{font:700 11px Figtree;letter-spacing:1.8px;text-transform:uppercase;color:${t.ink3}}
   .sheet{position:absolute;left:0;right:0;bottom:0;background:${t.sheet};border-radius:30px 30px 0 0;padding:10px 0 100px;box-shadow:0 -12px 40px rgba(0,0,0,${t.sheetShadow});z-index:6}
@@ -232,18 +232,37 @@ const B = {
   stat1: '#ffd9c2', stat1Ink: '#17131a', stat2: '#d9d0ff', stat2Ink: '#17131a', statBorder: 'box-shadow:0 0 0 2px #17131a,0 5px 0 #17131a',
 };
 
+
+const CN = Object.assign({}, A, {
+  name: 'Mix · Night', cta: '#ffcc33', ctaInk: '#17131a', ctaShadow: '0 0 0 2px #0b0910, 0 5px 0 #000',
+  glassBorder: 'box-shadow:0 0 0 1.5px rgba(255,255,255,.16),0 4px 0 rgba(0,0,0,.6)',
+  cardBorder: 'box-shadow:0 0 0 1.5px rgba(255,255,255,.14),0 5px 0 rgba(0,0,0,.65)',
+  statBorder: 'box-shadow:0 0 0 1.5px rgba(255,255,255,.14),0 5px 0 rgba(0,0,0,.65)',
+  rankInk: '#ffcc33', rankStroke: '-webkit-text-stroke:2.5px #0f0c14;paint-order:stroke fill',
+  ribHot: 'background:#ff5a3c;color:#fff;box-shadow:0 0 0 1.5px #0f0c14', ribAmber: 'background:#ffcc33;color:#17131a;box-shadow:0 0 0 1.5px #0f0c14',
+  tileOn: '#3a2f1a', tileOnRing: '#ffcc33', dayOn: '#ffcc33', dayOnInk: '#17131a',
+  badges: `<span style="font:800 12px Figtree;padding:6px 10px;border-radius:99px;background:#1f1928;box-shadow:0 0 0 1.5px rgba(255,255,255,.18);color:#f7f2ff">Family-owned</span><span style="font:800 12px Figtree;padding:6px 10px;border-radius:99px;background:#ffcc33;color:#17131a">Not a chain</span>`,
+  heroBtn: 'rgba(255,255,255,.12);box-shadow:0 0 0 1.5px rgba(255,255,255,.18)', haloIn: 'rgba(255,204,51,.2)', haloOut: 'rgba(255,204,51,0)', haloRing: 'rgba(255,204,51,.3)',
+  selHalo: 'radial-gradient(circle,rgba(255,204,51,.45),rgba(255,204,51,0) 68%)', ringInk: '#ffd970', accent: '#ffcc33',
+});
+const CD = Object.assign({}, B, { name: 'Mix · Day' });
+// Report button keeps the brand gradient + bite in both.
+CN.reportBg = CD.reportBg = 'linear-gradient(135deg,#ffb23d,#ff5a3c 55%,#ff2d6f)';
 const dirs = [
+  [CN, { eyebrow: 'East Austin · 61° · Tonight', headline: 'Tacos are out.' }, 'One identity, two moods. After dark: the warm night-market palette, soft light outlines with a hard black drop, sun-yellow main buttons and rank numbers, the brand gradient only on Report.'],
+  [CD, { eyebrow: 'East Austin · 74° · Lunch', headline: 'Brisket o’clock.' }, 'By day: the sticker-book paper, ink outlines with a hard drop, the same sun-yellow buttons and the same layout. Auto switches at sunset, with a manual override.'],
+
   [A, { eyebrow: 'East Austin · 61° · Tonight', headline: 'Tacos are out.' }, 'Warm, dark and calm, like a night market. One glowing accent (the Report button and the place you picked); everything else steps back. Thin outline pins replaced by stickers with soft shadows, a muted real-map look, big Unbounded headlines, the three-tooth bite cut into the Report button.'],
   [B, { eyebrow: 'East Austin · 61° · Tonight', headline: 'Tacos are out.' }, 'Bright, bold and collectible, like a sticker book. Warm paper background, thick ink outlines with a hard drop shadow on cards and buttons, our sun-yellow as the signature button, huge outlined rank numbers. Loud personality like Bump, but warm and foodie.'],
 ];
 (async () => {
   const b = await chromium.launch();
   const p = await b.newPage({ viewport: { width: 1352, height: 1100 }, deviceScaleFactor: 2 });
-  for (const [t, d, blurb] of dirs) {
+  for (const [t, d, blurb] of dirs.slice(0,2)) {
     const html = `<html><head><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap" rel="stylesheet"><style>${css(t)}</style></head><body>
     <div class="head"><h1>${t.name}</h1><p>${blurb}</p><div class="chips"><span>Signature: three-tooth bite</span><span>Unbounded display</span><span>Custom stickers</span><span>Crowd halo</span><span>Distance ring</span><span>Top 10</span><span>Food passport</span></div></div>
     ${mapScreen(t, d)}${spotScreen(t)}${youScreen(t)}</body></html>`;
-    const f = `/tmp/claude-0/-home-user-qave-app/16cdf127-600e-5d69-942b-202f0afbc4e9/scratchpad/identity/${t.name[0]}.html`;
+    const f = `/tmp/claude-0/-home-user-qave-app/16cdf127-600e-5d69-942b-202f0afbc4e9/scratchpad/identity/${t.name.replace(/[^A-Za-z]/g,"")}.html`;
     fs.writeFileSync(f, html);
     await p.goto('file://' + f); await p.waitForTimeout(1800);
     await p.screenshot({ path: f.replace('.html', '.png'), fullPage: true });
