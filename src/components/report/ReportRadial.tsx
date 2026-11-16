@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -12,7 +11,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge, Button, FoodSticker, Glyph, Icon, Text, useToast } from '@/components/ui';
+import { BittenButton } from '@/components/nav/BittenButton';
+import { Badge, Button, FoodSticker, Glyph, Icon, Sticker, Text, useToast } from '@/components/ui';
 import type { Spot } from '@/data/types';
 import { isDuplicate, newReport, REPORT_OPTIONS, reportTarget, type ReportOption } from '@/features/report/options';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
@@ -23,7 +23,7 @@ import { REP } from '@/state/rep';
 import { useStore } from '@/state/store';
 import { reportGlyph } from '@/theme/glyphs';
 import { dur, ease, native, spring } from '@/theme/motion';
-import { glow, gradients, radius, space } from '@/theme/tokens';
+import { radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 // The Report action from the center tab (02 spec 7.7, 03 spec 7). Mounted once at the root,
@@ -145,7 +145,7 @@ function RadialOverlay() {
         <Animated.View
           style={[
             styles.listCard,
-            { backgroundColor: c.paper, paddingBottom: Math.max(insets.bottom, space.lg), opacity: backdrop },
+            { backgroundColor: c.sheet, paddingBottom: Math.max(insets.bottom, space.lg), opacity: backdrop },
           ]}
         >
           <Text variant="title" accessibilityRole="header">
@@ -159,17 +159,16 @@ function RadialOverlay() {
                   accessibilityRole="button"
                   accessibilityLabel={optionA11y(o)}
                   accessibilityHint={soon(o)}
-                  style={({ pressed }) => [
-                    styles.listRow,
-                    { backgroundColor: c.card, borderColor: c.line },
-                    pressed && { opacity: 0.85 },
-                  ]}
                 >
-                  <Glyph of={reportGlyph[o.type]} size={24} />
-                  <Text variant="ui" style={[styles.rowLabel, styles.grow]}>
-                    {t(o.label)}
-                  </Text>
-                  {soon(o) ? <Badge label={soon(o) ?? ''} tone="neutral" style={styles.soon} /> : null}
+                  {({ pressed }) => (
+                    <Sticker radius={18} pressed={pressed} faceStyle={styles.listRow}>
+                      <Glyph of={reportGlyph[o.type]} size={24} />
+                      <Text variant="ui" style={[styles.rowLabel, styles.grow]}>
+                        {t(o.label)}
+                      </Text>
+                      {soon(o) ? <Badge label={soon(o) ?? ''} tone="neutral" style={styles.soon} /> : null}
+                    </Sticker>
+                  )}
                 </Pressable>
               ))
             : null}
@@ -234,7 +233,6 @@ function RadialOverlay() {
                             <View
                               style={[
                                 styles.circle,
-                                glow(c.neon, 12, 0.45),
                                 pressed && { transform: [{ scale: 1.12 }] },
                               ]}
                             >
@@ -258,11 +256,12 @@ function RadialOverlay() {
             accessibilityLabel={t('report.close')}
             style={[styles.close, { left: width / 2 - 31, bottom: originBottom - 31 }]}
           >
-            <LinearGradient colors={gradients.hotIcon} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.closeCircle}>
+            <View style={styles.closeCircle}>
+              <BittenButton size={60} />
               <View accessible={false} importantForAccessibility="no-hide-descendants" style={styles.plus}>
-                <Icon name="plus" size={30} color={c.onHot} strokeWidth={2.8} />
+                <Icon name="plus" size={30} color="#ffffff" strokeWidth={2.8} />
               </View>
-            </LinearGradient>
+            </View>
           </Pressable>
         </>
       )}
@@ -283,14 +282,14 @@ const styles = StyleSheet.create({
     width: ITEM,
     height: ITEM,
     borderRadius: ITEM / 2,
-    backgroundColor: '#1d2036',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: '#1f1928',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.14)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   close: { position: 'absolute', width: 62, height: 62 },
-  closeCircle: { flex: 1, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
+  closeCircle: { width: 60, height: 60, margin: 1, alignItems: 'center', justifyContent: 'center' },
   plus: { transform: [{ rotate: '45deg' }] },
   listCard: {
     position: 'absolute',
@@ -310,8 +309,6 @@ const styles = StyleSheet.create({
     gap: space.sm,
     paddingHorizontal: space.lg,
     paddingVertical: space.sm,
-    borderRadius: 16,
-    borderWidth: 1,
   },
   rowLabel: { fontSize: 17, lineHeight: 22 },
   grow: { flexGrow: 1, flexShrink: 1 },
